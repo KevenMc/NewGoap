@@ -9,6 +9,7 @@ namespace GOAP
     {
         public StatHandler statHandler;
         public Inventory inventory;
+        public string currentGoal;
 
         public StatHandler GetStatHandler()
         {

@@ -6,7 +6,9 @@ namespace GOAP
 {
     public class Action
     {
-        public string name;
+        public string actionName;
+        public int actionCost = 0;
+        public Stat goal;
         public ItemSO item;
         public List<StatEffect> statEffects = new List<StatEffect>();
         public List<Plan> subPlans = new List<Plan>();
@@ -14,7 +16,7 @@ namespace GOAP
         public Action(ItemSO item)
         {
             this.item = item;
-            this.name = "Use " + item.itemName;
+            this.actionName = "Use " + item.itemName;
         }
 
         public void AddSubPlan(Plan subPlan)
@@ -38,34 +40,6 @@ namespace GOAP
             {
                 agent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
             }
-        }
-    }
-
-    public class Plan
-    {
-        public List<Action> actions = new List<Action>();
-        public Stat goal;
-
-        public Plan(Stat goal)
-        {
-            this.goal = goal;
-        }
-
-        public void AddAction(Action action)
-        {
-            actions.Add(action);
-        }
-
-        public bool IsComplete(Agent agent)
-        {
-            // foreach (var statEffect in goal.statEffects)
-            // {
-            //     if (agent.GetStat(statEffect.statType) < statEffect.value)
-            //     {
-            //         return false;
-            //     }
-            // }
-            return true;
         }
     }
 }

@@ -7,46 +7,75 @@ namespace GOAP
     public class ActionPlanner : MonoBehaviour
     {
         private Agent agent;
+        public List<Plan> plans = new List<Plan>();
+        public Plan currentPlan;
 
         private void Start()
         {
             agent = GetComponent<Agent>();
         }
 
-        public void Plan()
+        public void SetGoal(Stat goal)
         {
-            // Get the current goal from the agent's stat handler
-            Stat currentGoal = agent.GetCurrentStatGoal();
-
-            // Create a new plan with the current goal as the root goal
-            Plan currentPlan = new Plan(currentGoal);
-
-            // Loop through the items in the agent's inventory and try to use them towards the goal
-            foreach (var inventoryItem in agent.inventory.items)
-            {
-                ItemSO item = inventoryItem.item;
-
-                // Check if the item can be used towards the goal
-                if (CanUseItem(item, currentGoal))
-                {
-                    // Create a new action for using the item
-                    Action useItemAction = new Action(item);
-
-                    // Add the action to the current plan
-                    currentPlan.AddAction(useItemAction);
-
-                    // Update the agent's stats and add a new sub-plan for the remaining goals
-                    agent.inventory.UseItem(item, agent);
-                    CreateSubPlans(currentPlan, currentGoal, agent.GetStatGoals());
-
-                    // Return if a solution is found
-                    if (currentPlan.IsComplete())
-                    {
-                        return;
-                    }
-                }
-            }
+            plans.Clear();
+            plans.Add(new Plan(goal));
+            agent.currentGoal = goal.statType.ToString();
         }
+
+        public void UpdatePlans()
+        {
+            Plan updatePlan = plans.OrderBy(p => p.planCost).FirstOrDefault();
+            if (updatePlan.isComplete)
+            {
+                currentPlan = updatePlan;
+            }
+
+            List<ItemSO> updateItems = agent.inventory.returnGoalItems(updatePlan.goal);
+
+            foreach (ItemSO item in updateItems)
+            {
+                Action newAction = new Action(item);
+                Plan newPlan = new Plan(updatePlan, newAction);
+                plans.Add(newPlan);
+                newPlan.ShowPlanContents();
+            }
+            plans.Remove(updatePlan);
+        }
+
+        // public void Plan()
+        // {
+        //     // Get the current goal from the agent's stat handler
+        //     Stat currentGoal = agent.GetCurrentStatGoal();
+
+        //     // Create a new plan with the current goal as the root goal
+        //     Plan currentPlan = new Plan(currentGoal);
+
+        //     // Loop through the items in the agent's inventory and try to use them towards the goal
+        //     foreach (var inventoryItem in agent.inventory.items)
+        //     {
+        //         ItemSO item = inventoryItem.item;
+
+        //         // Check if the item can be used towards the goal
+        //         if (CanUseItem(item, currentGoal))
+        //         {
+        //             // Create a new action for using the item
+        //             Action useItemAction = new Action(item);
+
+        //             // Add the action to the current plan
+        //             currentPlan.AddAction(useItemAction);
+
+        //             // Update the agent's stats and add a new sub-plan for the remaining goals
+        //             agent.inventory.UseItem(item, agent);
+        //             CreateSubPlans(currentPlan, currentGoal, agent.GetStatGoals());
+
+        //             // Return if a solution is found
+        //             if (currentPlan.IsComplete())
+        //             {
+        //                 return;
+        //             }
+        //         }
+        //     }
+        // }
 
         private bool CanUseItem(ItemSO item, Stat goal)
         {

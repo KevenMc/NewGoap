@@ -6,6 +6,9 @@ using UnityEngine.AI;
 public class MoveTo : MonoBehaviour
 {
     public NavMeshAgent navMeshAgent;
+    public GOAP.ActionPlanner actionPlanner;
+    public GOAP.StatHandler statHandler;
+    private int x = 0;
 
     public void Location(Vector3 target)
     {
@@ -22,6 +25,22 @@ public class MoveTo : MonoBehaviour
             {
                 Location(hit.point);
             }
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (x == 0)
+            {
+                actionPlanner.SetGoal(statHandler.currentGoals[0]);
+            }
+            else if (x == 1)
+            {
+                actionPlanner.UpdatePlans();
+            }
+            else
+            {
+                actionPlanner.plans[0].ShowPlanContents();
+            }
+            x++;
         }
     }
 }
