@@ -5,25 +5,23 @@ using System.Linq;
 
 namespace GOAP
 {
-    
-public class Agent : MonoBehaviour
-{
-    public StatHandler statHandler;
-    public Inventory inventory;
-
-    public StatHandler GetStatHandler()
+    public class Agent : MonoBehaviour
     {
-        if (statHandler == null)
+        public StatHandler statHandler;
+        public Inventory inventory;
+
+        public StatHandler GetStatHandler()
         {
-            statHandler = GetComponent<StatHandler>();
+            if (statHandler == null)
+            {
+                statHandler = GetComponent<StatHandler>();
+            }
+            return statHandler;
         }
-        return statHandler;
-    }
 
         public Stat GetCurrentStatGoal()
         {
             return GetStatHandler().currentGoals.FirstOrDefault();
         }
-    
-}
+    }
 }

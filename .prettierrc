@@ -1,0 +1,11 @@
+{
+  "overrides": [
+    {
+      "files": "*.cs",
+      "options": {
+        "parser": "csharp",
+        "plugins": ["prettier-plugin-csharp"]
+      }
+    }
+  ]
+}

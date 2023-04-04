@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-
 namespace GOAP
 {
     public class ActionPlanner : MonoBehaviour
@@ -39,7 +38,7 @@ namespace GOAP
                     // Update the agent's stats and add a new sub-plan for the remaining goals
                     agent.inventory.UseItem(item, agent);
                     CreateSubPlans(currentPlan, currentGoal, agent.GetStatGoals());
-                    
+
                     // Return if a solution is found
                     if (currentPlan.IsComplete())
                     {
@@ -63,7 +62,11 @@ namespace GOAP
             return false;
         }
 
-        private void CreateSubPlans(Action parentAction, Stat currentGoal, List<Stat> remainingGoals)
+        private void CreateSubPlans(
+            Action parentAction,
+            Stat currentGoal,
+            List<Stat> remainingGoals
+        )
         {
             // If there are no more goals, return
             if (remainingGoals.Count == 0)
@@ -93,7 +96,6 @@ namespace GOAP
                     // Add the action to the current plan
                     currentPlan.AddAction(useItemAction);
                     CreateSubPlans(useItemAction, nextGoal, remainingGoals.Skip(1).ToList());
-
                 }
             }
         }
