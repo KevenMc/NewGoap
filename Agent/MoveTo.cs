@@ -31,14 +31,15 @@ public class MoveTo : MonoBehaviour
             if (x == 0)
             {
                 actionPlanner.SetGoal(statHandler.currentGoals[0]);
+                actionPlanner.SetCurrentPlan();
             }
             else if (x == 1)
             {
-                actionPlanner.UpdatePlans();
+                actionPlanner.UpdatePlan(actionPlanner.currentPlan);
             }
             else
             {
-                actionPlanner.plans[0].ShowPlanContents();
+                actionPlanner.ShowCurrentPlan();
             }
             x++;
         }

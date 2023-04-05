@@ -9,14 +9,22 @@ namespace GOAP
         public string actionName;
         public int actionCost = 0;
         public Stat goal;
-        public ItemSO item;
+        public ItemSO itemData;
+        public Item item;
         public List<StatEffect> statEffects = new List<StatEffect>();
         public List<Plan> subPlans = new List<Plan>();
 
-        public Action(ItemSO item)
+        public Action(ItemSO itemData) //CCreate action from inventory
         {
+            this.itemData = itemData;
+            this.actionName = "Use " + itemData.itemName;
+        }
+
+        public Action(ItemSO itemData, Item item)
+        {
+            this.itemData = itemData;
             this.item = item;
-            this.actionName = "Use " + item.itemName;
+            this.actionName = "Collect " + itemData.itemName;
         }
 
         public void AddSubPlan(Plan subPlan)

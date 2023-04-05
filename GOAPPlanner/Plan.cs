@@ -10,7 +10,7 @@ namespace GOAP
         public Stat goal;
         public Stat endGoal;
         public int planCost = 0;
-        public bool isComplete = false;
+        public bool isComplete = true;
 
         public Plan(Stat goal)
         {
@@ -25,7 +25,6 @@ namespace GOAP
             this.actions = new List<Action>(originalPlan.actions);
             this.AddAction(newAction);
             this.CalulateCost();
-            this.ShowPlanContents();
         }
 
         public void AddAction(Action action)
@@ -52,8 +51,7 @@ namespace GOAP
             {
                 planContents += "- " + action.actionName + "\n";
             }
-            // Debug.Log(planContents);
-            // Alternatively, show the contents in a box in the Unity Editor window:
+
             UnityEditor.EditorUtility.DisplayDialog("Plan contents", planContents, "Close");
         }
     }

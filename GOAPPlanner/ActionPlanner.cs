@@ -9,6 +9,10 @@ namespace GOAP
         private Agent agent;
         public List<Plan> plans = new List<Plan>();
         public Plan currentPlan;
+        public Action currentAction;
+        public string currentActionName;
+        public ReverseIterate<Action> reverseActions;
+        public int currentActionIndex;
 
         private void Start()
         {
@@ -22,60 +26,65 @@ namespace GOAP
             agent.currentGoal = goal.statType.ToString();
         }
 
-        public void UpdatePlans()
+        public void ShowCurrentPlan()
+        {
+            if (plans.Count > 0)
+            {
+                plans[0].ShowPlanContents();
+            }
+            else
+            {
+                UnityEditor.EditorUtility.DisplayDialog("No Plans!", null, "Close");
+            }
+        }
+
+        public void SetCurrentPlan()
         {
             Plan updatePlan = plans.OrderBy(p => p.planCost).FirstOrDefault();
-            if (updatePlan.isComplete)
+            if (!updatePlan.isComplete)
             {
                 currentPlan = updatePlan;
+                Debug.Log(currentPlan.actions[0]);
+                reverseActions = new ReverseIterate<Action>(currentPlan.actions);
+                currentAction = reverseActions.Next();
+                currentActionName = currentAction.actionName;
             }
+        }
 
+        public void ExecuteCurrentPlan()
+        {
+            ReverseIterate<Action> reverseActions = new ReverseIterate<Action>(currentPlan.actions);
+        }
+
+        public void UpdatePlan(Plan updatePlan)
+        {
+            //check inventory
             List<ItemSO> updateItems = agent.inventory.returnGoalItems(updatePlan.goal);
 
             foreach (ItemSO item in updateItems)
             {
-                Action newAction = new Action(item);
-                Plan newPlan = new Plan(updatePlan, newAction);
+                Action newInventoryAction = new Action(item);
+                Plan newPlan = new Plan(updatePlan, newInventoryAction);
                 plans.Add(newPlan);
-                newPlan.ShowPlanContents();
             }
+
+            //check itemmemory
+            List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
+                updatePlan.goal
+            );
+
+            foreach (Item item in memoryItems)
+            {
+                Action newInventoryAction = new Action(item.itemData);
+                Plan newPlan = new Plan(updatePlan, newInventoryAction);
+
+                Action newCollectAction = new Action(item.itemData, item);
+                newPlan = new Plan(newPlan, newCollectAction);
+                plans.Add(newPlan);
+            }
+
             plans.Remove(updatePlan);
         }
-
-        // public void Plan()
-        // {
-        //     // Get the current goal from the agent's stat handler
-        //     Stat currentGoal = agent.GetCurrentStatGoal();
-
-        //     // Create a new plan with the current goal as the root goal
-        //     Plan currentPlan = new Plan(currentGoal);
-
-        //     // Loop through the items in the agent's inventory and try to use them towards the goal
-        //     foreach (var inventoryItem in agent.inventory.items)
-        //     {
-        //         ItemSO item = inventoryItem.item;
-
-        //         // Check if the item can be used towards the goal
-        //         if (CanUseItem(item, currentGoal))
-        //         {
-        //             // Create a new action for using the item
-        //             Action useItemAction = new Action(item);
-
-        //             // Add the action to the current plan
-        //             currentPlan.AddAction(useItemAction);
-
-        //             // Update the agent's stats and add a new sub-plan for the remaining goals
-        //             agent.inventory.UseItem(item, agent);
-        //             CreateSubPlans(currentPlan, currentGoal, agent.GetStatGoals());
-
-        //             // Return if a solution is found
-        //             if (currentPlan.IsComplete())
-        //             {
-        //                 return;
-        //             }
-        //         }
-        //     }
-        // }
 
         private bool CanUseItem(ItemSO item, Stat goal)
         {

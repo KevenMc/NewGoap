@@ -20,29 +20,7 @@ namespace GOAP
 
         void Start()
         {
-            AddItem(defaultItem);
-        }
-
-        public List<ItemSO> returnGoalItemsx(Stat goal)
-        {
-            Debug.Log("Return goal items");
-            Debug.Log(goal.statType.ToString());
-            foreach (InventoryItem invitem in items)
-            {
-                Debug.Log(invitem.item.itemName);
-            }
-            List<ItemSO> goalItems = items
-                .Where(
-                    inventoryItem =>
-                        inventoryItem.statEffects.Any(
-                            statEffect => statEffect.statType == goal.statType
-                        )
-                )
-                .Select(inventoryItem => inventoryItem.item)
-                .ToList();
-
-            Debug.Log(goalItems[0]);
-            return goalItems;
+            // AddItem(defaultItem);
         }
 
         public List<ItemSO> returnGoalItems(Stat goal)
