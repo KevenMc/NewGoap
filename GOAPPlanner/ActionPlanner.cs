@@ -39,9 +39,16 @@ namespace GOAP
             planList.Remove(updatePlan);
         }
 
-        public void UpdateplanList(List<Plan> planList)
+        public Plan GeneratePlan()
+        {
+            return UpdatePlanList(plans);
+        }
+
+        private Plan UpdatePlanList(List<Plan> planList)
         {
             Plan updatePlan = GetCheapestPlan(planList);
+            if (updatePlan.isComplete)
+                return updatePlan;
             if (updatePlan.actions.Count > 0)
             {
                 Action lastAction = updatePlan.actions.Last();
@@ -49,18 +56,21 @@ namespace GOAP
                 {
                     foreach (List<Plan> subPlans in lastAction.subPlanLists.Values)
                     {
-                        UpdateplanList(lastAction.subPlans);
+                        return UpdatePlanList(lastAction.subPlans);
                     }
                 }
                 else
                 {
                     ExpandPlan(updatePlan, planList);
+                    return UpdatePlanList(planList);
                 }
             }
             else
             {
                 ExpandPlan(updatePlan, planList);
+                return UpdatePlanList(planList);
             }
+            return new Plan();
         }
 
         public Plan GetCheapestPlan(List<Plan> planList)

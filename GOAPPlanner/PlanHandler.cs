@@ -22,9 +22,8 @@ namespace GOAP
             Debug.Log("Generating new plan for goal : " + goal.statType);
             // Set the goal in the action planner
             actionPlanner.SetGoal(goal);
-
+            currentPlan = actionPlanner.GeneratePlan();
             // Generate the plan using ExpandPlan
-            currentPlan = actionPlanner.initialPlan;
 
             return currentPlan;
         }
