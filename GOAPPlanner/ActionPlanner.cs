@@ -319,9 +319,11 @@ namespace GOAP
                     blueprint,
                     false
                 );
-                newBlueprintAction.GenerateSubPlans();
 
                 newPlan = new Plan(newPlan, newBlueprintAction);
+                newBlueprintAction.parentPlan = newPlan;
+                newBlueprintAction.GenerateSubPlans();
+
                 Debug.Log(newBlueprintAction.subPlanLists.Count);
                 Debug.Log("Newplan 3");
 

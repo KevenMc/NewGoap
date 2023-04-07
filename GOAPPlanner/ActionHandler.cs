@@ -19,12 +19,13 @@ namespace GOAP
         public bool hasUsedItem = false;
         public bool isExecutingPlan = false;
 
-        public void GetActionServer()
+        public void GetActionServer(Plan plan)
         {
             if (!planHandler.executingCurrentPlan)
             {
                 planHandler.executingCurrentPlan = true;
-                actionServer = new ReverseIterate<Action>(planHandler.currentPlan.actions);
+                planHandler.SetActionList();
+                actionServer = new ReverseIterate<Action>(planHandler.currentActionList);
                 ServeNextAction();
                 actionServer.IsLastAction();
             }
@@ -64,8 +65,21 @@ namespace GOAP
                     Destroy(action.item.gameObject);
                     hasCollectedItem = true;
                     break;
+                case ActionType.Blueprint:
+                    Debug.Log("Now i should make " + action.actionName);
+                    break;
                 default:
-                    Debug.Log("I don't know how to do that");
+                    Debug.Log(
+                        "I don't know how to do that : "
+                            + action.actionType
+                            + " : "
+                            + action.actionName
+                    );
+                    Debug.Log("Sub plan keys");
+                    foreach (Stat key in action.subPlanLists.Keys)
+                    {
+                        Debug.Log(key.statType);
+                    }
                     break;
             }
         }
@@ -78,7 +92,7 @@ namespace GOAP
             {
                 statHandler.UpdateGoals();
                 planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
-                GetActionServer();
+                //GetActionServer();
                 return;
             }
             switch (currentAction.actionStatus)

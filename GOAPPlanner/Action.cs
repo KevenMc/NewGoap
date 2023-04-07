@@ -69,6 +69,7 @@ namespace GOAP
         public Blueprint blueprint;
         public Vector3 location;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
+        public Plan parentPlan = null;
 
         public List<Plan> subPlans = new List<Plan>();
         public Dictionary<Stat, List<Plan>> subPlanLists = new Dictionary<Stat, List<Plan>>();
@@ -135,6 +136,10 @@ namespace GOAP
                     Stat itemStat = new Stat(StatType.Item, item.item, 0, 0, 0, 1);
                     // Action collectAction = new Action(item, null, false);
                     Plan subPlan = new Plan(itemStat);
+                    subPlan.parentAction = this;
+                    subPlan.parentPlan = this.parentPlan;
+                    Debug.Log(parentPlan);
+                    parentPlan.hasSubPlans = true;
                     // subPlan.AddAction(collectAction);
                     if (!subPlanLists.ContainsKey(itemStat))
                     {

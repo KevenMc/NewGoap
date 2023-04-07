@@ -11,6 +11,9 @@ namespace GOAP
         public Stat endGoal;
         public float planCost = 0;
         public bool isComplete = false;
+        public Action parentAction = null;
+        public Plan parentPlan = null;
+        public bool hasSubPlans = false;
 
         public Plan() { }
 
@@ -28,6 +31,7 @@ namespace GOAP
             this.actions = new List<Action>(originalPlan.actions);
             this.AddAction(newAction);
             this.CalulateCost();
+            this.SetActionParentPlans();
         }
 
         public void AddAction(Action action)
@@ -37,6 +41,14 @@ namespace GOAP
             {
                 isComplete = true;
                 planCost = -1;
+            }
+        }
+
+        private void SetActionParentPlans()
+        {
+            foreach (Action action in actions)
+            {
+                action.parentPlan = this;
             }
         }
 
