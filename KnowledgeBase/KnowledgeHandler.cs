@@ -8,6 +8,7 @@ namespace GOAP
     {
         public List<Item> itemsToAdd;
         public ItemMemory itemMemory = new ItemMemory();
+        public BlueprintRepertoire blueprintRepertoire = new BlueprintRepertoire();
 
         void Start()
         {

@@ -3,12 +3,14 @@ using UnityEngine;
 
 namespace GOAP
 {
-    [CreateAssetMenu(fileName = "New Crafting Recipe", menuName = "Crafting Recipe")]
-    public class CraftingRecipe : ScriptableObject
+    [CreateAssetMenu(fileName = "New Blueprint", menuName = "GOAP/Blueprint/Blueprint")]
+    public class Blueprint : ScriptableObject
     {
-        public string recipeName;
+        public string blueprintName;
         public string description;
         public List<ItemRequirement> requiredItems;
+        public List<ItemRequirement> requiredTools;
+        public StationSO craftingStation;
         public ItemSO craftedItem;
 
         [System.Serializable]
