@@ -10,6 +10,8 @@ namespace GOAP
         public List<Plan> plans = new List<Plan>();
         public float moveDistance = 1f;
         public Plan initialPlan;
+        public int x = 0;
+        public int y = 100;
 
         private void Start()
         {
@@ -36,40 +38,94 @@ namespace GOAP
             ExpandPlanFromInventory(updatePlan, planList);
             ExpandPlanFromItemMemory(updatePlan, planList);
             ExpandPlanFromBlueprintRepertoire(updatePlan, planList);
+            Debug.Log("Now removing a plan : " + updatePlan.goal.statType);
             planList.Remove(updatePlan);
         }
 
         public Plan GeneratePlan()
         {
+            Debug.Log("My plan list is this long : " + plans.Count);
             return UpdatePlanList(plans);
         }
 
         private Plan UpdatePlanList(List<Plan> planList)
         {
+            Debug.Log("My plan list is this long : " + planList.Count);
+            if (planList.Count == 0)
+            {
+                Debug.Log("No more plans to make");
+                return new Plan();
+            }
+            if (x == y)
+            {
+                Debug.Log("recursion is not your friend");
+                return new Plan();
+            }
+            x++;
             Plan updatePlan = GetCheapestPlan(planList);
             if (updatePlan.isComplete)
                 return updatePlan;
             if (updatePlan.actions.Count > 0)
             {
+                Debug.Log(1);
                 Action lastAction = updatePlan.actions.Last();
+                planList.Remove(updatePlan);
                 if (lastAction.subPlanLists.Count > 0)
                 {
+                    Debug.Log(2);
                     foreach (List<Plan> subPlans in lastAction.subPlanLists.Values)
                     {
-                        return UpdatePlanList(lastAction.subPlans);
+                        Debug.Log(3);
+                        foreach (Stat key in lastAction.subPlanLists.Keys)
+                        {
+                            if (lastAction.subPlanLists[key].Count == 0)
+                            {
+                                return new Plan();
+                            }
+                            Plan subPlan = UpdatePlanList(lastAction.subPlanLists[key]);
+                            if (!subPlan.isComplete)
+                            {
+                                return new Plan();
+                            }
+                        }
+                        return updatePlan;
+                        // return UpdatePlanList(lastAction.subPlans);
                     }
                 }
                 else
                 {
+                    Debug.Log(4);
+                    Debug.Log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+                    foreach (Action action in updatePlan.actions)
+                    {
+                        Debug.Log(action.actionName);
+                    }
+                    Debug.Log(updatePlan.goal.statType);
+                    Debug.Log("sorry, what ? " + updatePlan.endGoal.statType);
+
+                    Debug.Log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                     ExpandPlan(updatePlan, planList);
+
                     return UpdatePlanList(planList);
                 }
             }
             else
             {
+                Debug.Log(5);
+                Debug.Log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv*");
+
+                foreach (Action action in updatePlan.actions)
+                {
+                    Debug.Log(action.actionName);
+                }
+                Debug.Log(updatePlan.endGoal.statType);
+                Debug.Log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^*");
+
                 ExpandPlan(updatePlan, planList);
+
                 return UpdatePlanList(planList);
             }
+            Debug.Log(6);
             return new Plan();
         }
 
@@ -78,6 +134,12 @@ namespace GOAP
             if (planList.Count > 0)
             {
                 SortPlans(planList);
+                Debug.Log(
+                    "Now looking at plan with endgoal of : "
+                        + planList[0].endGoal.statType
+                        + " and current goal of : "
+                        + planList[0].goal.statType
+                );
                 return planList[0];
             }
             return initialPlan;
@@ -87,8 +149,30 @@ namespace GOAP
         {
             if (updatePlan.actions.Count > 0)
             {
+                Debug.Log(
+                    "Trying to get subplans from this plan which has a goal of "
+                        + updatePlan.goal.statType
+                );
                 Action lastAction = updatePlan.actions.Last();
-                if (lastAction.subPlans.Count > 0) { }
+                foreach (Stat key in lastAction.subPlanLists.Keys)
+                {
+                    Debug.Log(
+                        "£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££"
+                    );
+                    Debug.Log(
+                        "Number of subplans for goal "
+                            + key.statType
+                            + " is "
+                            + lastAction.subPlanLists[key].Count
+                    );
+                    Debug.Log(key);
+                }
+                if (lastAction.subPlanLists.Count > 0)
+                {
+                    Debug.Log(
+                        "£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££"
+                    );
+                }
             }
             return updatePlan;
         }
@@ -96,11 +180,10 @@ namespace GOAP
         public void UpdatePlan(Plan plan)
         {
             plan.CalulateCost();
-            Debug.Log("Current plan cost is : " + plan.planCost);
             Plan updatePlan = GetSubplans(plan);
         }
 
-        private void ExpandPlanFromInventory(Plan updatePlan, List<Plan> plans)
+        private void ExpandPlanFromInventory(Plan updatePlan, List<Plan> planList)
         {
             List<ItemSO> inventoryItems = agent.inventory.returnGoalItems(updatePlan.goal);
 
@@ -118,11 +201,12 @@ namespace GOAP
                 );
 
                 Plan newPlan = new Plan(updatePlan, newInventoryAction);
-                plans.Add(newPlan);
+                Debug.Log("Newplan 1");
+                planList.Add(newPlan);
             }
         }
 
-        private void ExpandPlanFromItemMemory(Plan updatePlan, List<Plan> plans)
+        private void ExpandPlanFromItemMemory(Plan updatePlan, List<Plan> planList)
         {
             List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
                 updatePlan.goal
@@ -193,13 +277,15 @@ namespace GOAP
 
                     newPlan = new Plan(newPlan, newMoveToAction);
                 }
+                Debug.Log("Newplan 2");
 
-                plans.Add(newPlan);
+                planList.Add(newPlan);
             }
         }
 
-        public void ExpandPlanFromBlueprintRepertoire(Plan updatePlan, List<Plan> plans)
+        public void ExpandPlanFromBlueprintRepertoire(Plan updatePlan, List<Plan> planList)
         {
+            int p = 0;
             List<Blueprint> matchingBlueprints = new List<Blueprint>();
             foreach (
                 Blueprint blueprint in agent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
@@ -207,6 +293,7 @@ namespace GOAP
                 )
             )
             {
+                p++;
                 Plan newPlan = updatePlan;
 
                 Action newInventoryAction = new Action(ActionType.UseItem);
@@ -221,13 +308,13 @@ namespace GOAP
                 );
 
                 newPlan = new Plan(newPlan, newInventoryAction);
-                Debug.Log("Adding blueprint");
 
+                Stat blueprintGoal = new Stat(StatType.Blueprint, 0, 0, 0, 1);
                 Action newBlueprintAction = new Action(ActionType.Blueprint);
                 newBlueprintAction.Setup(
                     "Blueprint " + blueprint.blueprintName,
                     0, // Set the action cost appropriately
-                    updatePlan.goal,
+                    blueprintGoal,
                     blueprint.craftedItem,
                     blueprint,
                     false
@@ -235,12 +322,17 @@ namespace GOAP
                 newBlueprintAction.GenerateSubPlans();
 
                 newPlan = new Plan(newPlan, newBlueprintAction);
-                Debug.Log("Action has subplans? : " + newBlueprintAction.subPlans.Count);
+                Debug.Log(newBlueprintAction.subPlanLists.Count);
+                Debug.Log("Newplan 3");
+
+                foreach (Stat key in newPlan.actions.Last().subPlanLists.Keys)
+                {
+                    Debug.Log(key.statType);
+                }
+                Debug.Log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                Debug.Log(newPlan.goal.statType);
                 plans.Add(newPlan);
             }
-
-            //return matchingBlueprints;
-            return;
         }
 
         #endregion

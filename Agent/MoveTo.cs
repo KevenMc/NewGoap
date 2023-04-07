@@ -30,11 +30,8 @@ public class MoveTo : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            if (!planHandler.executingCurrentPlan)
-            {
-                planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
-                actionHandler.GetActionServer();
-            }
+            planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
+            actionHandler.GetActionServer();
         }
     }
 }

@@ -15,5 +15,5 @@ MonoBehaviour:
   itemName: Energy Drink
   itemUseCost: 0
   statEffects:
-  - statType: 4
+  - statType: 102
     value: -100

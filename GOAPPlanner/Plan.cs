@@ -22,6 +22,7 @@ namespace GOAP
 
         public Plan(Plan originalPlan, Action newAction)
         {
+            Debug.Log("Adding new plan with goal of : " + newAction.goal.statType);
             this.endGoal = originalPlan.endGoal;
             this.goal = newAction.goal;
             this.actions = new List<Action>(originalPlan.actions);

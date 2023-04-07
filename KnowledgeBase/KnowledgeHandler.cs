@@ -20,11 +20,6 @@ namespace GOAP
             }
 
             blueprintRepertoire.AddBlueprintCatalogues(blueprintCatalogues);
-            Debug.Log("Known blueprints");
-            foreach (Blueprint blueprint in blueprintRepertoire.knownBlueprints)
-            {
-                Debug.Log(blueprint.blueprintName);
-            }
         }
     }
 }

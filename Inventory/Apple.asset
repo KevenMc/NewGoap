@@ -15,5 +15,5 @@ MonoBehaviour:
   itemName: Apple
   itemUseCost: 0
   statEffects:
-  - statType: 2
+  - statType: 100
     value: -500

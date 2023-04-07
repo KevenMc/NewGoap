@@ -15,5 +15,5 @@ MonoBehaviour:
   itemName: Water Bottle
   itemUseCost: 0
   statEffects:
-  - statType: 1
+  - statType: 101
     value: -500

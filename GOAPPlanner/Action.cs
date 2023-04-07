@@ -69,6 +69,7 @@ namespace GOAP
         public Blueprint blueprint;
         public Vector3 location;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
+
         public List<Plan> subPlans = new List<Plan>();
         public Dictionary<Stat, List<Plan>> subPlanLists = new Dictionary<Stat, List<Plan>>();
         public bool canComplete = false;
@@ -135,7 +136,16 @@ namespace GOAP
                     // Action collectAction = new Action(item, null, false);
                     Plan subPlan = new Plan(itemStat);
                     // subPlan.AddAction(collectAction);
-                    subPlanLists[itemStat].Add(subPlan);
+                    if (!subPlanLists.ContainsKey(itemStat))
+                    {
+                        // If the key is not present, add it to the dictionary with a new list containing the value
+                        subPlanLists.Add(itemStat, new List<Plan> { subPlan });
+                    }
+                    else
+                    {
+                        // If the key is present, append the value to the existing list
+                        subPlanLists[itemStat].Add(subPlan);
+                    }
                 }
             }
         }

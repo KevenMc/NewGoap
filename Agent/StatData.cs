@@ -4,9 +4,10 @@ namespace GOAP
     {
         Item = 0,
         Station = 1,
-        Hunger = 2,
-        Thirst = 3,
-        Energy = 4
+        Blueprint = 2,
+        Hunger = 100,
+        Thirst = 101,
+        Energy = 102
     }
 
     public class StatEffect
