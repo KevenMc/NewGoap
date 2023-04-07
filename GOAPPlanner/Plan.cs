@@ -9,8 +9,10 @@ namespace GOAP
         public List<Action> actions = new List<Action>();
         public Stat goal;
         public Stat endGoal;
-        public int planCost = 0;
-        public bool isComplete = true;
+        public float planCost = 0;
+        public bool isComplete = false;
+
+        public Plan() { }
 
         public Plan(Stat goal)
         {
@@ -30,11 +32,16 @@ namespace GOAP
         public void AddAction(Action action)
         {
             actions.Add(action);
+            if (action.canComplete)
+            {
+                isComplete = true;
+                planCost = -1;
+            }
         }
 
         private void CalulateCost()
         {
-            int currentCost = 0;
+            float currentCost = 0f;
             foreach (Action action in actions)
             {
                 currentCost += action.actionCost;

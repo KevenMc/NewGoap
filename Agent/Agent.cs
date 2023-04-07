@@ -11,6 +11,7 @@ namespace GOAP
         public Inventory inventory;
         public KnowledgeHandler knowledgeHandler;
         public string currentGoal;
+        public float distanceToArrive = 1f;
 
         public StatHandler GetStatHandler()
         {

@@ -8,11 +8,8 @@ namespace GOAP
     {
         private Agent agent;
         public List<Plan> plans = new List<Plan>();
-        public Plan currentPlan;
-        public Action currentAction;
-        public string currentActionName;
-        public ReverseIterate<Action> reverseActions;
-        public int currentActionIndex;
+        public float moveDistance = 1f;
+        public Plan initialPlan;
 
         private void Start()
         {
@@ -23,119 +20,144 @@ namespace GOAP
         {
             plans.Clear();
             plans.Add(new Plan(goal));
+            initialPlan = plans[0];
+
             agent.currentGoal = goal.statType.ToString();
         }
 
-        public void ShowCurrentPlan()
+        // public void ExpandPlan(Plan updatePlan)
+        // {
+        //     //check inventory
+        //     List<ItemSO> updateItems = agent.inventory.returnGoalItems(updatePlan.goal);
+
+        //     foreach (ItemSO item in updateItems)
+        //     {
+        //         Action newInventoryAction = new Action(item, true);
+        //         Plan newPlan = new Plan(updatePlan, newInventoryAction);
+        //         plans.Add(newPlan);
+        //     }
+
+        //     //check item memory
+        //     List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
+        //         updatePlan.goal
+        //     );
+
+        //     foreach (Item item in memoryItems)
+        //     {
+        //         Action newInventoryAction = new Action(item.itemData);
+        //         Plan newPlan = new Plan(updatePlan, newInventoryAction);
+
+        //         Action newCollectAction = new Action(item.itemData, item);
+        //         newPlan = new Plan(newPlan, newCollectAction);
+
+        //         if (moveDistance <= GetDistance(transform.position, item.transform.position))
+        //         {
+        //             Debug.Log((GetDistance(transform.position, item.transform.position)));
+        //             Action newMoveToAction = new Action(
+        //                 item.transform.position,
+        //                 item.itemData.itemName,
+        //                 true
+        //             );
+        //             newPlan = new Plan(newPlan, newMoveToAction);
+        //         }
+        //         plans.Add(newPlan);
+        //     }
+        //     plans.Remove(updatePlan);
+        // }
+        public void SortPlans()
         {
-            if (plans.Count > 0)
-            {
-                plans[0].ShowPlanContents();
-            }
-            else
-            {
-                UnityEditor.EditorUtility.DisplayDialog("No Plans!", null, "Close");
-            }
+            plans.Sort((plan1, plan2) => plan1.planCost.CompareTo(plan2.planCost));
         }
 
-        public void SetCurrentPlan()
+        #region
+        public void ExpandPlan(Plan updatePlan)
         {
-            Plan updatePlan = plans.OrderBy(p => p.planCost).FirstOrDefault();
-            if (!updatePlan.isComplete)
+            // Check inventory
+            List<ItemSO> inventoryItems = agent.inventory.returnGoalItems(updatePlan.goal);
+
+            foreach (ItemSO item in inventoryItems)
             {
-                currentPlan = updatePlan;
-                Debug.Log(currentPlan.actions[0]);
-                reverseActions = new ReverseIterate<Action>(currentPlan.actions);
-                currentAction = reverseActions.Next();
-                currentActionName = currentAction.actionName;
-            }
-        }
+                Action newInventoryAction = new Action(ActionType.UseItem);
+                newInventoryAction.Setup(
+                    "Use " + item.itemName,
+                    0, // Set the action cost appropriately
+                    updatePlan.goal,
+                    item,
+                    null,
+                    Vector3.zero,
+                    true
+                );
 
-        public void ExecuteCurrentPlan()
-        {
-            ReverseIterate<Action> reverseActions = new ReverseIterate<Action>(currentPlan.actions);
-        }
-
-        public void UpdatePlan(Plan updatePlan)
-        {
-            //check inventory
-            List<ItemSO> updateItems = agent.inventory.returnGoalItems(updatePlan.goal);
-
-            foreach (ItemSO item in updateItems)
-            {
-                Action newInventoryAction = new Action(item);
                 Plan newPlan = new Plan(updatePlan, newInventoryAction);
                 plans.Add(newPlan);
             }
 
-            //check itemmemory
+            // Check item memory
             List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
                 updatePlan.goal
             );
 
             foreach (Item item in memoryItems)
             {
-                Action newInventoryAction = new Action(item.itemData);
-                Plan newPlan = new Plan(updatePlan, newInventoryAction);
+                Action newInventoryAction = new Action(ActionType.UseItem);
+                newInventoryAction.Setup(
+                    "Use " + item.itemData.itemName,
+                    0, // Set the action cost appropriately
+                    updatePlan.goal,
+                    item.itemData,
+                    item,
+                    Vector3.zero,
+                    true
+                );
 
-                Action newCollectAction = new Action(item.itemData, item);
+                Action newCollectAction = new Action(ActionType.CollectItem);
+                newCollectAction.Setup(
+                    "Collect " + item.itemData.itemName,
+                    0, // Set the action cost appropriately
+                    updatePlan.goal,
+                    item.itemData,
+                    item,
+                    item.transform.position,
+                    true
+                );
+
+                Plan newPlan = new Plan(updatePlan, newInventoryAction);
                 newPlan = new Plan(newPlan, newCollectAction);
+
+                if (
+                    agent.distanceToArrive
+                    <= GetDistance(transform.position, item.transform.position)
+                )
+                {
+                    Action newMoveToAction = new Action(ActionType.MoveToLocation);
+                    newMoveToAction.Setup(
+                        "Move to " + item.itemData.itemName,
+                        0, // Set the action cost appropriately
+                        updatePlan.goal,
+                        null,
+                        null,
+                        item.transform.position,
+                        true
+                    );
+
+                    newPlan = new Plan(newPlan, newMoveToAction);
+                }
+
                 plans.Add(newPlan);
             }
-
             plans.Remove(updatePlan);
         }
 
-        private bool CanUseItem(ItemSO item, Stat goal)
-        {
-            foreach (var statEffect in item.statEffects)
-            {
-                // Check if the item has a stat effect that can be used towards the goal
-                if (goal.statType == statEffect.statType && statEffect.value < 0)
-                {
-                    return true;
-                }
-            }
+        #endregion
 
-            return false;
+        public static float GetDistance(Vector3 a, Vector3 b)
+        {
+            return Vector3.Distance(a, b);
         }
 
-        private void CreateSubPlans(
-            Action parentAction,
-            Stat currentGoal,
-            List<Stat> remainingGoals
-        )
+        public static float GetDistance(Vector2 a, Vector2 b)
         {
-            // If there are no more goals, return
-            if (remainingGoals.Count == 0)
-            {
-                return;
-            }
-
-            // Get the first remaining goal and create a new sub-plan for it
-            Stat nextGoal = remainingGoals[0];
-            Plan subPlan = new Plan(nextGoal);
-
-            // Add the sub-plan to the parent plan and set it as the current plan
-            parentAction.AddSubPlan(subPlan);
-            Plan currentPlan = subPlan;
-
-            // Loop through the items in the agent's inventory and try to use them towards the sub-goal
-            foreach (var inventoryItem in agent.inventory.items)
-            {
-                ItemSO item = inventoryItem.item;
-
-                // Check if the item can be used towards the sub-goal
-                if (CanUseItem(item, nextGoal))
-                {
-                    // Create a new action for using the item
-                    Action useItemAction = new Action(item);
-
-                    // Add the action to the current plan
-                    currentPlan.AddAction(useItemAction);
-                    CreateSubPlans(useItemAction, nextGoal, remainingGoals.Skip(1).ToList());
-                }
-            }
+            return Vector2.Distance(a, b);
         }
     }
 }

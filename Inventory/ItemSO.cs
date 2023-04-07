@@ -14,6 +14,7 @@ namespace GOAP
         }
 
         public string itemName;
+        public float itemUseCost;
         public List<StatEffect> statEffects = new List<StatEffect>();
     }
 }

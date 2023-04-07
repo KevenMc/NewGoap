@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -12,6 +13,11 @@ namespace GOAP
         {
             this.list = list;
             index = list.Count - 1;
+        }
+
+        public bool IsLastAction()
+        {
+            return (index == -1);
         }
 
         public T Next()

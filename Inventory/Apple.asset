@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Apple
   m_EditorClassIdentifier: 
   itemName: Apple
+  itemUseCost: 0
   statEffects:
   - statType: 0
-    value: -5
+    value: -500

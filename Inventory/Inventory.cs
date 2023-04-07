@@ -6,6 +6,8 @@ namespace GOAP
 {
     public class Inventory : MonoBehaviour
     {
+        public Agent agent;
+
         [System.Serializable]
         public class InventoryItem
         {
@@ -71,7 +73,7 @@ namespace GOAP
             }
         }
 
-        public void UseItem(ItemSO item, Agent agent)
+        public void UseItem(ItemSO item, Agent useAgent)
         {
             var inventoryItem = items.Find(x => x.item == item);
 
@@ -79,7 +81,7 @@ namespace GOAP
             {
                 foreach (var statEffect in item.statEffects)
                 {
-                    agent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
+                    useAgent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
                 }
 
                 RemoveItem(item);

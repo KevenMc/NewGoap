@@ -8,12 +8,13 @@ public class MoveTo : MonoBehaviour
     public NavMeshAgent navMeshAgent;
     public GOAP.ActionPlanner actionPlanner;
     public GOAP.StatHandler statHandler;
-    private int x = 0;
+    public GOAP.PlanHandler planHandler;
+    public GOAP.ActionHandler actionHandler;
 
-    public void Location(Vector3 target)
-    {
-        navMeshAgent.SetDestination(target);
-    }
+    // public void Location(Vector3 target)
+    // {
+    //     // navMeshAgent.SetDestination(target);
+    // }
 
     private void Update()
     {
@@ -23,25 +24,17 @@ public class MoveTo : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                Location(hit.point);
+                //   Location(hit.point);
             }
         }
+
         if (Input.GetMouseButtonDown(1))
         {
-            if (x == 0)
+            if (!planHandler.executingCurrentPlan)
             {
-                actionPlanner.SetGoal(statHandler.currentGoals[0]);
-                actionPlanner.SetCurrentPlan();
+                planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
+                actionHandler.GetActionServer();
             }
-            else if (x == 1)
-            {
-                actionPlanner.UpdatePlan(actionPlanner.currentPlan);
-            }
-            else
-            {
-                actionPlanner.ShowCurrentPlan();
-            }
-            x++;
         }
     }
 }

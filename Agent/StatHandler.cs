@@ -19,13 +19,18 @@ namespace GOAP
             {
                 stat.current += stat.increment * deltaTime;
             }
-
+            UpdateGoals();
             // Update current goals list based on stat priorities
+        }
+
+        public void UpdateGoals()
+        {
             currentGoals = stats
                 .Where(stat => stat.current >= stat.trigger)
                 .OrderByDescending(stat => stat.priority)
                 //.Select(stat => stat)
                 .ToList();
+            // Debug.Log(currentGoals[0].statType);
         }
 
         public void ModifyStat(StatType statType, float value)

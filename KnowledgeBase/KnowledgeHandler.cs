@@ -6,22 +6,15 @@ namespace GOAP
 {
     public class KnowledgeHandler : MonoBehaviour
     {
-        public Item itemToAdd;
+        public List<Item> itemsToAdd;
         public ItemMemory itemMemory = new ItemMemory();
 
         void Start()
         {
             itemMemory = new ItemMemory();
-            itemMemory.AddItem(itemToAdd);
-            LogMemoryContents();
-        }
-
-        void LogMemoryContents()
-        {
-            Debug.Log("Item Memory Contents:");
-            foreach (var item in itemMemory.itemLocations)
+            foreach (Item itemToAdd in itemsToAdd)
             {
-                Debug.Log("Item: " + item);
+                itemMemory.AddItem(itemToAdd);
             }
         }
     }
