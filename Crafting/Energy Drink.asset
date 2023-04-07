@@ -17,6 +17,8 @@ MonoBehaviour:
   requiredItems:
   - item: {fileID: 11400000, guid: 3f94f6a07432cfec6815a8e25c139a42, type: 2}
     destroyOnCraft: 1
+  - item: {fileID: 11400000, guid: c4b2f07b1cd5ff62aa341b3bd5f2ae4f, type: 2}
+    destroyOnCraft: 1
   requiredTools: []
   craftingStation: {fileID: 0}
   craftedItem: {fileID: 11400000, guid: 03bb22d341a082052a096fef77b1df35, type: 2}

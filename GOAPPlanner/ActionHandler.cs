@@ -9,6 +9,7 @@ namespace GOAP
         public PlanHandler planHandler;
         public Agent agent;
         public MovementHandler movementHandler;
+        public BlueprintHandler blueprintHandler;
         public Inventory inventory;
         public StatHandler statHandler;
         public Action currentAction;
@@ -18,6 +19,7 @@ namespace GOAP
         public bool hasCollectedItem = false;
         public bool hasUsedItem = false;
         public bool isExecutingPlan = false;
+        public bool hasCompletedBlueprint = false;
 
         public void GetActionServer(Plan plan)
         {
@@ -67,6 +69,9 @@ namespace GOAP
                     break;
                 case ActionType.Blueprint:
                     Debug.Log("Now i should make " + action.actionName);
+                    blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
+                    hasCompletedBlueprint = true;
+                    Debug.Log("I have made " + action.actionName);
                     break;
                 default:
                     Debug.Log(
@@ -113,6 +118,11 @@ namespace GOAP
                     if (hasUsedItem)
                     {
                         hasUsedItem = false;
+                        currentAction.actionStatus = ActionStatus.Complete;
+                    }
+                    if (hasCompletedBlueprint)
+                    {
+                        hasCompletedBlueprint = false;
                         currentAction.actionStatus = ActionStatus.Complete;
                     }
                     break;
