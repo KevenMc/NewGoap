@@ -39,21 +39,33 @@ namespace GOAP
         {
             StatType goalStatType = goal.statType;
             List<Item> items = new List<Item>();
-            if (itemsByStat.ContainsKey(goalStatType))
+            switch (goalStatType)
             {
-                items.AddRange(itemsByStat[goalStatType]);
+                case StatType.Item:
+                    items.AddRange(itemLocations[goal.item]);
+                    Debug.Log("ADDING SPECIFC ITEM");
+                    break;
+                default:
+
+                    if (itemsByStat.ContainsKey(goalStatType))
+                    {
+                        items.AddRange(itemsByStat[goalStatType]);
+                    }
+
+                    break;
             }
+
             return items;
         }
 
-        public List<Item> GetItemLocations(StatType statType)
-        {
-            List<Item> items = new List<Item>();
-            if (itemsByStat.ContainsKey(statType))
-            {
-                items.AddRange(itemsByStat[statType]);
-            }
-            return items;
-        }
+        // public List<Item> GetItemLocations(StatType statType)
+        // {
+        //     List<Item> items = new List<Item>();
+        //     if (itemsByStat.ContainsKey(statType))
+        //     {
+        //         items.AddRange(itemsByStat[statType]);
+        //     }
+        //     return items;
+        // }
     }
 }

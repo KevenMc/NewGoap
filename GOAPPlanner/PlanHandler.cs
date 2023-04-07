@@ -17,14 +17,6 @@ namespace GOAP
             //  actionPlanner = new ActionPlanner();
         }
 
-        public void SetCurrentPlan()
-        {
-            if (actionPlanner.plans.Count > 0)
-            {
-                currentPlan = actionPlanner.plans[0];
-            }
-        }
-
         public Plan GenerateCompletePlan(Stat goal)
         {
             Debug.Log("Generating new plan for goal : " + goal.statType);
@@ -33,27 +25,8 @@ namespace GOAP
 
             // Generate the plan using ExpandPlan
             currentPlan = actionPlanner.initialPlan;
-            int x = 0;
-            while (currentPlan != null)
-            {
-                actionPlanner.SortPlans();
-                SetCurrentPlan();
-                x++;
-                if (x > 5)
-                {
-                    Debug.Log("OH NO!");
-                    return new Plan();
-                }
-                if (currentPlan.isComplete)
-                {
-                    Debug.Log("Plan has been generated");
-                    currentPlan.ShowPlanContents();
-                    return currentPlan;
-                }
-                actionPlanner.ExpandPlan(currentPlan);
-            }
 
-            return null;
+            return currentPlan;
         }
     }
 }

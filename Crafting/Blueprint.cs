@@ -17,7 +17,6 @@ namespace GOAP
         public class ItemRequirement
         {
             public ItemSO item;
-            public int amount;
             public bool destroyOnCraft;
         }
     }

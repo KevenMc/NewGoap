@@ -2,9 +2,11 @@ namespace GOAP
 {
     public enum StatType
     {
-        Hunger = 0,
-        Thirst = 1,
-        Energy = 2
+        Item = 0,
+        Station = 1,
+        Hunger = 2,
+        Thirst = 3,
+        Energy = 4
     }
 
     public class StatEffect

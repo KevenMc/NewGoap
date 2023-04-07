@@ -25,54 +25,73 @@ namespace GOAP
             agent.currentGoal = goal.statType.ToString();
         }
 
-        // public void ExpandPlan(Plan updatePlan)
-        // {
-        //     //check inventory
-        //     List<ItemSO> updateItems = agent.inventory.returnGoalItems(updatePlan.goal);
-
-        //     foreach (ItemSO item in updateItems)
-        //     {
-        //         Action newInventoryAction = new Action(item, true);
-        //         Plan newPlan = new Plan(updatePlan, newInventoryAction);
-        //         plans.Add(newPlan);
-        //     }
-
-        //     //check item memory
-        //     List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
-        //         updatePlan.goal
-        //     );
-
-        //     foreach (Item item in memoryItems)
-        //     {
-        //         Action newInventoryAction = new Action(item.itemData);
-        //         Plan newPlan = new Plan(updatePlan, newInventoryAction);
-
-        //         Action newCollectAction = new Action(item.itemData, item);
-        //         newPlan = new Plan(newPlan, newCollectAction);
-
-        //         if (moveDistance <= GetDistance(transform.position, item.transform.position))
-        //         {
-        //             Debug.Log((GetDistance(transform.position, item.transform.position)));
-        //             Action newMoveToAction = new Action(
-        //                 item.transform.position,
-        //                 item.itemData.itemName,
-        //                 true
-        //             );
-        //             newPlan = new Plan(newPlan, newMoveToAction);
-        //         }
-        //         plans.Add(newPlan);
-        //     }
-        //     plans.Remove(updatePlan);
-        // }
-        public void SortPlans()
+        public void SortPlans(List<Plan> planList)
         {
-            plans.Sort((plan1, plan2) => plan1.planCost.CompareTo(plan2.planCost));
+            planList.Sort((plan1, plan2) => plan1.planCost.CompareTo(plan2.planCost));
         }
 
         #region
-        public void ExpandPlan(Plan updatePlan)
+        public void ExpandPlan(Plan updatePlan, List<Plan> planList)
         {
-            // Check inventory
+            ExpandPlanFromInventory(updatePlan, planList);
+            ExpandPlanFromItemMemory(updatePlan, planList);
+            ExpandPlanFromBlueprintRepertoire(updatePlan, planList);
+            planList.Remove(updatePlan);
+        }
+
+        public void UpdateplanList(List<Plan> planList)
+        {
+            Plan updatePlan = GetCheapestPlan(planList);
+            if (updatePlan.actions.Count > 0)
+            {
+                Action lastAction = updatePlan.actions.Last();
+                if (lastAction.subPlanLists.Count > 0)
+                {
+                    foreach (List<Plan> subPlans in lastAction.subPlanLists.Values)
+                    {
+                        UpdateplanList(lastAction.subPlans);
+                    }
+                }
+                else
+                {
+                    ExpandPlan(updatePlan, planList);
+                }
+            }
+            else
+            {
+                ExpandPlan(updatePlan, planList);
+            }
+        }
+
+        public Plan GetCheapestPlan(List<Plan> planList)
+        {
+            if (planList.Count > 0)
+            {
+                SortPlans(planList);
+                return planList[0];
+            }
+            return initialPlan;
+        }
+
+        private Plan GetSubplans(Plan updatePlan)
+        {
+            if (updatePlan.actions.Count > 0)
+            {
+                Action lastAction = updatePlan.actions.Last();
+                if (lastAction.subPlans.Count > 0) { }
+            }
+            return updatePlan;
+        }
+
+        public void UpdatePlan(Plan plan)
+        {
+            plan.CalulateCost();
+            Debug.Log("Current plan cost is : " + plan.planCost);
+            Plan updatePlan = GetSubplans(plan);
+        }
+
+        private void ExpandPlanFromInventory(Plan updatePlan, List<Plan> plans)
+        {
             List<ItemSO> inventoryItems = agent.inventory.returnGoalItems(updatePlan.goal);
 
             foreach (ItemSO item in inventoryItems)
@@ -80,7 +99,7 @@ namespace GOAP
                 Action newInventoryAction = new Action(ActionType.UseItem);
                 newInventoryAction.Setup(
                     "Use " + item.itemName,
-                    0, // Set the action cost appropriately
+                    1, // Set the action cost appropriately
                     updatePlan.goal,
                     item,
                     null,
@@ -91,38 +110,60 @@ namespace GOAP
                 Plan newPlan = new Plan(updatePlan, newInventoryAction);
                 plans.Add(newPlan);
             }
+        }
 
-            // Check item memory
+        private void ExpandPlanFromItemMemory(Plan updatePlan, List<Plan> plans)
+        {
             List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(
                 updatePlan.goal
             );
 
             foreach (Item item in memoryItems)
             {
-                Action newInventoryAction = new Action(ActionType.UseItem);
-                newInventoryAction.Setup(
-                    "Use " + item.itemData.itemName,
-                    0, // Set the action cost appropriately
-                    updatePlan.goal,
-                    item.itemData,
-                    item,
-                    Vector3.zero,
-                    true
-                );
+                Plan newPlan = new Plan();
 
-                Action newCollectAction = new Action(ActionType.CollectItem);
-                newCollectAction.Setup(
-                    "Collect " + item.itemData.itemName,
-                    0, // Set the action cost appropriately
-                    updatePlan.goal,
-                    item.itemData,
-                    item,
-                    item.transform.position,
-                    true
-                );
+                if (updatePlan.goal.statType != StatType.Item)
+                {
+                    Action newInventoryAction = new Action(ActionType.UseItem);
+                    newInventoryAction.Setup(
+                        "Use " + item.itemData.itemName,
+                        1, // Set the action cost appropriately
+                        updatePlan.goal,
+                        item.itemData,
+                        item,
+                        Vector3.zero,
+                        true
+                    );
 
-                Plan newPlan = new Plan(updatePlan, newInventoryAction);
-                newPlan = new Plan(newPlan, newCollectAction);
+                    Action newCollectAction = new Action(ActionType.CollectItem);
+                    newCollectAction.Setup(
+                        "Collect " + item.itemData.itemName,
+                        1, // Set the action cost appropriately
+                        updatePlan.goal,
+                        item.itemData,
+                        item,
+                        item.transform.position,
+                        true
+                    );
+
+                    newPlan = new Plan(updatePlan, newInventoryAction);
+                    newPlan = new Plan(newPlan, newCollectAction);
+                }
+                else
+                {
+                    Action newCollectAction = new Action(ActionType.CollectItem);
+                    newCollectAction.Setup(
+                        "Collect " + item.itemData.itemName,
+                        1, // Set the action cost appropriately
+                        updatePlan.goal,
+                        item.itemData,
+                        item,
+                        item.transform.position,
+                        true
+                    );
+
+                    newPlan = new Plan(updatePlan, newCollectAction);
+                }
 
                 if (
                     agent.distanceToArrive
@@ -145,7 +186,51 @@ namespace GOAP
 
                 plans.Add(newPlan);
             }
-            plans.Remove(updatePlan);
+        }
+
+        public void ExpandPlanFromBlueprintRepertoire(Plan updatePlan, List<Plan> plans)
+        {
+            List<Blueprint> matchingBlueprints = new List<Blueprint>();
+            foreach (
+                Blueprint blueprint in agent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
+                    updatePlan.goal
+                )
+            )
+            {
+                Plan newPlan = updatePlan;
+
+                Action newInventoryAction = new Action(ActionType.UseItem);
+                newInventoryAction.Setup(
+                    "Use " + blueprint.craftedItem.itemName,
+                    1, // Set the action cost appropriately
+                    updatePlan.goal,
+                    blueprint.craftedItem,
+                    null,
+                    Vector3.zero,
+                    false
+                );
+
+                newPlan = new Plan(newPlan, newInventoryAction);
+                Debug.Log("Adding blueprint");
+
+                Action newBlueprintAction = new Action(ActionType.Blueprint);
+                newBlueprintAction.Setup(
+                    "Blueprint " + blueprint.blueprintName,
+                    0, // Set the action cost appropriately
+                    updatePlan.goal,
+                    blueprint.craftedItem,
+                    blueprint,
+                    false
+                );
+                newBlueprintAction.GenerateSubPlans();
+
+                newPlan = new Plan(newPlan, newBlueprintAction);
+                Debug.Log("Action has subplans? : " + newBlueprintAction.subPlans.Count);
+                plans.Add(newPlan);
+            }
+
+            //return matchingBlueprints;
+            return;
         }
 
         #endregion

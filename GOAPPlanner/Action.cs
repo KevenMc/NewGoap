@@ -66,8 +66,11 @@ namespace GOAP
         public Stat goal;
         public ItemSO itemData;
         public Item item;
+        public Blueprint blueprint;
         public Vector3 location;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
+        public List<Plan> subPlans = new List<Plan>();
+        public Dictionary<Stat, List<Plan>> subPlanLists = new Dictionary<Stat, List<Plan>>();
         public bool canComplete = false;
 
         public Action(ActionType actionType)
@@ -86,12 +89,55 @@ namespace GOAP
         )
         {
             this.actionName = actionName;
-            this.actionCost = actionCost;
+            //  this.actionCost = actionCost;
             this.goal = goal;
             this.itemData = itemData;
             this.item = item;
             this.location = location;
             this.canComplete = canComplete;
+        }
+
+        public void Setup(
+            string actionName,
+            float actionCost,
+            Stat goal,
+            ItemSO itemData,
+            Blueprint blueprint,
+            bool canComplete
+        )
+        {
+            this.actionName = actionName;
+            // this.actionCost = actionCost;
+            this.goal = goal;
+            this.itemData = itemData;
+            this.blueprint = blueprint;
+            this.canComplete = canComplete;
+        }
+
+        public float TotalActionCost()
+        {
+            float returnVal = actionCost;
+            foreach (Plan subplan in subPlans)
+            {
+                returnVal += subplan.planCost;
+            }
+            return returnVal;
+        }
+
+        public void GenerateSubPlans()
+        {
+            if (actionType == ActionType.Blueprint)
+            {
+                Debug.Log("Blueprint : " + blueprint);
+                foreach (Blueprint.ItemRequirement item in blueprint.requiredItems)
+                {
+                    Stat itemStat = new Stat(StatType.Item, item.item, 0, 0, 0, 1);
+                    // Action collectAction = new Action(item, null, false);
+                    Plan subPlan = new Plan(itemStat);
+                    // subPlan.AddAction(collectAction);
+                    subPlanLists[itemStat].Add(subPlan);
+                }
+            }
         }
     }
 }

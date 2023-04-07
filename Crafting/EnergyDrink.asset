@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8831ba4ae774c74ca41727f7f051f5e, type: 3}
-  m_Name: Apple
+  m_Name: EnergyDrink
   m_EditorClassIdentifier: 
-  itemName: Apple
+  itemName: Energy Drink
   itemUseCost: 0
   statEffects:
-  - statType: 2
-    value: -500
+  - statType: 4
+    value: -100

@@ -39,12 +39,16 @@ namespace GOAP
             }
         }
 
-        private void CalulateCost()
+        public void CalulateCost()
         {
             float currentCost = 0f;
             foreach (Action action in actions)
             {
-                currentCost += action.actionCost;
+                foreach (Plan subplan in action.subPlans)
+                {
+                    subplan.CalulateCost();
+                }
+                currentCost += action.TotalActionCost();
             }
             planCost = currentCost;
         }
