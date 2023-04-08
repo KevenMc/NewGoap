@@ -9,8 +9,8 @@ namespace GOAP
     public class ActionPlanner : MonoBehaviour
     {
         private Agent agent;
-        public List<Action> actionPlans = new List<Action>();
-        public Action initialActionPlan;
+        public List<Action> actionList = new List<Action>();
+        public Action masterAction;
         public float moveDistance = 1f;
         public int x = 0;
         public int y = 100;
@@ -23,39 +23,84 @@ namespace GOAP
         public void SetGoal(Stat goal)
         {
             Debug.Log("Setting goal");
-            actionPlans.Clear();
-            actionPlans.Add(new Action(goal));
-            initialActionPlan = actionPlans[0];
+            actionList.Clear();
+            actionList.Add(new Action(goal));
+            masterAction = actionList[0];
             agent.currentGoal = goal.statType.ToString();
 
-            ExtendAction(initialActionPlan);
-            SortPlans(actionPlans);
-            Debug.Log(actionPlans[0].actionName);
-            Debug.Log(actionPlans[0].canComplete);
-            Debug.Log(actionPlans.Count);
-            //  ExtendAction(actionPlans[0]);
+            RecursiveFindAction();
         }
 
         public void RecursiveFindAction()
         {
-            if (actionPlans.Count == 0)
+            if (actionList.Count == 0)
             {
                 Debug.Log("No possible plan of action can be found");
                 return;
             }
-            SortPlans(actionPlans);
-            if (actionPlans[0].canComplete)
+            SortPlans(actionList);
+            if (actionList[0].CanComplete())
             {
-                Debug.Log("Found a plan of action");
+                Debug.Log("-------------------------------------------");
+                if (CanCompleteMasterAction(masterAction))
+                {
+                    RecursiveShowActions(actionList[0]);
+                }
+                else
+                {
+                    Debug.Log("No, this will not do");
+                }
                 return;
             }
-            ExtendAction(actionPlans[0]);
+            ExtendAction(actionList[0]);
             RecursiveFindAction();
         }
 
-        public void SortPlans(List<Action> actionList)
+        public Boolean CanCompleteMasterAction(Action action)
         {
-            actionList.Sort((action1, action2) => action1.actionCost.CompareTo(action2.actionCost));
+            Debug.Log("Checking action : " + action.actionName);
+            if (action.subActions.Count > 0)
+            {
+                foreach (Action subAction in action.subActions)
+                {
+                    Debug.Log("Sub action : " + subAction.actionName);
+                    CanCompleteMasterAction(subAction);
+                }
+            }
+            else if (action.childActions.Count > 0)
+            {
+                //handle child actions
+                foreach (Action childAction in action.childActions)
+                {
+                    Debug.Log("Child action : " + childAction.actionName);
+                    CanCompleteMasterAction(childAction);
+                }
+            }
+            else if (!action.canComplete)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public void RecursiveShowActions(Action action)
+        {
+            if (action.parentAction != null)
+            {
+                Debug.Log(
+                    action.actionName
+                        + " -> "
+                        + action.parentAction.actionName
+                        + " | => "
+                        + action.masterAction.actionName
+                        + " | "
+                        + action.masterAction.isSubAction
+                        + " | "
+                        + action.actionCost
+                );
+
+                RecursiveShowActions(action.parentAction);
+            }
         }
 
         #region
@@ -67,7 +112,26 @@ namespace GOAP
             ExtendActionPlanFromItemMemory(action);
             ExtendActionPlanFromBlueprintRepertoire(action);
             Debug.Log("Remove actions from actionPlans");
-            actionPlans.Remove(action);
+
+            if (action.childActions.Count == 0 && !action.CanComplete())
+            {
+                RecursiveDropActions(action);
+            }
+            actionList.Remove(action);
+        }
+
+        public void RecursiveDropActions(Action action)
+        {
+            Debug.Log("This action line is a dead end : " + action.actionName);
+            if (action.parentAction == null)
+            {
+                return;
+            }
+            action.parentAction.childActions.Remove(action);
+            if (action.parentAction.childActions.Count == 0)
+            {
+                RecursiveDropActions(action.parentAction);
+            }
         }
 
         private void ExtendActionPlanFromInventory(Action action)
@@ -76,8 +140,8 @@ namespace GOAP
             foreach (ItemSO itemData in inventoryItems)
             {
                 Action newInventoryAction = new Action(action);
-                newInventoryAction.Init(ActionType.UseItem, action.goal, itemData, true);
-                actionPlans.Add(newInventoryAction);
+                newInventoryAction.Init(ActionType.Use_Item, action.goal, itemData, true);
+                actionList.Add(newInventoryAction);
             }
         }
 
@@ -96,7 +160,7 @@ namespace GOAP
                 {
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.UseItem,
+                        ActionType.Use_Item,
                         new Stat(StatType.HaveItem, item.itemData),
                         item.itemData
                     );
@@ -104,7 +168,7 @@ namespace GOAP
 
                 updateAction = new Action(updateAction);
                 updateAction.Init(
-                    ActionType.CollectItem,
+                    ActionType.Collect_Item,
                     new Stat(StatType.IsAtLocation, item.itemData),
                     item,
                     isAtLocation
@@ -114,14 +178,14 @@ namespace GOAP
                 {
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.MoveToLocation,
+                        ActionType.Move_To_Location,
                         new Stat(StatType.IsAtLocation, item.itemData),
                         item.transform.position,
                         true
                     );
                 }
 
-                actionPlans.Add(updateAction);
+                actionList.Add(updateAction);
             }
         }
 
@@ -134,8 +198,14 @@ namespace GOAP
                 )
             )
             {
+                if (blueprint.craftedItem != null)
+                {
+                    action = new Action(action);
+                    action.Init(ActionType.Use_Item, action.goal, blueprint.craftedItem);
+                }
+
                 Action blueprintAction = new Action(action);
-                blueprintAction.Init(ActionType.Blueprint, blueprint);
+                blueprintAction.Init(ActionType.Blueprint_Make, blueprint);
 
                 foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems)
                 {
@@ -144,16 +214,26 @@ namespace GOAP
                         itemRequirement.itemData
                     );
                     Action itemAction = new Action(itemRequirementStat);
-                    itemAction.Init(ActionType.BlueprintItem, itemRequirement.itemData, action);
+                    itemAction.Init(
+                        ActionType.Blueprint_Require_Item,
+                        itemRequirement.itemData,
+                        blueprintAction
+                    );
                     blueprintAction.subActions.Add(itemAction);
-                    itemAction.masterAction = action;
-                    itemAction.hasMasterAction = true;
-                    actionPlans.Add(itemAction);
+                    itemAction.isSubAction = true;
+                    // itemAction.masterAction = action;
+                    // itemAction.hasMasterAction = true;
+                    actionList.Add(itemAction);
                 }
             }
         }
 
         #endregion
+
+        public void SortPlans(List<Action> actionList)
+        {
+            actionList.Sort((action1, action2) => action1.actionCost.CompareTo(action2.actionCost));
+        }
 
         public static float GetDistance(Vector3 a, Vector3 b)
         {

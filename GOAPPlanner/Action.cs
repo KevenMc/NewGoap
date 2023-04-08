@@ -12,12 +12,13 @@ namespace GOAP
         public ActionType actionType;
         public Action masterAction;
         public bool hasMasterAction = true;
-        public Action parentAction;
+        public Action parentAction = null;
         public List<Action> childActions = new List<Action>();
         public float actionCost = 1;
         public bool canComplete = false;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
         public List<Action> subActions = new List<Action>();
+        public Boolean isSubAction = false;
         #endregion
 
         #region
@@ -32,6 +33,8 @@ namespace GOAP
             this.goal = goal;
             this.hasMasterAction = false;
             this.masterAction = this;
+            this.actionName = goal.ToString();
+            Debug.Log("Master action is : " + this.masterAction.actionName);
         }
 
         public Action(Action parentAction)
@@ -39,7 +42,6 @@ namespace GOAP
             this.parentAction = parentAction;
             this.masterAction = parentAction.masterAction;
             parentAction.childActions.Add(this);
-            this.actionCost += parentAction.actionCost;
         }
 
         // Init method to use item from inventory
@@ -55,6 +57,7 @@ namespace GOAP
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;
             this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost + itemData.itemUseCost;
         }
 
         // Init method to collect item
@@ -65,6 +68,7 @@ namespace GOAP
             this.item = item;
             this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
             this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost;
         }
 
         // Init method to move to location
@@ -80,6 +84,7 @@ namespace GOAP
             this.location = location;
             this.actionName = actionType.ToString() + " : " + location;
             this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost;
         }
 
         // Init method for blueprint
@@ -88,8 +93,9 @@ namespace GOAP
             Debug.Log("Init for blueprint");
             this.actionType = actionType;
             this.blueprint = blueprint;
-            this.actionName = actionType.ToString() + " : " + blueprint;
+            this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
             this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost;
         }
 
         // Init method for blueprint sub-actions
@@ -103,15 +109,26 @@ namespace GOAP
             Debug.Log("Init for blueprint sub-action");
             this.actionType = actionType;
             this.itemData = itemData;
-            this.actionName =
-                actionType.ToString()
-                + " : "
-                + blueprint?.blueprintName
-                + " : "
-                + blueprint?.craftedItem;
-            this.masterAction = parentAction;
-            this.hasMasterAction = true;
+            this.actionName = actionType.ToString() + " : " + itemData.itemName;
+            this.parentAction = parentAction;
+            this.masterAction = this;
+            this.hasMasterAction = false;
             this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost;
+        }
+
+        public Boolean CanComplete()
+        {
+            foreach (Action subAction in subActions)
+            {
+                if (!subAction.canComplete)
+                    return false;
+            }
+            if (subActions.Count > 0)
+            {
+                canComplete = true;
+            }
+            return canComplete;
         }
     }
 }

@@ -39,10 +39,14 @@ namespace GOAP
         {
             StatType goalStatType = goal.statType;
             List<Item> items = new List<Item>();
+
             switch (goalStatType)
             {
                 case StatType.HaveItem:
-                    items.AddRange(itemLocations[goal.itemData]);
+                    if (itemLocations.ContainsKey(goal.itemData))
+                    {
+                        items.AddRange(itemLocations[goal.itemData]);
+                    }
                     break;
                 default:
 

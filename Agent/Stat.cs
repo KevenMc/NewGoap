@@ -31,7 +31,7 @@ namespace GOAP
 
         public Stat(
             StatType statType,
-            ItemSO item,
+            ItemSO itemData,
             float current,
             float trigger,
             float increment,
@@ -39,11 +39,19 @@ namespace GOAP
         )
         {
             this.statType = statType;
-            this.itemData = item;
+            this.itemData = itemData;
             this.current = current;
             this.trigger = trigger;
             this.increment = increment;
             this.priority = priority;
+        }
+
+        public override string ToString()
+        {
+            string retString = "StatType : " + statType.ToString() + "\n";
+            if (itemData != null)
+                retString += "Item type : " + itemData.itemName;
+            return retString;
         }
     }
 }
