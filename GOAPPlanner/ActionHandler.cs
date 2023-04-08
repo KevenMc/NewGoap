@@ -20,6 +20,7 @@ namespace GOAP
         public bool hasUsedItem = false;
         public bool isExecutingPlan = false;
         public bool hasCompletedBlueprint = false;
+        public bool stop = false;
 
         public void GetActionServer(Plan plan)
         {
@@ -68,10 +69,8 @@ namespace GOAP
                     hasCollectedItem = true;
                     break;
                 case ActionType.Blueprint:
-                    Debug.Log("Now i should make " + action.actionName);
                     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
                     hasCompletedBlueprint = true;
-                    Debug.Log("I have made " + action.actionName);
                     break;
                 default:
                     Debug.Log(
@@ -80,17 +79,15 @@ namespace GOAP
                             + " : "
                             + action.actionName
                     );
-                    Debug.Log("Sub plan keys");
-                    foreach (Stat key in action.subPlanLists.Keys)
-                    {
-                        Debug.Log(key.statType);
-                    }
+
                     break;
             }
         }
 
         private void Update()
         {
+            if (stop)
+                return;
             if (currentAction == null)
                 return;
             if (!planHandler.executingCurrentPlan)
@@ -134,6 +131,7 @@ namespace GOAP
                         planHandler.executingCurrentPlan = false;
 
                         Debug.Log("I have finished my plan");
+                        stop = true;
                     }
                     else
                     {
