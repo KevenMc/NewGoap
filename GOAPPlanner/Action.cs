@@ -50,6 +50,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
+            Debug.Log("Init for item from inventory");
             this.actionType = actionType;
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;
@@ -59,6 +60,7 @@ namespace GOAP
         // Init method to collect item
         public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
         {
+            Debug.Log("Init for collect item");
             this.actionType = actionType;
             this.item = item;
             this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
@@ -73,6 +75,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
+            Debug.Log("Init blueprint for location");
             this.actionType = actionType;
             this.location = location;
             this.actionName = actionType.ToString() + " : " + location;
@@ -82,6 +85,7 @@ namespace GOAP
         // Init method for blueprint
         public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
         {
+            Debug.Log("Init for blueprint");
             this.actionType = actionType;
             this.blueprint = blueprint;
             this.actionName = actionType.ToString() + " : " + blueprint;
@@ -89,11 +93,24 @@ namespace GOAP
         }
 
         // Init method for blueprint sub-actions
-        public void Init(ActionType actionType, ItemSO itemData, Boolean canComplete = false)
+        public void Init(
+            ActionType actionType,
+            ItemSO itemData,
+            Action parentAction,
+            Boolean canComplete = false
+        )
         {
+            Debug.Log("Init for blueprint sub-action");
             this.actionType = actionType;
             this.itemData = itemData;
-            this.actionName = actionType.ToString() + " : " + itemData.itemName;
+            this.actionName =
+                actionType.ToString()
+                + " : "
+                + blueprint?.blueprintName
+                + " : "
+                + blueprint?.craftedItem;
+            this.masterAction = parentAction;
+            this.hasMasterAction = true;
             this.canComplete = canComplete;
         }
     }

@@ -22,11 +22,35 @@ namespace GOAP
 
         public void SetGoal(Stat goal)
         {
+            Debug.Log("Setting goal");
             actionPlans.Clear();
             actionPlans.Add(new Action(goal));
             initialActionPlan = actionPlans[0];
-
             agent.currentGoal = goal.statType.ToString();
+
+            ExtendAction(initialActionPlan);
+            SortPlans(actionPlans);
+            Debug.Log(actionPlans[0].actionName);
+            Debug.Log(actionPlans[0].canComplete);
+            Debug.Log(actionPlans.Count);
+            //  ExtendAction(actionPlans[0]);
+        }
+
+        public void RecursiveFindAction()
+        {
+            if (actionPlans.Count == 0)
+            {
+                Debug.Log("No possible plan of action can be found");
+                return;
+            }
+            SortPlans(actionPlans);
+            if (actionPlans[0].canComplete)
+            {
+                Debug.Log("Found a plan of action");
+                return;
+            }
+            ExtendAction(actionPlans[0]);
+            RecursiveFindAction();
         }
 
         public void SortPlans(List<Action> actionList)
@@ -38,9 +62,11 @@ namespace GOAP
 
         public void ExtendAction(Action action)
         {
+            Debug.Log("Extending current action");
             ExtendActionPlanFromInventory(action);
             ExtendActionPlanFromItemMemory(action);
             ExtendActionPlanFromBlueprintRepertoire(action);
+            Debug.Log("Remove actions from actionPlans");
             actionPlans.Remove(action);
         }
 
@@ -50,7 +76,7 @@ namespace GOAP
             foreach (ItemSO itemData in inventoryItems)
             {
                 Action newInventoryAction = new Action(action);
-                newInventoryAction.Init(ActionType.UseItem, itemData);
+                newInventoryAction.Init(ActionType.UseItem, action.goal, itemData, true);
                 actionPlans.Add(newInventoryAction);
             }
         }
@@ -118,9 +144,10 @@ namespace GOAP
                         itemRequirement.itemData
                     );
                     Action itemAction = new Action(itemRequirementStat);
-                    itemAction.Init(ActionType.BlueprintItem, itemRequirement.itemData);
+                    itemAction.Init(ActionType.BlueprintItem, itemRequirement.itemData, action);
                     blueprintAction.subActions.Add(itemAction);
-
+                    itemAction.masterAction = action;
+                    itemAction.hasMasterAction = true;
                     actionPlans.Add(itemAction);
                 }
             }

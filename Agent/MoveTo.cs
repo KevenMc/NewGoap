@@ -30,6 +30,7 @@ public class MoveTo : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
+            Debug.Log("Right click");
             actionPlanner.SetGoal(statHandler.currentGoals[0]);
         }
     }
