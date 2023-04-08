@@ -2,9 +2,11 @@ namespace GOAP
 {
     public enum StatType
     {
-        Item = 0,
-        Station = 1,
-        Blueprint = 2,
+        HaveItem = 0,
+        IsAtLocation = 1,
+        MoveTo = 2,
+        Station = 3,
+        Blueprint = 4,
         Hunger = 100,
         Thirst = 101,
         Energy = 102

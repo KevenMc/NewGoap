@@ -41,9 +41,8 @@ namespace GOAP
             List<Item> items = new List<Item>();
             switch (goalStatType)
             {
-                case StatType.Item:
-                    items.AddRange(itemLocations[goal.item]);
-                    Debug.Log("ADDING SPECIFC ITEM");
+                case StatType.HaveItem:
+                    items.AddRange(itemLocations[goal.itemData]);
                     break;
                 default:
 

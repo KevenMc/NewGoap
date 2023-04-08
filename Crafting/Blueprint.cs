@@ -16,7 +16,7 @@ namespace GOAP
         [System.Serializable]
         public class ItemRequirement
         {
-            public ItemSO item;
+            public ItemSO itemData;
             public bool destroyOnCraft;
         }
     }

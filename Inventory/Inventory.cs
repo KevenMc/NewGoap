@@ -11,7 +11,7 @@ namespace GOAP
         [System.Serializable]
         public class InventoryItem
         {
-            public ItemSO item;
+            public ItemSO itemData;
             public int quantity;
             public List<StatEffect> statEffects;
         }
@@ -25,7 +25,7 @@ namespace GOAP
             // AddItem(defaultItem);
         }
 
-        public List<ItemSO> returnGoalItems(Stat goal)
+        public List<ItemSO> returnGoalItems(StatType statType)
         {
             if (items == null)
             {
@@ -36,17 +36,17 @@ namespace GOAP
             return items
                 .Where(
                     inventoryItem =>
-                        inventoryItem.item.statEffects.Any(
-                            statEffect => statEffect.statType == goal.statType
+                        inventoryItem.itemData.statEffects.Any(
+                            statEffect => statEffect.statType == statType
                         )
                 )
-                .Select(inventoryItem => inventoryItem.item)
+                .Select(inventoryItem => inventoryItem.itemData)
                 .ToList();
         }
 
         public void AddItem(ItemSO item, int quantity = 1)
         {
-            var inventoryItem = items.Find(x => x.item == item);
+            var inventoryItem = items.Find(x => x.itemData == item);
 
             if (inventoryItem != null)
             {
@@ -54,13 +54,13 @@ namespace GOAP
             }
             else
             {
-                items.Add(new InventoryItem { item = item, quantity = quantity });
+                items.Add(new InventoryItem { itemData = item, quantity = quantity });
             }
         }
 
         public void RemoveItem(ItemSO item, int quantity = 1)
         {
-            var inventoryItem = items.Find(x => x.item == item);
+            var inventoryItem = items.Find(x => x.itemData == item);
 
             if (inventoryItem != null)
             {
@@ -75,7 +75,7 @@ namespace GOAP
 
         public void UseItem(ItemSO item, Agent useAgent)
         {
-            var inventoryItem = items.Find(x => x.item == item);
+            var inventoryItem = items.Find(x => x.itemData == item);
 
             if (inventoryItem != null && inventoryItem.quantity > 0)
             {

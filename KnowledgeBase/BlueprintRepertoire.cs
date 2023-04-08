@@ -68,8 +68,8 @@ namespace GOAP
 
             switch (goal.statType)
             {
-                case StatType.Item:
-                    Debug.Log("I am searching for an item of type : " + goal.item.itemName);
+                case StatType.HaveItem:
+                    Debug.Log("I am searching for an item of type : " + goal.itemData.itemName);
                     break;
                 default:
                     if (blueprintsByStatType.ContainsKey(goal.statType))

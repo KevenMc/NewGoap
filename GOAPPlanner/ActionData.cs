@@ -5,7 +5,8 @@ namespace GOAP
         UseItem = 0,
         CollectItem = 1,
         MoveToLocation = 2,
-        Blueprint = 3
+        Blueprint = 3,
+        BlueprintItem = 4
     }
 
     public enum ActionStatus

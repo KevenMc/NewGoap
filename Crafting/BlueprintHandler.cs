@@ -14,7 +14,7 @@ namespace GOAP
             {
                 if (item.destroyOnCraft)
                 {
-                    inventory.RemoveItem(item.item);
+                    inventory.RemoveItem(item.itemData);
                 }
             }
             inventory.AddItem(blueprint.craftedItem);

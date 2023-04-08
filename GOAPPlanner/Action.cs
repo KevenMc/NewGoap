@@ -1,158 +1,100 @@
 using System;
-using System.Runtime.CompilerServices;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace GOAP
 {
-    // public class Action
-    // {
-    //     public string actionName;
-    //     public ActionType actionType;
-
-    //     public int actionCost = 0;
-    //     public Stat goal;
-    //     public ItemSO itemData;
-
-    //     public Item item;
-
-    //     public Vector3 location;
-    //     public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
-    //     public bool canComplete = false;
-
-    //     // public List<StatEffect> statEffects = new List<StatEffect>();
-    //     // public List<Plan> subPlans = new List<Plan>();
-
-    //     public Action(ItemSO itemData, bool isComplete = false) //CCreate action from inventory
-    //     {
-    //         this.itemData = itemData;
-    //         this.actionName = "Use " + itemData.itemName;
-    //         this.actionType = ActionType.UseItem;
-    //         this.canComplete = isComplete;
-    //     }
-
-    //     public Action(ItemSO itemData, Item item, bool isComplete = false) //create collect action
-    //     {
-    //         this.itemData = itemData;
-    //         this.item = item;
-    //         this.actionName = "Collect " + itemData.itemName;
-    //         this.actionType = ActionType.CollectItem;
-    //         this.canComplete = isComplete;
-    //     }
-
-    //     public Action(Vector3 location, string locationName, bool isComplete = false) //create action from location
-    //     {
-    //         this.location = location;
-    //         this.actionName = "Move to " + locationName;
-    //         this.actionType = ActionType.MoveToLocation;
-    //         this.canComplete = isComplete;
-    //     }
-
-    //     public Action(Vector2 location, string locationName, bool isComplete = false) //create action from location
-    //     {
-    //         this.location = location;
-    //         this.actionName = "Move to " + locationName;
-    //         this.actionType = ActionType.MoveToLocation;
-    //         this.canComplete = isComplete;
-    //     }
-    // }
-
     public class Action
     {
+        #region
         public string actionName;
+        public Stat goal; //this is the goal that is being satisfied by completing the immediate child action
         public ActionType actionType;
+        public Action masterAction;
+        public bool hasMasterAction = true;
+        public Action parentAction;
+        public List<Action> childActions = new List<Action>();
         public float actionCost = 1;
-        public Stat goal;
+        public bool canComplete = false;
+        public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
+        public List<Action> subActions = new List<Action>();
+        #endregion
+
+        #region
         public ItemSO itemData;
         public Item item;
-        public Blueprint blueprint;
         public Vector3 location;
-        public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
-        public Plan parentPlan = null;
+        public Blueprint blueprint;
+        #endregion
 
-        public List<Plan> subPlans = new List<Plan>();
-        public Dictionary<Stat, List<Plan>> subPlanLists = new Dictionary<Stat, List<Plan>>();
-        public bool canComplete = false;
+        public Action(Stat goal)
+        {
+            this.goal = goal;
+            this.hasMasterAction = false;
+            this.masterAction = this;
+        }
 
-        public Action(ActionType actionType)
+        public Action(Action parentAction)
+        {
+            this.parentAction = parentAction;
+            this.masterAction = parentAction.masterAction;
+            parentAction.childActions.Add(this);
+            this.actionCost += parentAction.actionCost;
+        }
+
+        // Init method to use item from inventory
+        public void Init(
+            ActionType actionType,
+            Stat goal,
+            ItemSO itemData,
+            Boolean canComplete = false
+        )
         {
             this.actionType = actionType;
+            this.itemData = itemData;
+            this.actionName = actionType.ToString() + " : " + itemData.itemName;
+            this.canComplete = canComplete;
         }
 
-        public void Setup(
-            string actionName,
-            float actionCost,
-            Stat goal,
-            ItemSO itemData,
-            Item item,
-            Vector3 location,
-            bool canComplete
-        )
+        // Init method to collect item
+        public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
         {
-            this.actionName = actionName;
-            //  this.actionCost = actionCost;
-            this.goal = goal;
-            this.itemData = itemData;
+            this.actionType = actionType;
             this.item = item;
-            this.location = location;
+            this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
             this.canComplete = canComplete;
         }
 
-        public void Setup(
-            string actionName,
-            float actionCost,
+        // Init method to move to location
+        public void Init(
+            ActionType actionType,
             Stat goal,
-            ItemSO itemData,
-            Blueprint blueprint,
-            bool canComplete
+            Vector3 location,
+            Boolean canComplete = false
         )
         {
-            this.actionName = actionName;
-            // this.actionCost = actionCost;
-            this.goal = goal;
-            this.itemData = itemData;
-            this.blueprint = blueprint;
+            this.actionType = actionType;
+            this.location = location;
+            this.actionName = actionType.ToString() + " : " + location;
             this.canComplete = canComplete;
         }
 
-        public float TotalActionCost()
+        // Init method for blueprint
+        public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
         {
-            float returnVal = actionCost;
-            foreach (Plan subplan in subPlans)
-            {
-                returnVal += subplan.planCost;
-            }
-            return returnVal;
+            this.actionType = actionType;
+            this.blueprint = blueprint;
+            this.actionName = actionType.ToString() + " : " + blueprint;
+            this.canComplete = canComplete;
         }
 
-        public void GenerateSubPlans()
+        // Init method for blueprint sub-actions
+        public void Init(ActionType actionType, ItemSO itemData, Boolean canComplete = false)
         {
-            if (actionType == ActionType.Blueprint)
-            {
-                Debug.Log("Blueprint : " + blueprint);
-                foreach (Blueprint.ItemRequirement item in blueprint.requiredItems)
-                {
-                    Stat itemStat = new Stat(StatType.Item, item.item, 0, 0, 0, 1);
-                    // Action collectAction = new Action(item, null, false);
-                    Plan subPlan = new Plan(itemStat);
-                    subPlan.parentAction = this;
-                    subPlan.parentPlan = this.parentPlan;
-                    Debug.Log(parentPlan);
-                    parentPlan.hasSubPlans = true;
-                    // subPlan.AddAction(collectAction);
-                    if (!subPlanLists.ContainsKey(itemStat))
-                    {
-                        // If the key is not present, add it to the dictionary with a new list containing the value
-                        subPlanLists.Add(itemStat, new List<Plan> { subPlan });
-                    }
-                    else
-                    {
-                        // If the key is present, append the value to the existing list
-                        subPlanLists[itemStat].Add(subPlan);
-                    }
-                }
-            }
+            this.actionType = actionType;
+            this.itemData = itemData;
+            this.actionName = actionType.ToString() + " : " + itemData.itemName;
+            this.canComplete = canComplete;
         }
     }
 }

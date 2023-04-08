@@ -8,7 +8,7 @@ namespace GOAP
     public class Stat
     {
         public StatType statType;
-        public ItemSO item;
+        public ItemSO itemData;
         public float current;
         public float trigger;
         public float increment;
@@ -23,6 +23,12 @@ namespace GOAP
             this.priority = priority;
         }
 
+        public Stat(StatType statType, ItemSO itemData)
+        {
+            this.statType = statType;
+            this.itemData = itemData;
+        }
+
         public Stat(
             StatType statType,
             ItemSO item,
@@ -33,7 +39,7 @@ namespace GOAP
         )
         {
             this.statType = statType;
-            this.item = item;
+            this.itemData = item;
             this.current = current;
             this.trigger = trigger;
             this.increment = increment;
