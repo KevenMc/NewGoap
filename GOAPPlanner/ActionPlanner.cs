@@ -60,22 +60,23 @@ namespace GOAP
 
         public Boolean CanCompleteMasterAction(Action action)
         {
+            List<Boolean> returnList = new List<bool>();
+            returnList.Add(true);
             Debug.Log("Checking action : " + action.actionName);
             if (action.subActions.Count > 0)
             {
                 SortPlans(action.subActions);
-                CanCompleteMasterAction(action.subActions[0]);
+                foreach (Action subAction in action.subActions)
+                {
+                    returnList.Add(CanCompleteMasterAction(subAction));
+                }
             }
             else if (action.childActions.Count > 0)
             {
                 //handle child actions
-                CanCompleteMasterAction(action.childActions.Last());
+                returnList.Add(CanCompleteMasterAction(action.childActions.Last()));
             }
-            else if (!action.canComplete)
-            {
-                return false;
-            }
-            return true;
+            return returnList.All(b => b);
         }
 
         public void RecursiveShowActions(Action action)
@@ -257,11 +258,10 @@ namespace GOAP
             // Convert the dictionary to JSON
             string jsonData = JsonUtility.ToJson(jSONAction);
             jsonData = jsonData
-                .Replace("\n", "")
+                .Replace("\\n", "")
                 .Replace("\\", "")
                 .Replace("\"{", "{")
                 .Replace("}\"", "}");
-            //  .Replace("}\"", "}");
 
             Debug.Log("json data : " + jsonData);
 
