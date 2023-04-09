@@ -34,7 +34,6 @@ namespace GOAP
         {
             while (true)
             {
-                Debug.Log("Movement Manager");
                 yield return new WaitForSeconds(refreshRate);
 
                 //Handle movement

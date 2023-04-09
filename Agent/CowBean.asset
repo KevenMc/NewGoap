@@ -12,5 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c2fd4fe9dcedc233aecd9d7fffd41b7, type: 3}
   m_Name: CowBean
   m_EditorClassIdentifier: 
-  passportName: 
-  stats: []
+  passportName: CowBean
+  stats:
+  - statType: 100
+    itemData: {fileID: 0}
+    current: 0
+    trigger: 2
+    increment: 1
+    priority: 2
+  - statType: 101
+    itemData: {fileID: 0}
+    current: 0
+    trigger: 7
+    increment: 1
+    priority: 3
+  - statType: 102
+    itemData: {fileID: 0}
+    current: 0
+    trigger: 8
+    increment: 1
+    priority: 1

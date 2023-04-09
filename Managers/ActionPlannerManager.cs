@@ -34,14 +34,12 @@ namespace GOAP
         {
             while (true)
             {
-                Debug.Log("Action Planner Manager");
                 yield return new WaitForSeconds(refreshRate);
 
-                foreach (var planner in actionPlanners)
+                foreach (ActionPlanner planner in actionPlanners)
                 {
                     planner.PlanAction();
                 }
-                yield return null;
             }
         }
 

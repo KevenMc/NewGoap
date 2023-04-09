@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace GOAP
         public float trigger;
         public float increment;
         public int priority;
+        public Boolean isUrgent = false;
 
         public Stat(StatType statType, float current, float trigger, float increment, int priority)
         {
@@ -30,6 +32,7 @@ namespace GOAP
             this.trigger = stat.trigger;
             this.increment = stat.increment;
             this.priority = stat.priority;
+            this.isUrgent = stat.isUrgent;
         }
 
         public Stat(StatType statType, ItemSO itemData)
@@ -61,6 +64,11 @@ namespace GOAP
             if (itemData != null)
                 retString += "Item type : " + itemData.itemName;
             return retString;
+        }
+
+        public Boolean IsUrgent()
+        {
+            return isUrgent;
         }
     }
 }

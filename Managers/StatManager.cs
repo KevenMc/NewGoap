@@ -34,7 +34,6 @@ namespace GOAP
         {
             while (true)
             {
-                Debug.Log("Stat Manager");
                 yield return new WaitForSeconds(refreshRate);
 
                 foreach (StatHandler handler in statHandlers)

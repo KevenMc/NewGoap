@@ -13,6 +13,7 @@ namespace GOAP
 
         public Dictionary<StatType, Stat> statsByStatType = new Dictionary<StatType, Stat>();
         public List<Stat> currentGoals = new List<Stat>();
+        public Stat currentGoal;
 
         public void Init()
         {
@@ -21,20 +22,17 @@ namespace GOAP
             StatManager.instance.RegisterStatHandler(this);
         }
 
-        // private void OnEnable()
-        // {
-        //     StatManager.instance.AddHandler(this);
-        // }
+        private void OnEnable()
+        {
+            StatManager.instance.RegisterStatHandler(this);
+        }
 
         private void OnDisable()
         {
             StatManager.instance.UnregisterStatHandler(this);
         }
 
-        public void Start()
-        {
-            CompileStatPassports();
-        }
+        public void Start() { }
 
         public void CompileStatPassports()
         {
@@ -51,7 +49,7 @@ namespace GOAP
             foreach (Stat stat in stats)
             {
                 statsByStatType[stat.statType] = stat;
-                Debug.Log("Adding " + stat.statType + " to statdict");
+                Debug.Log("Adding " + stat.statType + " to stat dict");
             }
         }
 
