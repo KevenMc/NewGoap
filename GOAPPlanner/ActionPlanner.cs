@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 
 namespace GOAP
 {
@@ -29,6 +30,7 @@ namespace GOAP
             agent.currentGoal = goal.statType.ToString();
 
             RecursiveFindAction();
+            SaveMasterActionToFile("MYaction.json");
         }
 
         public void RecursiveFindAction()
@@ -61,20 +63,13 @@ namespace GOAP
             Debug.Log("Checking action : " + action.actionName);
             if (action.subActions.Count > 0)
             {
-                foreach (Action subAction in action.subActions)
-                {
-                    Debug.Log("Sub action : " + subAction.actionName);
-                    CanCompleteMasterAction(subAction);
-                }
+                SortPlans(action.subActions);
+                CanCompleteMasterAction(action.subActions[0]);
             }
             else if (action.childActions.Count > 0)
             {
                 //handle child actions
-                foreach (Action childAction in action.childActions)
-                {
-                    Debug.Log("Child action : " + childAction.actionName);
-                    CanCompleteMasterAction(childAction);
-                }
+                CanCompleteMasterAction(action.childActions.Last());
             }
             else if (!action.canComplete)
             {
@@ -93,9 +88,11 @@ namespace GOAP
                         + action.parentAction.actionName
                         + " | => "
                         + action.masterAction.actionName
-                        + " | "
+                        + " | SubAction : "
                         + action.masterAction.isSubAction
-                        + " | "
+                        + " - "
+                        + action.subActions.Count
+                        + " | Cost : "
                         + action.actionCost
                 );
 
@@ -221,8 +218,6 @@ namespace GOAP
                     );
                     blueprintAction.subActions.Add(itemAction);
                     itemAction.isSubAction = true;
-                    // itemAction.masterAction = action;
-                    // itemAction.hasMasterAction = true;
                     actionList.Add(itemAction);
                 }
             }
@@ -244,5 +239,37 @@ namespace GOAP
         {
             return Vector2.Distance(a, b);
         }
+
+        #region
+
+        public void SaveMasterActionToFile(string filePath)
+        {
+            // Create a dictionary to hold the masterAction and its sub-actions
+            Dictionary<string, object> actionData = new Dictionary<string, object>();
+
+            // Add the masterAction to the dictionary
+            actionData.Add("MasterAction", masterAction.actionName);
+            Debug.Log("MasterAction : " + masterAction.actionName);
+            JSONAction jSONAction = new JSONAction(masterAction);
+            // Debug.Log(jSONAction);
+
+
+            // Convert the dictionary to JSON
+            string jsonData = JsonUtility.ToJson(jSONAction);
+            jsonData = jsonData
+                .Replace("\n", "")
+                .Replace("\\", "")
+                .Replace("\"{", "{")
+                .Replace("}\"", "}");
+            //  .Replace("}\"", "}");
+
+            Debug.Log("json data : " + jsonData);
+
+            // Save the JSON data to a file
+            File.WriteAllText(filePath, jsonData);
+
+            Debug.Log("MasterAction saved to file: " + filePath);
+        }
+        #endregion
     }
 }

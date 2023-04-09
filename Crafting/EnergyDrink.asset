@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnergyDrink
   m_EditorClassIdentifier: 
   itemName: Energy Drink
-  itemUseCost: 10
+  itemUseCost: 0
   statEffects:
   - statType: 102
     value: -100
