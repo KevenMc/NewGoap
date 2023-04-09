@@ -12,9 +12,32 @@ namespace GOAP
         private Agent agent;
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
+        public Boolean requiresNewAction = false;
         public float moveDistance = 1f;
+        private GOAPManager goapManager;
         public int x = 0;
         public int y = 100;
+
+        private void OnEnable()
+        {
+            goapManager = GOAPManager.instance;
+            RegisterActionPlanner();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterActionPlanner();
+        }
+
+        public void RegisterActionPlanner()
+        {
+            GOAPManager.RegisterActionPlanner(this);
+        }
+
+        public void UnregisterActionPlanner()
+        {
+            GOAPManager.UnregisterActionPlanner(this);
+        }
 
         private void Start()
         {
@@ -27,10 +50,16 @@ namespace GOAP
             actionList.Clear();
             actionList.Add(new Action(goal));
             masterAction = actionList[0];
+            requiresNewAction = true;
             agent.currentGoal = goal.statType.ToString();
+        }
 
-            RecursiveFindAction();
-            SaveMasterActionToFile("MYaction.json");
+        public void PlanAction()
+        {
+            if (requiresNewAction)
+            {
+                RecursiveFindAction();
+            }
         }
 
         public void RecursiveFindAction()
@@ -47,6 +76,7 @@ namespace GOAP
                 if (CanCompleteMasterAction(masterAction))
                 {
                     RecursiveShowActions(actionList[0]);
+                    requiresNewAction = false;
                 }
                 else
                 {
@@ -68,6 +98,7 @@ namespace GOAP
                 SortPlans(action.subActions);
                 foreach (Action subAction in action.subActions)
                 {
+                    Debug.Log("77777777777777777777777777777777777777777777777777777777777777777");
                     returnList.Add(CanCompleteMasterAction(subAction));
                 }
             }
@@ -113,7 +144,7 @@ namespace GOAP
 
             if (action.childActions.Count == 0 && !action.CanComplete())
             {
-                RecursiveDropActions(action);
+                // RecursiveDropActions(action);
             }
             actionList.Remove(action);
         }

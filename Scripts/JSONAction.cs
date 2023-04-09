@@ -9,7 +9,6 @@ namespace GOAP
         public string actionName;
         public float actionCost;
         public string childAction;
-        public string[] subActions;
 
         public JSONAction(Action action)
         {
@@ -17,19 +16,56 @@ namespace GOAP
             this.actionCost = action.actionCost;
             if (action.childActions.Count > 0)
             {
-                this.childAction = JsonUtility.ToJson(new JSONAction(action.childActions[0]));
-            }
-            if (action.subActions.Count > 0)
-            {
-                string[] subActions = new string[action.subActions.Count];
-                int x = 0;
-                foreach (Action subAction in action.subActions)
+                if (action.childActions[0].subActions.Count > 0)
                 {
-                    subActions[0] = JsonUtility.ToJson(new JSONAction(subAction));
-                    x++;
+                    this.childAction = JsonUtility.ToJson(
+                        new JSONActionWithSubAction(action.childActions[0])
+                    );
                 }
-                this.subActions = subActions;
+                else if (action.childActions[0].childActions.Count > 0)
+                {
+                    this.childAction = JsonUtility.ToJson(new JSONAction(action.childActions[0]));
+                }
+                else
+                {
+                    this.childAction = JsonUtility.ToJson(
+                        new JSONActionEndNode(action.childActions[0])
+                    );
+                }
             }
+        }
+    }
+
+    public class JSONActionEndNode
+    {
+        public string actionName;
+        public float actionCost;
+
+        public JSONActionEndNode(Action action)
+        {
+            this.actionName = action.actionName;
+            this.actionCost = action.actionCost;
+        }
+    }
+
+    public class JSONActionWithSubAction
+    {
+        public string actionName;
+        public float actionCost;
+        public string[] subActions;
+
+        public JSONActionWithSubAction(Action action)
+        {
+            this.actionName = action.actionName;
+            this.actionCost = action.actionCost;
+            string[] subActions = new string[action.subActions.Count];
+            int i = 0;
+            foreach (Action subAction in action.subActions)
+            {
+                subActions[i] = JsonUtility.ToJson(new JSONAction(subAction));
+                i++;
+            }
+            this.subActions = subActions;
         }
     }
 }
