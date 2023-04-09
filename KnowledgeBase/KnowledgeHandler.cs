@@ -11,7 +11,7 @@ namespace GOAP
         public ItemMemory itemMemory = new ItemMemory();
         public BlueprintRepertoire blueprintRepertoire = new BlueprintRepertoire();
 
-        void Start()
+        public void Init()
         {
             itemMemory = new ItemMemory(); //testing
             foreach (Item itemToAdd in itemsToAdd) //

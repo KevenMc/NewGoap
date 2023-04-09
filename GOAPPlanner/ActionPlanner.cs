@@ -12,17 +12,21 @@ namespace GOAP
         private Agent agent;
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
-        public Boolean requiresNewAction = false;
+        public Boolean requiresNewAction = true;
         public float moveDistance = 1f;
-        private GOAPManager goapManager;
-        public int x = 0;
-        public int y = 100;
+        private ActionPlannerManager goapManager;
 
-        private void OnEnable()
+        public void Init()
         {
-            goapManager = GOAPManager.instance;
+            goapManager = ActionPlannerManager.instance;
             RegisterActionPlanner();
         }
+
+        // private void OnEnable()
+        // {
+        //     goapManager = GOAPManager.instance;
+        //     RegisterActionPlanner();
+        // }
 
         private void OnDisable()
         {
@@ -31,12 +35,12 @@ namespace GOAP
 
         public void RegisterActionPlanner()
         {
-            GOAPManager.RegisterActionPlanner(this);
+            ActionPlannerManager.RegisterActionPlanner(this);
         }
 
         public void UnregisterActionPlanner()
         {
-            GOAPManager.UnregisterActionPlanner(this);
+            ActionPlannerManager.UnregisterActionPlanner(this);
         }
 
         private void Start()
@@ -56,18 +60,30 @@ namespace GOAP
 
         public void PlanAction()
         {
-            if (requiresNewAction)
+            agent.statHandler.UpdateGoals();
+
+            if (requiresNewAction && agent.statHandler.currentGoals.Count > 0)
             {
-                RecursiveFindAction();
+                Debug.Log("I am planning");
+
+                foreach (Stat stat in agent.statHandler.currentGoals)
+                {
+                    Debug.Log("finding plan for " + stat.statType);
+                    SetGoal(stat);
+                    if (RecursiveFindAction())
+                    {
+                        return;
+                    }
+                }
             }
         }
 
-        public void RecursiveFindAction()
+        public Boolean RecursiveFindAction()
         {
             if (actionList.Count == 0)
             {
                 Debug.Log("No possible plan of action can be found");
-                return;
+                return false;
             }
             SortPlans(actionList);
             if (actionList[0].CanComplete())
@@ -77,28 +93,27 @@ namespace GOAP
                 {
                     RecursiveShowActions(actionList[0]);
                     requiresNewAction = false;
+                    return true;
                 }
                 else
                 {
                     Debug.Log("No, this will not do");
                 }
-                return;
             }
             ExtendAction(actionList[0]);
             RecursiveFindAction();
+            return false;
         }
 
         public Boolean CanCompleteMasterAction(Action action)
         {
             List<Boolean> returnList = new List<bool>();
             returnList.Add(true);
-            Debug.Log("Checking action : " + action.actionName);
             if (action.subActions.Count > 0)
             {
                 SortPlans(action.subActions);
                 foreach (Action subAction in action.subActions)
                 {
-                    Debug.Log("77777777777777777777777777777777777777777777777777777777777777777");
                     returnList.Add(CanCompleteMasterAction(subAction));
                 }
             }

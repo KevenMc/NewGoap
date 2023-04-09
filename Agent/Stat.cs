@@ -23,6 +23,15 @@ namespace GOAP
             this.priority = priority;
         }
 
+        public Stat(Stat stat)
+        {
+            this.statType = stat.statType;
+            this.current = stat.current;
+            this.trigger = stat.trigger;
+            this.increment = stat.increment;
+            this.priority = stat.priority;
+        }
+
         public Stat(StatType statType, ItemSO itemData)
         {
             this.statType = statType;

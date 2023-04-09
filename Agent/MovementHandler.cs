@@ -11,6 +11,8 @@ namespace GOAP
         private Vector3 target;
         public Agent agent;
 
+        public void Init() { }
+
         public void MoveTo(Vector3 location)
         {
             target = location;

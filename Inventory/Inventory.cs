@@ -20,10 +20,7 @@ namespace GOAP
 
         public List<InventoryItem> items = new List<InventoryItem>();
 
-        void Start()
-        {
-            // AddItem(defaultItem);
-        }
+        public void Init() { }
 
         public List<ItemSO> returnGoalItems(StatType statType)
         {

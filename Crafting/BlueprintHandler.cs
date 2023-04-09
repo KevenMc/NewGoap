@@ -8,6 +8,8 @@ namespace GOAP
     {
         public Inventory inventory;
 
+        public void Init() { }
+
         public void CompleteBlueprintNoStation(Blueprint blueprint)
         {
             foreach (Blueprint.ItemRequirement item in blueprint.requiredItems)

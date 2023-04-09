@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,20 +8,51 @@ namespace GOAP
 {
     public class StatHandler : MonoBehaviour
     {
+        public List<StatPassport> statPassports = new List<StatPassport>();
         public List<Stat> stats = new List<Stat>();
+
+        public Dictionary<StatType, Stat> statsByStatType = new Dictionary<StatType, Stat>();
         public List<Stat> currentGoals = new List<Stat>();
 
-        private void Update()
+        public void Init()
         {
-            float deltaTime = Time.deltaTime;
-
-            // Update the current value of each stat
-            foreach (var stat in stats)
-            {
-                stat.current += stat.increment * deltaTime;
-            }
+            CompileStatPassports();
             UpdateGoals();
-            // Update current goals list based on stat priorities
+            StatManager.instance.RegisterStatHandler(this);
+        }
+
+        // private void OnEnable()
+        // {
+        //     StatManager.instance.AddHandler(this);
+        // }
+
+        private void OnDisable()
+        {
+            StatManager.instance.UnregisterStatHandler(this);
+        }
+
+        public void Start()
+        {
+            CompileStatPassports();
+        }
+
+        public void CompileStatPassports()
+        {
+            foreach (StatPassport statPassport in statPassports)
+            {
+                foreach (Stat stat in statPassport.stats)
+                {
+                    if (!stats.Contains(stat))
+                    {
+                        stats.Add(new Stat(stat));
+                    }
+                }
+            }
+            foreach (Stat stat in stats)
+            {
+                statsByStatType[stat.statType] = stat;
+                Debug.Log("Adding " + stat.statType + " to statdict");
+            }
         }
 
         public void UpdateGoals()
@@ -28,9 +60,7 @@ namespace GOAP
             currentGoals = stats
                 .Where(stat => stat.current >= stat.trigger)
                 .OrderByDescending(stat => stat.priority)
-                //.Select(stat => stat)
                 .ToList();
-            // Debug.Log(currentGoals[0].statType);
         }
 
         public void ModifyStat(StatType statType, float value)

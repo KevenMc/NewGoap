@@ -1,12 +1,24 @@
+using UnityEngine;
+
 namespace GOAP
 {
     public enum StatType
     {
-        HaveItem = 0,
-        IsAtLocation = 1,
-        MoveTo = 2,
-        Station = 3,
-        Blueprint = 4,
+        [HideInInspector]
+        Null = 0,
+
+        [HideInInspector]
+        HaveItem = 1,
+
+        [HideInInspector]
+        IsAtLocation = 2,
+
+        [HideInInspector]
+        MoveTo = 3,
+
+        [HideInInspector]
+        Station = 4,
+        Blueprint = 5,
         Hunger = 100,
         Thirst = 101,
         Energy = 102
