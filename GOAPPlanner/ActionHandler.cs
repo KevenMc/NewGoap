@@ -48,7 +48,7 @@ namespace GOAP
 
         public void UnregisterActionPlanner()
         {
-            ActionManager.instance.RegisterSubscriber(this);
+            ActionManager.instance.UnregisterSubscriber(this);
             MovementManager.instance.UnregisterSubscriber(this);
         }
 
@@ -89,7 +89,6 @@ namespace GOAP
 
             if (distance < agent.distanceToArrive)
             {
-                Debug.Log("ARRIVED AT A LOCATION");
                 MovementManager.instance.UnregisterSubscriber(this);
 
                 navMeshAgent.SetDestination(transform.position);
@@ -103,12 +102,20 @@ namespace GOAP
             movingToLocation = false;
         }
 
+        private IEnumerator PauseForOneSecond()
+        {
+            // Pause for one second
+            yield return new WaitForSeconds(1f);
+        }
+
         public void ExecuteAction()
         {
             Debug.Log("Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
             currentAction = actionsToPerform.Last();
             actionsToPerform.Remove(currentAction);
-
+            actionsToPerform.Add(currentAction.parentAction);
+            Debug.Log(currentAction.actionName);
+            Debug.Log(currentAction.item);
             switch (currentAction.actionType)
             {
                 // case ActionType.Use_Item:
@@ -122,12 +129,10 @@ namespace GOAP
 
                     movingToLocation = true;
                     break;
-                // case ActionType.Collect_Item:
-                //     inventory.AddItem(action.itemData);
-                //     action.item.transform.position += Vector3.up;
-                //     Destroy(action.item.gameObject);
-                //     hasCollectedItem = true;
-                //     break;
+                case ActionType.Collect_Item:
+                    currentAction.item.transform.SetParent(this.transform);
+                    agent.animator.SetBool("Pickup", true);
+                    break;
                 // case ActionType.Blueprint_Make:
                 //     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
                 //     hasCompletedBlueprint = true;
@@ -142,6 +147,15 @@ namespace GOAP
 
                     break;
             }
+        }
+
+        public void PickUpItem()
+        {
+            Debug.Log("Should now collect item : " + currentAction.item.itemData);
+            inventory.AddItem(currentAction.item.itemData);
+            Destroy(currentAction.item.gameObject);
+            hasCollectedItem = true;
+            agent.animator.SetBool("Pickup", false);
         }
 
         private void Updatex()

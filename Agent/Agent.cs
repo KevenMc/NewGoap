@@ -19,6 +19,7 @@ namespace GOAP
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
         public ActionHandler actionHandler;
+        public Animator animator;
         public string currentGoal;
         public float distanceToArrive = 1f;
 
@@ -35,6 +36,8 @@ namespace GOAP
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
             actionHandler = GetComponent<ActionHandler>();
+
+            Animator animator = GetComponent<Animator>();
 
             statHandler.Init();
             actionPlanner.Init();

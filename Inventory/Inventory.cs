@@ -57,6 +57,8 @@ namespace GOAP
 
         public void RemoveItem(ItemSO item, int quantity = 1)
         {
+            Debug.Log("Using an item " + item.itemName);
+
             var inventoryItem = items.Find(x => x.itemData == item);
 
             if (inventoryItem != null)
@@ -72,6 +74,7 @@ namespace GOAP
 
         public void UseItem(ItemSO item, Agent useAgent)
         {
+            Debug.Log("Using an item " + item.itemName);
             var inventoryItem = items.Find(x => x.itemData == item);
 
             if (inventoryItem != null && inventoryItem.quantity > 0)

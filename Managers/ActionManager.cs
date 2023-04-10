@@ -21,6 +21,25 @@ namespace GOAP
             }
         }
 
-        protected override void PerformTask(ActionHandler subscriber) { }
+        protected override void PerformTask(ActionHandler subscriber)
+        {
+            if (subscriber.currentAction != null)
+            {
+                switch (subscriber.currentAction.actionType)
+                {
+                    case ActionType.Move_To_Location:
+                        if (subscriber.HasArrivedAtLocation())
+                        {
+                            Debug.Log("Finished moving");
+                            subscriber.UnregisterActionPlanner();
+                            subscriber.ExecuteAction();
+                        }
+                        break;
+                    default:
+                        Debug.Log("Some other action");
+                        break;
+                }
+            }
+        }
     }
 }

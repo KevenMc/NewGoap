@@ -21,9 +21,6 @@ namespace GOAP
             }
         }
 
-        protected override void PerformTask(ActionHandler subscriber)
-        {
-            subscriber.HasArrivedAtLocation();
-        }
+        protected override void PerformTask(ActionHandler subscriber) { }
     }
 }
