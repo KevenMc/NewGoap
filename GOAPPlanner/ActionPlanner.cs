@@ -185,9 +185,17 @@ namespace GOAP
             List<ItemSO> inventoryItems = agent.inventory.returnGoalItems(action.goal.statType);
             foreach (ItemSO itemData in inventoryItems)
             {
-                Action newInventoryAction = new Action(action);
-                newInventoryAction.Init(ActionType.Use_Item, action.goal, itemData, true);
-                actionList.Add(newInventoryAction);
+                Action newEquipAction = new Action(action);
+                newEquipAction.Init(ActionType.Use_Item, action.goal, itemData, false);
+
+                Action newInventoryAction = new Action(newEquipAction);
+                newInventoryAction.Init(
+                    ActionType.Equip_From_Inventory,
+                    newEquipAction.goal,
+                    itemData,
+                    true
+                );
+                actionList.Add(newEquipAction);
             }
         }
 
@@ -210,15 +218,25 @@ namespace GOAP
                         new Stat(StatType.HaveItem, item.itemData),
                         item.itemData
                     );
-                }
 
-                updateAction = new Action(updateAction);
-                updateAction.Init(
-                    ActionType.Collect_Item,
-                    new Stat(StatType.IsAtLocation, item.itemData),
-                    item,
-                    isAtLocation
-                );
+                    updateAction = new Action(updateAction);
+                    updateAction.Init(
+                        ActionType.Collect_Item_To_Equip,
+                        new Stat(StatType.IsAtLocation, item.itemData),
+                        item,
+                        isAtLocation
+                    );
+                }
+                else
+                {
+                    updateAction = new Action(updateAction);
+                    updateAction.Init(
+                        ActionType.Collect_Item_To_Inventory,
+                        new Stat(StatType.IsAtLocation, item.itemData),
+                        item,
+                        isAtLocation
+                    );
+                }
 
                 if (!isAtLocation)
                 {

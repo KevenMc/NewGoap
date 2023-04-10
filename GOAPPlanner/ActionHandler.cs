@@ -129,9 +129,13 @@ namespace GOAP
 
                     movingToLocation = true;
                     break;
-                case ActionType.Collect_Item:
+                case ActionType.Collect_Item_To_Inventory:
                     currentAction.item.transform.SetParent(this.transform);
-                    agent.animator.SetBool("Pickup", true);
+                    agent.animator.SetBool("Collect_Item_To_Inventory", true);
+                    break;
+                case ActionType.Collect_Item_To_Equip:
+                    currentAction.item.transform.SetParent(this.transform);
+                    agent.animator.SetBool("Collect_Item_To_Equip", true);
                     break;
                 // case ActionType.Blueprint_Make:
                 //     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
@@ -155,7 +159,7 @@ namespace GOAP
             inventory.AddItem(currentAction.item.itemData);
             Destroy(currentAction.item.gameObject);
             hasCollectedItem = true;
-            agent.animator.SetBool("Pickup", false);
+            agent.animator.SetBool("Collect_Item_To_Inventory", false);
         }
 
         private void Updatex()
