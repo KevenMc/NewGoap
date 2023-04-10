@@ -20,15 +20,18 @@ MonoBehaviour:
     trigger: 2
     increment: 1
     priority: 2
+    isUrgent: 0
   - statType: 101
     itemData: {fileID: 0}
     current: 0
-    trigger: 7
+    trigger: 4
     increment: 1
     priority: 3
+    isUrgent: 1
   - statType: 102
     itemData: {fileID: 0}
     current: 0
     trigger: 8
     increment: 1
     priority: 1
+    isUrgent: 0

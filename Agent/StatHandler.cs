@@ -19,17 +19,18 @@ namespace GOAP
         {
             CompileStatPassports();
             UpdateGoals();
-            StatManager.instance.RegisterStatHandler(this);
+            Debug.Log("NOW REGISTER STATMANAGER");
+            StatManager.instance.RegisterSubscriber(this);
         }
 
         private void OnEnable()
         {
-            StatManager.instance.RegisterStatHandler(this);
+            StatManager.instance.RegisterSubscriber(this);
         }
 
         private void OnDisable()
         {
-            StatManager.instance.UnregisterStatHandler(this);
+            StatManager.instance.UnregisterSubscriber(this);
         }
 
         public void Start() { }

@@ -24,11 +24,9 @@ namespace GOAP
         public bool isExecutingPlan = false;
         public bool hasCompletedBlueprint = false;
         public bool stop = false;
-        public ActionManager actionManager;
 
         public void Init()
         {
-            actionManager = ActionManager.instance;
             RegisterActionPlanner();
         }
 
@@ -44,12 +42,14 @@ namespace GOAP
 
         public void RegisterActionPlanner()
         {
-            ActionManager.RegisterActionHandler(this);
+            ActionManager.instance.RegisterSubscriber(this);
+            MovementManager.instance.RegisterSubscriber(this);
         }
 
         public void UnregisterActionPlanner()
         {
-            ActionManager.UnregisterActionHandler(this);
+            ActionManager.instance.RegisterSubscriber(this);
+            MovementManager.instance.UnregisterSubscriber(this);
         }
 
         public void SetActionList()
@@ -90,7 +90,8 @@ namespace GOAP
             if (distance < agent.distanceToArrive)
             {
                 Debug.Log("ARRIVED AT A LOCATION");
-                UnregisterActionPlanner();
+                MovementManager.instance.UnregisterSubscriber(this);
+
                 navMeshAgent.SetDestination(transform.position);
                 return true;
             }
@@ -117,7 +118,8 @@ namespace GOAP
 
                 case ActionType.Move_To_Location:
                     MoveTo(currentAction.location);
-                    RegisterActionPlanner();
+                    MovementManager.instance.RegisterSubscriber(this);
+
                     movingToLocation = true;
                     break;
                 // case ActionType.Collect_Item:
