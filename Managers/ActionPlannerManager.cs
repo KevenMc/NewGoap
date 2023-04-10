@@ -4,12 +4,9 @@ using UnityEngine;
 
 namespace GOAP
 {
-    public class ActionPlannerManager : MonoBehaviour
+    public class ActionPlannerManager : AbstractManager<ActionPlanner>
     {
         public static ActionPlannerManager instance;
-        private List<ActionPlanner> actionPlanners = new List<ActionPlanner>();
-        private IEnumerator actionPlannerCoroutine;
-        public float refreshRate = 0.1f;
 
         private void Awake()
         {
@@ -24,35 +21,9 @@ namespace GOAP
             }
         }
 
-        private void Start()
+        protected override void PerformTask(ActionPlanner subscriber)
         {
-            actionPlannerCoroutine = ActionPlannerCoroutine();
-            StartCoroutine(actionPlannerCoroutine);
-        }
-
-        private IEnumerator ActionPlannerCoroutine()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(refreshRate);
-
-                foreach (ActionPlanner planner in actionPlanners)
-                {
-                    planner.PlanAction();
-                }
-            }
-        }
-
-        public static void RegisterActionPlanner(ActionPlanner planner)
-        {
-            if (instance.actionPlanners.Contains(planner))
-                return;
-            instance.actionPlanners.Add(planner);
-        }
-
-        public static void UnregisterActionPlanner(ActionPlanner planner)
-        {
-            instance.actionPlanners.Remove(planner);
+            subscriber.PlanAction();
         }
     }
 }

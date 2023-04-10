@@ -14,11 +14,9 @@ namespace GOAP
         public Action masterAction;
         public Boolean requiresNewAction = true;
         public float moveDistance = 1f;
-        private ActionPlannerManager actionPlannerManager;
 
         public void Init()
         {
-            actionPlannerManager = ActionPlannerManager.instance;
             RegisterActionPlanner();
         }
 
@@ -34,12 +32,12 @@ namespace GOAP
 
         public void RegisterActionPlanner()
         {
-            ActionPlannerManager.RegisterActionPlanner(this);
+            ActionPlannerManager.instance.RegisterSubscriber(this);
         }
 
         public void UnregisterActionPlanner()
         {
-            ActionPlannerManager.UnregisterActionPlanner(this);
+            ActionPlannerManager.instance.UnregisterSubscriber(this);
         }
 
         private void Start()
