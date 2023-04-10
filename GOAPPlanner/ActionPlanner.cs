@@ -190,7 +190,7 @@ namespace GOAP
 
                 Action newInventoryAction = new Action(newEquipAction);
                 newInventoryAction.Init(
-                    ActionType.Equip_From_Inventory,
+                    ActionType.Inventory_To_Equip,
                     newEquipAction.goal,
                     itemData,
                     true
@@ -221,7 +221,7 @@ namespace GOAP
 
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.Collect_Item_To_Equip,
+                        ActionType.Collect_To_Equip,
                         new Stat(StatType.IsAtLocation, item.itemData),
                         item,
                         isAtLocation
@@ -231,7 +231,15 @@ namespace GOAP
                 {
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.Collect_Item_To_Inventory,
+                        ActionType.Equip_To_Inventory,
+                        new Stat(StatType.IsAtLocation, item.itemData),
+                        item,
+                        false
+                    );
+
+                    updateAction = new Action(updateAction);
+                    updateAction.Init(
+                        ActionType.Collect_To_Equip,
                         new Stat(StatType.IsAtLocation, item.itemData),
                         item,
                         isAtLocation

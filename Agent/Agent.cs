@@ -22,6 +22,7 @@ namespace GOAP
         public Animator animator;
         public string currentGoal;
         public float distanceToArrive = 1f;
+        public GameObject equipLocation;
 
         private void Start()
         {

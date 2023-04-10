@@ -3,12 +3,14 @@ namespace GOAP
     public enum ActionType
     {
         Use_Item = 0,
-        Collect_Item_To_Inventory = 1,
-        Collect_Item_To_Equip = 2,
-        Equip_From_Inventory = 3,
-        Move_To_Location = 4,
-        Blueprint_Make = 5,
-        Blueprint_Require_Item = 6
+
+        //  Collect_Item_To_Inventory,
+        Collect_To_Equip,
+        Equip_To_Inventory,
+        Inventory_To_Equip,
+        Move_To_Location,
+        Blueprint_Make,
+        Blueprint_Require_Item
     }
 
     public enum ActionStatus

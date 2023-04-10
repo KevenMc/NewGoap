@@ -23,6 +23,7 @@ namespace GOAP
         public bool hasUsedItem = false;
         public bool isExecutingPlan = false;
         public bool hasCompletedBlueprint = false;
+        public Item equippedItem;
         public bool stop = false;
 
         public void Init()
@@ -86,7 +87,7 @@ namespace GOAP
         public bool HasArrivedAtLocation()
         {
             float distance = Vector3.Distance(transform.position, target);
-
+            Debug.Log(distance);
             if (distance < agent.distanceToArrive)
             {
                 MovementManager.instance.UnregisterSubscriber(this);
@@ -129,13 +130,14 @@ namespace GOAP
 
                     movingToLocation = true;
                     break;
-                case ActionType.Collect_Item_To_Inventory:
-                    currentAction.item.transform.SetParent(this.transform);
-                    agent.animator.SetBool("Collect_Item_To_Inventory", true);
+
+                case ActionType.Collect_To_Equip:
+                    agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), true);
                     break;
-                case ActionType.Collect_Item_To_Equip:
-                    currentAction.item.transform.SetParent(this.transform);
-                    agent.animator.SetBool("Collect_Item_To_Equip", true);
+                case ActionType.Use_Item:
+                    Debug.Log("Now use the item");
+                    agent.animator.SetBool(ActionType.Use_Item.ToString(), true);
+
                     break;
                 // case ActionType.Blueprint_Make:
                 //     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
@@ -151,6 +153,26 @@ namespace GOAP
 
                     break;
             }
+        }
+
+        public void Use_Item()
+        {
+            inventory.UseItem(equippedItem.itemData, agent);
+            Destroy(equippedItem.gameObject);
+            agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
+        }
+
+        public void Collect_To_Equip()
+        {
+            equippedItem = currentAction.item;
+            currentAction.item.transform.SetParent(agent.equipLocation.transform);
+            currentAction.item.transform.localPosition = new Vector3();
+            agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), false);
+        }
+
+        public void Collect_Item_To_Inventory()
+        {
+            agent.animator.SetBool(ActionType.Equip_To_Inventory.ToString(), false);
         }
 
         public void PickUpItem()
