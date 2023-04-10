@@ -11,26 +11,6 @@ namespace GOAP
         public UnityEngine.AI.NavMeshAgent navMeshAgent;
         private Vector3 target;
 
-        public void Init() { }
-
-        public void MoveTo(Vector3 location)
-        {
-            target = location;
-            navMeshAgent.SetDestination(target);
-        }
-
-        public bool HasArrivedAtLocation()
-        {
-            float distance = Vector3.Distance(transform.position, target);
-
-            if (distance < agent.distanceToArrive)
-            {
-                navMeshAgent.SetDestination(transform.position);
-                return true;
-            }
-            return false;
-        }
-
         public Agent agent;
         public BlueprintHandler blueprintHandler;
         public Inventory inventory;
@@ -44,18 +24,33 @@ namespace GOAP
         public bool isExecutingPlan = false;
         public bool hasCompletedBlueprint = false;
         public bool stop = false;
+        public ActionManager actionManager;
 
-        // public void GetActionServer(Plan plan)
-        // {
-        //     if (!planHandler.executingCurrentPlan)
-        //     {
-        //         planHandler.executingCurrentPlan = true;
-        //         planHandler.SetActionList();
-        //         actionServer = new ReverseIterate<Action>(planHandler.currentActionList);
-        //         ServeNextAction();
-        //         actionServer.IsLastAction();
-        //     }
-        // }
+        public void Init()
+        {
+            actionManager = ActionManager.instance;
+            RegisterActionPlanner();
+        }
+
+        private void OnEnable()
+        {
+            Init();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterActionPlanner();
+        }
+
+        public void RegisterActionPlanner()
+        {
+            ActionManager.RegisterActionHandler(this);
+        }
+
+        public void UnregisterActionPlanner()
+        {
+            ActionManager.UnregisterActionHandler(this);
+        }
 
         public void SetActionList()
         {
@@ -82,20 +77,34 @@ namespace GOAP
             }
         }
 
-        private void ServeNextAction()
+        public void MoveTo(Vector3 location)
+        {
+            target = location;
+            navMeshAgent.SetDestination(target);
+        }
+
+        public bool HasArrivedAtLocation()
+        {
+            float distance = Vector3.Distance(transform.position, target);
+
+            if (distance < agent.distanceToArrive)
+            {
+                Debug.Log("ARRIVED AT A LOCATION");
+                UnregisterActionPlanner();
+                navMeshAgent.SetDestination(transform.position);
+                return true;
+            }
+            return false;
+        }
+
+        public void ResetExecution()
         {
             movingToLocation = false;
-            hasCollectedItem = false;
-            masterAction = actionServer.Next();
         }
 
-        public void ExecuteNextAction()
+        public void ExecuteAction()
         {
-            ExecuteAction();
-        }
-
-        private void ExecuteAction()
-        {
+            Debug.Log("Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
             currentAction = actionsToPerform.Last();
             actionsToPerform.Remove(currentAction);
 
@@ -108,6 +117,7 @@ namespace GOAP
 
                 case ActionType.Move_To_Location:
                     MoveTo(currentAction.location);
+                    RegisterActionPlanner();
                     movingToLocation = true;
                     break;
                 // case ActionType.Collect_Item:
@@ -132,17 +142,13 @@ namespace GOAP
             }
         }
 
-        private void Update()
+        private void Updatex()
         {
             if (masterAction == null)
             {
                 return;
             }
-            else
-            {
-                Debug.Log("888888888888888888888888888888888888888888888888888888888888888888");
-                Debug.Log("There is a master action to complete! " + masterAction.actionName);
-            }
+
             // if (!planHandler.executingCurrentPlan)
             // {
             //     statHandler.UpdateGoals();
@@ -153,7 +159,7 @@ namespace GOAP
             switch (masterAction.actionStatus)
             {
                 case ActionStatus.WaitingToExecute:
-                    ExecuteNextAction();
+                    ExecuteAction();
                     break;
                 case ActionStatus.Executing:
                     if (movingToLocation && HasArrivedAtLocation())
@@ -189,10 +195,7 @@ namespace GOAP
                         Debug.Log("I have finished my plan");
                         stop = true;
                     }
-                    else
-                    {
-                        ServeNextAction();
-                    }
+                    else { }
 
                     break;
             }

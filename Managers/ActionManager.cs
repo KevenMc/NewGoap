@@ -8,6 +8,8 @@ namespace GOAP
     {
         public static ActionManager instance;
         private List<ActionHandler> actionHandlers = new List<ActionHandler>();
+        private List<ActionHandler> removeActionHandlers = new List<ActionHandler>();
+        private List<ActionHandler> addActionHandlers = new List<ActionHandler>();
         private IEnumerator actionHandlerCoroutine;
         public float refreshRate = 0.1f;
 
@@ -35,8 +37,13 @@ namespace GOAP
             while (true)
             {
                 yield return new WaitForSeconds(refreshRate);
+                AddRegisteredActionHandlers();
+                ClearUnregisteredActionHandlers();
 
-                foreach (ActionHandler actionHandler in actionHandlers) { }
+                foreach (ActionHandler actionHandler in actionHandlers)
+                {
+                    actionHandler.HasArrivedAtLocation();
+                }
             }
         }
 
@@ -44,12 +51,38 @@ namespace GOAP
         {
             if (instance.actionHandlers.Contains(actionHandler))
                 return;
-            instance.actionHandlers.Add(actionHandler);
+            instance.addActionHandlers.Add(actionHandler);
         }
 
         public static void UnregisterActionHandler(ActionHandler actionHandler)
         {
-            instance.actionHandlers.Remove(actionHandler);
+            instance.removeActionHandlers.Add(actionHandler);
+        }
+
+        private void ClearUnregisteredActionHandlers()
+        {
+            List<ActionHandler> tempList = new List<ActionHandler>(removeActionHandlers);
+            foreach (ActionHandler actionHandler in tempList)
+            {
+                if (actionHandlers.Contains(actionHandler))
+                {
+                    actionHandlers.Remove(actionHandler);
+                    removeActionHandlers.Remove(actionHandler);
+                }
+            }
+        }
+
+        private void AddRegisteredActionHandlers()
+        {
+            List<ActionHandler> tempList = new List<ActionHandler>(addActionHandlers);
+            foreach (ActionHandler actionHandler in tempList)
+            {
+                if (!actionHandlers.Contains(actionHandler))
+                {
+                    actionHandlers.Add(actionHandler);
+                    addActionHandlers.Remove(actionHandler);
+                }
+            }
         }
     }
 }

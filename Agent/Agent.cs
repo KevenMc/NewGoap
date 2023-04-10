@@ -46,8 +46,11 @@ namespace GOAP
 
         public void SetMasterAction(Action action)
         {
+            Debug.Log("Set master action");
             actionHandler.masterAction = action;
+            actionHandler.ResetExecution();
             actionHandler.SetActionList();
+            actionHandler.ExecuteAction();
         }
     }
 }

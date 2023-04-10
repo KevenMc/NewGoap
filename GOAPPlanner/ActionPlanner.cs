@@ -14,11 +14,11 @@ namespace GOAP
         public Action masterAction;
         public Boolean requiresNewAction = true;
         public float moveDistance = 1f;
-        private ActionPlannerManager goapManager;
+        private ActionPlannerManager actionPlannerManager;
 
         public void Init()
         {
-            goapManager = ActionPlannerManager.instance;
+            actionPlannerManager = ActionPlannerManager.instance;
             RegisterActionPlanner();
         }
 
