@@ -18,7 +18,7 @@ namespace GOAP
         public Inventory inventory;
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
-        public MovementHandler movementHandler;
+        public ActionHandler actionHandler;
         public string currentGoal;
         public float distanceToArrive = 1f;
 
@@ -34,14 +34,20 @@ namespace GOAP
             inventory = GetComponent<Inventory>();
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
-            movementHandler = GetComponent<MovementHandler>();
+            actionHandler = GetComponent<ActionHandler>();
 
             statHandler.Init();
             actionPlanner.Init();
             inventory.Init();
             knowledgeHandler.Init();
             blueprintHandler.Init();
-            movementHandler.Init();
+            actionHandler.Init();
+        }
+
+        public void SetMasterAction(Action action)
+        {
+            actionHandler.masterAction = action;
+            actionHandler.SetActionList();
         }
     }
 }

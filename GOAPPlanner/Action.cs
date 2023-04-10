@@ -16,9 +16,10 @@ namespace GOAP
         public List<Action> childActions = new List<Action>();
         public float actionCost = 1;
         public bool canComplete = false;
-        public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
         public List<Action> subActions = new List<Action>();
         public Boolean isSubAction = false;
+        public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
+        public AnimationClip animation;
         #endregion
 
         #region

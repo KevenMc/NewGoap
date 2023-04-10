@@ -2,26 +2,48 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace GOAP
 {
     public class ActionHandler : MonoBehaviour
     {
-        // public PlanHandler planHandler;
-        // public Agent agent;
-        // public MovementHandler movementHandler;
-        // public BlueprintHandler blueprintHandler;
-        // public Inventory inventory;
-        // public StatHandler statHandler;
-        // public Action currentAction;
-        // public ReverseIterate<Action> actionServer;
-        // public MoveTo moveTo;
-        // public bool movingToLocation = false;
-        // public bool hasCollectedItem = false;
-        // public bool hasUsedItem = false;
-        // public bool isExecutingPlan = false;
-        // public bool hasCompletedBlueprint = false;
-        // public bool stop = false;
+        public UnityEngine.AI.NavMeshAgent navMeshAgent;
+        private Vector3 target;
+
+        public void Init() { }
+
+        public void MoveTo(Vector3 location)
+        {
+            target = location;
+            navMeshAgent.SetDestination(target);
+        }
+
+        public bool HasArrivedAtLocation()
+        {
+            float distance = Vector3.Distance(transform.position, target);
+
+            if (distance < agent.distanceToArrive)
+            {
+                navMeshAgent.SetDestination(transform.position);
+                return true;
+            }
+            return false;
+        }
+
+        public Agent agent;
+        public BlueprintHandler blueprintHandler;
+        public Inventory inventory;
+        public Action masterAction;
+        public Action currentAction;
+        public ReverseIterate<Action> actionServer = new ReverseIterate<Action>();
+        private List<Action> actionsToPerform = new List<Action>();
+        public bool movingToLocation = false;
+        public bool hasCollectedItem = false;
+        public bool hasUsedItem = false;
+        public bool isExecutingPlan = false;
+        public bool hasCompletedBlueprint = false;
+        public bool stop = false;
 
         // public void GetActionServer(Plan plan)
         // {
@@ -35,136 +57,145 @@ namespace GOAP
         //     }
         // }
 
-        // private void ServeNextAction()
-        // {
-        //     movingToLocation = false;
-        //     hasCollectedItem = false;
-        //     currentAction = actionServer.Next();
-        // }
+        public void SetActionList()
+        {
+            actionsToPerform.Clear();
+            RecursiveSetActions(masterAction);
+        }
 
-        // public void ExecuteNextAction()
-        // {
-        //     ExecuteAction(currentAction);
-        // }
+        private void RecursiveSetActions(Action action)
+        {
+            if (action.CanComplete())
+            {
+                actionsToPerform.Add(action);
+            }
+            else
+            {
+                foreach (Action childAction in action.childActions)
+                {
+                    RecursiveSetActions(childAction);
+                }
+                foreach (Action subAction in action.subActions)
+                {
+                    RecursiveSetActions(subAction);
+                }
+            }
+        }
 
-        // private void ExecuteAction(Action action)
-        // {
-        //     if (action.subPlanLists.Count > 0)
-        //     {
-        //         foreach (List<Plan> planList in action.subPlanLists.Values)
-        //         {
-        //             if (!planList[0].isComplete)
-        //             {
-        //                 Debug.Log("This suplan is incomplete");
-        //                 return;
-        //             }
-        //             Debug.Log("This suplan is complete");
-        //         }
-        //         action.canComplete = true;
-        //     }
+        private void ServeNextAction()
+        {
+            movingToLocation = false;
+            hasCollectedItem = false;
+            masterAction = actionServer.Next();
+        }
 
-        //     action.actionStatus = ActionStatus.Executing;
-        //     Debug.Log("Executing action : " + action.actionName);
-        //     Debug.Log("Can execute this action? : " + action.canComplete);
-        //     if (!action.canComplete)
-        //     {
-        //         Debug.Log("Oh no, i can't do that!");
-        //         return;
-        //     }
+        public void ExecuteNextAction()
+        {
+            ExecuteAction();
+        }
 
-        //     switch (action.actionType)
-        //     {
-        //         case ActionType.UseItem:
-        //             inventory.UseItem(action.itemData, agent);
-        //             hasUsedItem = true;
-        //             break;
+        private void ExecuteAction()
+        {
+            currentAction = actionsToPerform.Last();
+            actionsToPerform.Remove(currentAction);
 
-        //         case ActionType.MoveToLocation:
-        //             movementHandler.MoveTo(action.location);
-        //             movingToLocation = true;
-        //             break;
-        //         case ActionType.CollectItem:
-        //             inventory.AddItem(action.itemData);
-        //             action.item.transform.position += Vector3.up;
-        //             Destroy(action.item.gameObject);
-        //             hasCollectedItem = true;
-        //             break;
-        //         case ActionType.Blueprint:
-        //             blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
-        //             hasCompletedBlueprint = true;
-        //             break;
-        //         default:
-        //             Debug.Log(
-        //                 "I don't know how to do that : "
-        //                     + action.actionType
-        //                     + " : "
-        //                     + action.actionName
-        //             );
+            switch (currentAction.actionType)
+            {
+                // case ActionType.Use_Item:
+                //     inventory.UseItem(action.itemData, agent);
+                //     hasUsedItem = true;
+                //     break;
 
-        //             break;
-        //     }
-        // }
+                case ActionType.Move_To_Location:
+                    MoveTo(currentAction.location);
+                    movingToLocation = true;
+                    break;
+                // case ActionType.Collect_Item:
+                //     inventory.AddItem(action.itemData);
+                //     action.item.transform.position += Vector3.up;
+                //     Destroy(action.item.gameObject);
+                //     hasCollectedItem = true;
+                //     break;
+                // case ActionType.Blueprint_Make:
+                //     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
+                //     hasCompletedBlueprint = true;
+                //     break;
+                default:
+                    Debug.Log(
+                        "I don't know how to do that : "
+                            + currentAction.actionType
+                            + " : "
+                            + currentAction.actionName
+                    );
 
-        // private void Update()
-        // {
-        //     if (stop)
-        //         return;
-        //     if (currentAction == null)
-        //         return;
-        //     if (!planHandler.executingCurrentPlan)
-        //     {
-        //         statHandler.UpdateGoals();
-        //         planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
-        //         //GetActionServer();
-        //         return;
-        //     }
-        //     switch (currentAction.actionStatus)
-        //     {
-        //         case ActionStatus.WaitingToExecute:
-        //             ExecuteNextAction();
-        //             break;
-        //         case ActionStatus.Executing:
-        //             if (movingToLocation && movementHandler.HasArrivedAtLocation())
-        //             {
-        //                 currentAction.previousAction.canComplete = true;
-        //                 currentAction.actionStatus = ActionStatus.Complete;
-        //             }
-        //             if (hasCollectedItem == true)
-        //             {
-        //                 hasCollectedItem = false;
-        //                 currentAction.actionStatus = ActionStatus.Complete;
-        //             }
-        //             if (hasUsedItem)
-        //             {
-        //                 hasUsedItem = false;
-        //                 currentAction.previousAction.canComplete = true;
+                    break;
+            }
+        }
 
-        //                 currentAction.actionStatus = ActionStatus.Complete;
-        //             }
-        //             if (hasCompletedBlueprint)
-        //             {
-        //                 hasCompletedBlueprint = false;
-        //                 currentAction.previousAction.canComplete = true;
-        //                 currentAction.actionStatus = ActionStatus.Complete;
-        //             }
-        //             break;
-        //         case ActionStatus.Complete:
+        private void Update()
+        {
+            if (masterAction == null)
+            {
+                return;
+            }
+            else
+            {
+                Debug.Log("888888888888888888888888888888888888888888888888888888888888888888");
+                Debug.Log("There is a master action to complete! " + masterAction.actionName);
+            }
+            // if (!planHandler.executingCurrentPlan)
+            // {
+            //     statHandler.UpdateGoals();
+            //     planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
+            //     //GetActionServer();
+            //     return;
+            // }
+            switch (masterAction.actionStatus)
+            {
+                case ActionStatus.WaitingToExecute:
+                    ExecuteNextAction();
+                    break;
+                case ActionStatus.Executing:
+                    if (movingToLocation && HasArrivedAtLocation())
+                    {
+                        masterAction.parentAction.canComplete = true;
+                        masterAction.actionStatus = ActionStatus.Complete;
+                    }
+                    if (hasCollectedItem == true)
+                    {
+                        hasCollectedItem = false;
+                        masterAction.actionStatus = ActionStatus.Complete;
+                    }
+                    if (hasUsedItem)
+                    {
+                        hasUsedItem = false;
+                        masterAction.parentAction.canComplete = true;
 
-        //             if (actionServer.IsLastAction())
-        //             {
-        //                 isExecutingPlan = false;
-        //                 planHandler.executingCurrentPlan = false;
+                        masterAction.actionStatus = ActionStatus.Complete;
+                    }
+                    if (hasCompletedBlueprint)
+                    {
+                        hasCompletedBlueprint = false;
+                        masterAction.parentAction.canComplete = true;
+                        masterAction.actionStatus = ActionStatus.Complete;
+                    }
+                    break;
+                case ActionStatus.Complete:
 
-        //                 Debug.Log("I have finished my plan");
-        //                 stop = true;
-        //             }
-        //             else
-        //             {
-        //                 ServeNextAction();
-        //             }
+                    if (actionServer.IsLastAction())
+                    {
+                        isExecutingPlan = false;
 
-        //             break;
-        //     }
-        // }
+                        Debug.Log("I have finished my plan");
+                        stop = true;
+                    }
+                    else
+                    {
+                        ServeNextAction();
+                    }
+
+                    break;
+            }
+        }
     }
 }

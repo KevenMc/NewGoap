@@ -9,6 +9,12 @@ namespace GOAP
         private List<T> list;
         private int index;
 
+        public ReverseIterate()
+        {
+            this.list = new List<T>();
+            index = -1;
+        }
+
         public ReverseIterate(List<T> list)
         {
             this.list = list;
@@ -42,6 +48,12 @@ namespace GOAP
             {
                 yield return list[i];
             }
+        }
+
+        public void Clear()
+        {
+            list.Clear();
+            index = -1;
         }
     }
 }

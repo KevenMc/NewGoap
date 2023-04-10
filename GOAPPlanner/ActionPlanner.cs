@@ -75,6 +75,7 @@ namespace GOAP
                 Debug.Log(topStat.ToString());
                 if (RecursiveFindAction())
                 {
+                    agent.SetMasterAction(masterAction);
                     return;
                 }
             }
@@ -85,6 +86,7 @@ namespace GOAP
                     SetGoal(stat);
                     if (RecursiveFindAction())
                     {
+                        agent.SetMasterAction(masterAction);
                         return;
                     }
                 }
@@ -102,12 +104,12 @@ namespace GOAP
             if (actionList[0].CanComplete() && CanCompleteMasterAction(masterAction))
             {
                 RecursiveShowActions(actionList[0]);
+
                 requiresNewAction = false;
                 return true;
             }
             ExtendAction(actionList[0]);
-            RecursiveFindAction();
-            return false;
+            return RecursiveFindAction();
         }
 
         public Boolean CanCompleteMasterAction(Action action)
