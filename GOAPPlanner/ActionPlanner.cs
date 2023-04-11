@@ -182,7 +182,9 @@ namespace GOAP
 
         private void ExtendActionPlanFromInventory(Action action)
         {
-            List<ItemSO> inventoryItems = agent.inventory.returnGoalItems(action.goal.statType);
+            List<ItemSO> inventoryItems = agent.inventoryHandler.returnGoalItems(
+                action.goal.statType
+            );
             foreach (ItemSO itemData in inventoryItems)
             {
                 Action newEquipAction = new Action(action);
@@ -231,7 +233,7 @@ namespace GOAP
                 {
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.Equip_To_Inventory,
+                        ActionType.UnEquip_To_Inventory,
                         new Stat(StatType.Have_Item_Equipped, item.itemData),
                         item,
                         false
@@ -277,7 +279,7 @@ namespace GOAP
                 }
 
                 Action blueprintAction = new Action(action);
-                blueprintAction.Init(ActionType.Blueprint_Make, blueprint);
+                blueprintAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
 
                 foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems)
                 {

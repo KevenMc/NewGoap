@@ -6,10 +6,10 @@ namespace GOAP
 
         //  Collect_Item_To_Inventory,
         Collect_To_Equip,
-        Equip_To_Inventory,
+        UnEquip_To_Inventory,
         Inventory_To_Equip,
         Move_To_Location,
-        Blueprint_Make,
+        Make_Blueprint_From_Inventory,
         Blueprint_Require_Item
     }
 

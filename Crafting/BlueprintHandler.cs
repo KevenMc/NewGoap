@@ -6,7 +6,7 @@ namespace GOAP
 {
     public class BlueprintHandler : MonoBehaviour
     {
-        public Inventory inventory;
+        public InventoryHandler inventoryHandler;
 
         public void Init() { }
 
@@ -16,10 +16,10 @@ namespace GOAP
             {
                 if (item.destroyOnCraft)
                 {
-                    inventory.RemoveItem(item.itemData);
+                    inventoryHandler.RemoveItem(item.itemData);
                 }
             }
-            inventory.AddItem(blueprint.craftedItem);
+            inventoryHandler.AddItem(blueprint.craftedItem);
         }
     }
 }

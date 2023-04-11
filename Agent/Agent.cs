@@ -7,7 +7,7 @@ namespace GOAP
 {
     [RequireComponent(typeof(StatHandler))]
     [RequireComponent(typeof(ActionPlanner))]
-    [RequireComponent(typeof(Inventory))]
+    [RequireComponent(typeof(InventoryHandler))]
     [RequireComponent(typeof(KnowledgeHandler))]
     [RequireComponent(typeof(BlueprintHandler))]
     [RequireComponent(typeof(MovementHandler))]
@@ -15,7 +15,7 @@ namespace GOAP
     {
         public StatHandler statHandler;
         public ActionPlanner actionPlanner;
-        public Inventory inventory;
+        public InventoryHandler inventoryHandler;
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
         public ActionHandler actionHandler;
@@ -33,7 +33,7 @@ namespace GOAP
         {
             statHandler = GetComponent<StatHandler>();
             actionPlanner = GetComponent<ActionPlanner>();
-            inventory = GetComponent<Inventory>();
+            inventoryHandler = GetComponent<InventoryHandler>();
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
             actionHandler = GetComponent<ActionHandler>();
@@ -42,7 +42,7 @@ namespace GOAP
 
             statHandler.Init();
             actionPlanner.Init();
-            inventory.Init();
+            inventoryHandler.Init();
             knowledgeHandler.Init();
             blueprintHandler.Init();
             actionHandler.Init();

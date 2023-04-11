@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace GOAP
 {
-    public class Inventory : MonoBehaviour
+    public class InventoryHandler : MonoBehaviour
     {
         public Agent agent;
 

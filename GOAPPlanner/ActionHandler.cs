@@ -13,7 +13,7 @@ namespace GOAP
 
         public Agent agent;
         public BlueprintHandler blueprintHandler;
-        public Inventory inventory;
+        public InventoryHandler inventory;
         public Action masterAction;
         public Action currentAction;
         public ReverseIterate<Action> actionServer = new ReverseIterate<Action>();
@@ -137,22 +137,16 @@ namespace GOAP
                     movingToLocation = true;
                     break;
 
-                case ActionType.Collect_To_Equip:
-                    agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), true);
-                    break;
-
                 case ActionType.Use_Item:
-                    agent.animator.SetBool(ActionType.Use_Item.ToString(), true);
-                    break;
-
-                case ActionType.Equip_To_Inventory:
-                    agent.animator.SetBool(ActionType.Equip_To_Inventory.ToString(), true);
+                case ActionType.UnEquip_To_Inventory:
+                case ActionType.Collect_To_Equip:
+                    agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
 
                 case ActionType.Blueprint_Require_Item:
                     ExecuteAction();
                     break;
-                case ActionType.Blueprint_Make:
+                case ActionType.Make_Blueprint_From_Inventory:
                     blueprintHandler.CompleteBlueprintNoStation(currentAction.blueprint);
                     // hasCompletedBlueprint = true;
                     break;
@@ -186,9 +180,9 @@ namespace GOAP
 
         public void Equip_To_Inventory()
         {
-            agent.inventory.AddItem(currentAction.item.itemData);
+            agent.inventoryHandler.AddItem(currentAction.item.itemData);
             Destroy(currentAction.item.gameObject);
-            agent.animator.SetBool(ActionType.Equip_To_Inventory.ToString(), false);
+            agent.animator.SetBool(ActionType.UnEquip_To_Inventory.ToString(), false);
             currentAction.parentAction.canComplete = true;
         }
 
