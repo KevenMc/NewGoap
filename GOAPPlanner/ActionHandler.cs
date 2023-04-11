@@ -139,7 +139,7 @@ namespace GOAP
 
                 case ActionType.Use_Item:
                 case ActionType.UnEquip_To_Inventory:
-                case ActionType.Collect_To_Equip:
+                case ActionType.Collect_And_Equip:
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
 
@@ -174,7 +174,7 @@ namespace GOAP
             equippedItem = currentAction.item;
             currentAction.item.transform.SetParent(agent.equipLocation.transform);
             currentAction.item.transform.localPosition = new Vector3();
-            agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), false);
+            agent.animator.SetBool(ActionType.Collect_And_Equip.ToString(), false);
             currentAction.parentAction.canComplete = true;
         }
 

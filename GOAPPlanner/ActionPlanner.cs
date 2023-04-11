@@ -223,7 +223,7 @@ namespace GOAP
 
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.Collect_To_Equip,
+                        ActionType.Collect_And_Equip,
                         new Stat(StatType.Move_To_Location, item.itemData),
                         item,
                         isAtLocation
@@ -241,7 +241,7 @@ namespace GOAP
 
                     updateAction = new Action(updateAction);
                     updateAction.Init(
-                        ActionType.Collect_To_Equip,
+                        ActionType.Collect_And_Equip,
                         new Stat(StatType.Move_To_Location, item.itemData),
                         item,
                         isAtLocation
