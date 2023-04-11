@@ -192,7 +192,7 @@ namespace GOAP
 
                 Action newInventoryAction = new Action(newEquipAction);
                 newInventoryAction.Init(
-                    ActionType.Inventory_To_Equip,
+                    ActionType.Equip_From_Inventory,
                     newEquipAction.goal,
                     itemData,
                     true
