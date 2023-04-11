@@ -13,7 +13,7 @@ namespace GOAP
 
         public Agent agent;
         public BlueprintHandler blueprintHandler;
-        public InventoryHandler inventory;
+        public InventoryHandler inventoryHandler;
         public Action masterAction;
         public Action currentAction;
         public ReverseIterate<Action> actionServer = new ReverseIterate<Action>();
@@ -137,12 +137,18 @@ namespace GOAP
                     movingToLocation = true;
                     break;
 
-                // case ActionType.Use_Item:
                 case ActionType.Equip_From_Inventory:
                 case ActionType.UnEquip_To_Inventory:
                 case ActionType.Make_Blueprint_From_Inventory:
                 case ActionType.Collect_And_Equip:
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
+                    break;
+
+                case ActionType.Use_Item:
+                    Debug.Log(currentAction.itemData.itemName);
+                    agent.animator.Play(currentAction.itemData.useItemAnimation.name);
+                    agent.animator.SetBool(currentAction.actionType.ToString(), true);
+
                     break;
 
                 case ActionType.Blueprint_Require_Item:
@@ -161,12 +167,13 @@ namespace GOAP
             }
         }
 
-        // public void Use_Item()
-        // {
-        //     inventory.UseItem(equippedItem.itemData, agent);
-        //     Destroy(equippedItem.gameObject);
-        //     agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
-        // }
+        public void Use_Item()
+        {
+            inventoryHandler.UseItem(currentAction.itemData, agent);
+            Destroy(inventoryHandler.equippedItem.gameObject);
+            agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
+            Debug.Log("Now use item");
+        }
 
         public void Make_Blueprint_From_Inventory()
         {
@@ -180,18 +187,30 @@ namespace GOAP
             equippedItem = currentAction.item;
             currentAction.item.transform.SetParent(agent.equipLocation.transform);
             currentAction.item.transform.localPosition = new Vector3();
+            inventoryHandler.equippedItem = equippedItem.gameObject;
+
             agent.animator.SetBool(ActionType.Collect_And_Equip.ToString(), false);
             currentAction.parentAction.canComplete = true;
         }
 
         public void UnEquip_To_Inventory()
         {
-            agent.inventoryHandler.AddItem(currentAction.item.itemData);
+            inventoryHandler.AddItem(currentAction.item.itemData);
             Destroy(currentAction.item.gameObject);
             agent.animator.SetBool(ActionType.UnEquip_To_Inventory.ToString(), false);
             currentAction.parentAction.canComplete = true;
         }
 
-        public void Equip_From_Inventory() { }
+        public void Equip_From_Inventory()
+        {
+            equippedItem = currentAction.item;
+            currentAction.item.transform.SetParent(agent.equipLocation.transform);
+            currentAction.item.transform.localPosition = new Vector3();
+        }
+
+        public void InstantiateEquippedItem()
+        {
+            inventoryHandler.InstantiateEquippedItem(currentAction.itemData.itemPrefab);
+        }
     }
 }

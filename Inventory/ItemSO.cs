@@ -15,6 +15,8 @@ namespace GOAP
 
         public string itemName;
         public float itemUseCost;
+        public GameObject itemPrefab;
+        public AnimationClip useItemAnimation;
         public List<StatEffect> statEffects = new List<StatEffect>();
     }
 }

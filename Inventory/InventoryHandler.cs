@@ -16,6 +16,15 @@ namespace GOAP
             public List<StatEffect> statEffects;
         }
 
+        public GameObject equippedItem;
+
+        public void InstantiateEquippedItem(GameObject itemPrefab)
+        {
+            equippedItem = Instantiate(itemPrefab);
+            equippedItem.transform.SetParent(agent.equipLocation.transform);
+            equippedItem.transform.localPosition = new Vector3();
+        }
+
         public List<InventoryItem> items = new List<InventoryItem>();
 
         public void Init() { }
