@@ -4,21 +4,11 @@ namespace GOAP
 {
     public enum StatType
     {
-        [HideInInspector]
-        Null = 0,
-
-        [HideInInspector]
-        HaveItem = 1,
-
-        [HideInInspector]
-        IsAtLocation = 2,
-
-        [HideInInspector]
-        MoveTo = 3,
-
-        [HideInInspector]
-        Station = 4,
-        Blueprint = 5,
+        Null,
+        Have_Item_Equipped,
+        Have_Item_In_Inventory,
+        Move_To_Location,
+        Blueprint,
         Hunger = 100,
         Thirst = 101,
         Energy = 102

@@ -68,7 +68,7 @@ namespace GOAP
 
             switch (goal.statType)
             {
-                case StatType.HaveItem:
+                case StatType.Have_Item_Equipped:
                     Debug.Log("I am searching for an item of type : " + goal.itemData.itemName);
                     break;
                 default:

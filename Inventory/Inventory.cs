@@ -41,9 +41,10 @@ namespace GOAP
                 .ToList();
         }
 
-        public void AddItem(ItemSO item, int quantity = 1)
+        public void AddItem(ItemSO itemData, int quantity = 1)
         {
-            var inventoryItem = items.Find(x => x.itemData == item);
+            Debug.Log("Adding item to inventory : " + itemData.itemName);
+            var inventoryItem = items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null)
             {
@@ -51,15 +52,13 @@ namespace GOAP
             }
             else
             {
-                items.Add(new InventoryItem { itemData = item, quantity = quantity });
+                items.Add(new InventoryItem { itemData = itemData, quantity = quantity });
             }
         }
 
-        public void RemoveItem(ItemSO item, int quantity = 1)
+        public void RemoveItem(ItemSO itemData, int quantity = 1)
         {
-            Debug.Log("Using an item " + item.itemName);
-
-            var inventoryItem = items.Find(x => x.itemData == item);
+            var inventoryItem = items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null)
             {
@@ -72,19 +71,19 @@ namespace GOAP
             }
         }
 
-        public void UseItem(ItemSO item, Agent useAgent)
+        public void UseItem(ItemSO itemData, Agent useAgent)
         {
-            Debug.Log("Using an item " + item.itemName);
-            var inventoryItem = items.Find(x => x.itemData == item);
+            Debug.Log("Using an item " + itemData.itemName);
+            var inventoryItem = items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null && inventoryItem.quantity > 0)
             {
-                foreach (var statEffect in item.statEffects)
+                foreach (var statEffect in itemData.statEffects)
                 {
                     useAgent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
                 }
 
-                RemoveItem(item);
+                RemoveItem(itemData);
             }
         }
     }

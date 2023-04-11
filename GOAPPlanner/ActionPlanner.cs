@@ -98,11 +98,11 @@ namespace GOAP
                 Debug.Log("No possible plan of action can be found");
                 return false;
             }
-            SortPlans(actionList);
+            SortActionList(actionList);
             if (actionList[0].CanComplete() && CanCompleteMasterAction(masterAction))
             {
                 RecursiveShowActions(actionList[0]);
-
+                SaveMasterActionToFile("json.json");
                 requiresNewAction = false;
                 return true;
             }
@@ -116,7 +116,7 @@ namespace GOAP
             returnList.Add(true);
             if (action.subActions.Count > 0)
             {
-                SortPlans(action.subActions);
+                SortActionList(action.subActions);
                 foreach (Action subAction in action.subActions)
                 {
                     returnList.Add(CanCompleteMasterAction(subAction));
@@ -210,19 +210,19 @@ namespace GOAP
                     >= GetDistance(transform.position, item.transform.position);
 
                 Action updateAction = action;
-                if (action.goal.statType != StatType.HaveItem)
+                if (action.goal.statType != StatType.Have_Item_Equipped)
                 {
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.Use_Item,
-                        new Stat(StatType.HaveItem, item.itemData),
+                        new Stat(StatType.Have_Item_Equipped, item.itemData),
                         item.itemData
                     );
 
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.Collect_To_Equip,
-                        new Stat(StatType.IsAtLocation, item.itemData),
+                        new Stat(StatType.Move_To_Location, item.itemData),
                         item,
                         isAtLocation
                     );
@@ -232,7 +232,7 @@ namespace GOAP
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.Equip_To_Inventory,
-                        new Stat(StatType.IsAtLocation, item.itemData),
+                        new Stat(StatType.Have_Item_Equipped, item.itemData),
                         item,
                         false
                     );
@@ -240,7 +240,7 @@ namespace GOAP
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.Collect_To_Equip,
-                        new Stat(StatType.IsAtLocation, item.itemData),
+                        new Stat(StatType.Move_To_Location, item.itemData),
                         item,
                         isAtLocation
                     );
@@ -251,7 +251,7 @@ namespace GOAP
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.Move_To_Location,
-                        new Stat(StatType.IsAtLocation, item.itemData),
+                        new Stat(StatType.Move_To_Location, item.itemData),
                         item.transform.position,
                         true
                     );
@@ -282,7 +282,7 @@ namespace GOAP
                 foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems)
                 {
                     Stat itemRequirementStat = new Stat(
-                        StatType.HaveItem,
+                        StatType.Have_Item_Equipped,
                         itemRequirement.itemData
                     );
                     Action itemAction = new Action(itemRequirementStat);
@@ -300,7 +300,7 @@ namespace GOAP
 
         #endregion
 
-        public void SortPlans(List<Action> actionList)
+        public void SortActionList(List<Action> actionList)
         {
             actionList.Sort((action1, action2) => action1.actionCost.CompareTo(action2.actionCost));
         }
@@ -319,12 +319,6 @@ namespace GOAP
 
         public void SaveMasterActionToFile(string filePath)
         {
-            // Create a dictionary to hold the masterAction and its sub-actions
-            Dictionary<string, object> actionData = new Dictionary<string, object>();
-
-            // Add the masterAction to the dictionary
-            actionData.Add("MasterAction", masterAction.actionName);
-            Debug.Log("MasterAction : " + masterAction.actionName);
             JSONAction jSONAction = new JSONAction(masterAction);
             // Debug.Log(jSONAction);
 

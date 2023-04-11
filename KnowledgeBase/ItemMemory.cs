@@ -42,7 +42,7 @@ namespace GOAP
 
             switch (goalStatType)
             {
-                case StatType.HaveItem:
+                case StatType.Have_Item_Equipped:
                     if (itemLocations.ContainsKey(goal.itemData))
                     {
                         items.AddRange(itemLocations[goal.itemData]);

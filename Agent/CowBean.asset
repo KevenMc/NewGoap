@@ -21,7 +21,7 @@ MonoBehaviour:
     increment: 1
     priority: 2
     isUrgent: 0
-  - statType: 101
+  - statType: 102
     itemData: {fileID: 0}
     current: 0
     trigger: 0

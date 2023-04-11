@@ -28,6 +28,7 @@ namespace GOAP
 
                 foreach (T subscriber in subscribers)
                 {
+                    Debug.Log(":::" + subscriber);
                     PerformTask(subscriber);
                 }
             }

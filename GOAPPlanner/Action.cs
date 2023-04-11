@@ -11,18 +11,19 @@ namespace GOAP
         public Stat goal; //this is the goal that is being satisfied by completing the immediate child action
         public ActionType actionType;
         public Action masterAction;
+        public Boolean isOwnMaster = false;
         public bool hasMasterAction = true;
         public Action parentAction = null;
         public List<Action> childActions = new List<Action>();
-        public float actionCost = 1;
-        public bool canComplete = false;
         public List<Action> subActions = new List<Action>();
+        public bool canComplete = false;
         public Boolean isSubAction = false;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
         public AnimationClip animation;
         #endregion
 
         #region
+        public float actionCost = 1;
         public ItemSO itemData;
         public Item item;
         public Vector3 location;
@@ -33,6 +34,7 @@ namespace GOAP
         {
             this.goal = goal;
             this.hasMasterAction = false;
+            this.isOwnMaster = true;
             this.masterAction = this;
             this.actionName = goal.ToString();
             Debug.Log("Master action is : " + this.masterAction.actionName);
@@ -66,6 +68,7 @@ namespace GOAP
         {
             Debug.Log("Init for collect item");
             this.actionType = actionType;
+            this.goal = goal;
             this.item = item;
             this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
             this.canComplete = canComplete;
@@ -114,6 +117,7 @@ namespace GOAP
             this.parentAction = parentAction;
             this.masterAction = this;
             this.hasMasterAction = false;
+            this.isOwnMaster = true;
             this.canComplete = canComplete;
             this.actionCost += this.parentAction.actionCost;
         }
@@ -123,7 +127,9 @@ namespace GOAP
             foreach (Action subAction in subActions)
             {
                 if (!subAction.canComplete)
+                {
                     return false;
+                }
             }
             if (subActions.Count > 0)
             {

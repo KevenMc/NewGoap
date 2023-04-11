@@ -87,12 +87,13 @@ namespace GOAP
         public bool HasArrivedAtLocation()
         {
             float distance = Vector3.Distance(transform.position, target);
-            Debug.Log(distance);
+            // Debug.Log(distance);
             if (distance < agent.distanceToArrive)
             {
                 MovementManager.instance.UnregisterSubscriber(this);
 
                 navMeshAgent.SetDestination(transform.position);
+                currentAction.parentAction.canComplete = true;
                 return true;
             }
             return false;
@@ -111,12 +112,17 @@ namespace GOAP
 
         public void ExecuteAction()
         {
-            Debug.Log("Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
             currentAction = actionsToPerform.Last();
             actionsToPerform.Remove(currentAction);
-            actionsToPerform.Add(currentAction.parentAction);
-            Debug.Log(currentAction.actionName);
-            Debug.Log(currentAction.item);
+            Debug.Log(
+                "Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                    + currentAction.actionName
+            );
+            if (!currentAction.isOwnMaster || currentAction.parentAction.CanComplete())
+            {
+                actionsToPerform.Add(currentAction.parentAction);
+            }
+
             switch (currentAction.actionType)
             {
                 // case ActionType.Use_Item:
@@ -126,7 +132,7 @@ namespace GOAP
 
                 case ActionType.Move_To_Location:
                     MoveTo(currentAction.location);
-                    MovementManager.instance.RegisterSubscriber(this);
+                    ActionManager.instance.RegisterSubscriber(this);
 
                     movingToLocation = true;
                     break;
@@ -134,15 +140,22 @@ namespace GOAP
                 case ActionType.Collect_To_Equip:
                     agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), true);
                     break;
-                case ActionType.Use_Item:
-                    Debug.Log("Now use the item");
-                    agent.animator.SetBool(ActionType.Use_Item.ToString(), true);
 
+                case ActionType.Use_Item:
+                    agent.animator.SetBool(ActionType.Use_Item.ToString(), true);
                     break;
-                // case ActionType.Blueprint_Make:
-                //     blueprintHandler.CompleteBlueprintNoStation(action.blueprint);
-                //     hasCompletedBlueprint = true;
-                //     break;
+
+                case ActionType.Equip_To_Inventory:
+                    agent.animator.SetBool(ActionType.Equip_To_Inventory.ToString(), true);
+                    break;
+
+                case ActionType.Blueprint_Require_Item:
+                    ExecuteAction();
+                    break;
+                case ActionType.Blueprint_Make:
+                    blueprintHandler.CompleteBlueprintNoStation(currentAction.blueprint);
+                    // hasCompletedBlueprint = true;
+                    break;
                 default:
                     Debug.Log(
                         "I don't know how to do that : "
@@ -168,11 +181,15 @@ namespace GOAP
             currentAction.item.transform.SetParent(agent.equipLocation.transform);
             currentAction.item.transform.localPosition = new Vector3();
             agent.animator.SetBool(ActionType.Collect_To_Equip.ToString(), false);
+            currentAction.parentAction.canComplete = true;
         }
 
-        public void Collect_Item_To_Inventory()
+        public void Equip_To_Inventory()
         {
+            agent.inventory.AddItem(currentAction.item.itemData);
+            Destroy(currentAction.item.gameObject);
             agent.animator.SetBool(ActionType.Equip_To_Inventory.ToString(), false);
+            currentAction.parentAction.canComplete = true;
         }
 
         public void PickUpItem()
@@ -182,65 +199,6 @@ namespace GOAP
             Destroy(currentAction.item.gameObject);
             hasCollectedItem = true;
             agent.animator.SetBool("Collect_Item_To_Inventory", false);
-        }
-
-        private void Updatex()
-        {
-            if (masterAction == null)
-            {
-                return;
-            }
-
-            // if (!planHandler.executingCurrentPlan)
-            // {
-            //     statHandler.UpdateGoals();
-            //     planHandler.GenerateCompletePlan(statHandler.currentGoals[0]);
-            //     //GetActionServer();
-            //     return;
-            // }
-            switch (masterAction.actionStatus)
-            {
-                case ActionStatus.WaitingToExecute:
-                    ExecuteAction();
-                    break;
-                case ActionStatus.Executing:
-                    if (movingToLocation && HasArrivedAtLocation())
-                    {
-                        masterAction.parentAction.canComplete = true;
-                        masterAction.actionStatus = ActionStatus.Complete;
-                    }
-                    if (hasCollectedItem == true)
-                    {
-                        hasCollectedItem = false;
-                        masterAction.actionStatus = ActionStatus.Complete;
-                    }
-                    if (hasUsedItem)
-                    {
-                        hasUsedItem = false;
-                        masterAction.parentAction.canComplete = true;
-
-                        masterAction.actionStatus = ActionStatus.Complete;
-                    }
-                    if (hasCompletedBlueprint)
-                    {
-                        hasCompletedBlueprint = false;
-                        masterAction.parentAction.canComplete = true;
-                        masterAction.actionStatus = ActionStatus.Complete;
-                    }
-                    break;
-                case ActionStatus.Complete:
-
-                    if (actionServer.IsLastAction())
-                    {
-                        isExecutingPlan = false;
-
-                        Debug.Log("I have finished my plan");
-                        stop = true;
-                    }
-                    else { }
-
-                    break;
-            }
         }
     }
 }
