@@ -138,6 +138,7 @@ namespace GOAP
                     break;
 
                 // case ActionType.Use_Item:
+                case ActionType.Equip_From_Inventory:
                 case ActionType.UnEquip_To_Inventory:
                 case ActionType.Make_Blueprint_From_Inventory:
                 case ActionType.Collect_And_Equip:
