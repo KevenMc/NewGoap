@@ -32,7 +32,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Equip item to inventory
+  m_Name: UnEquip_To_Inventory
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -119,7 +119,7 @@ AnimatorStateMachine:
     m_Position: {x: 260, y: 130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -3321708659482856210}
-    m_Position: {x: 500, y: -40, z: 0}
+    m_Position: {x: 530, y: -40, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -3151681107160602621}
     m_Position: {x: 535, y: 25, z: 0}
@@ -142,7 +142,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Equip_To_Inventory
+    m_ConditionEvent: UnEquip_To_Inventory
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7949197854168270502}
@@ -249,7 +249,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Equip_To_Inventory
+    m_ConditionEvent: UnEquip_To_Inventory
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7949197854168270502}
@@ -274,24 +274,24 @@ AnimatorController:
   m_Name: SM_Bean_Cowboy_01
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Collect_To_Equip
+  - m_Name: Collect_And_Equip
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: Equip_To_Inventory
+    m_Controller: {fileID: 0}
+  - m_Name: UnEquip_To_Inventory
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: Use_Item
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -314,7 +314,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Collect_To_Equip
+    m_ConditionEvent: Collect_And_Equip
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -951002104596511102}

@@ -4,7 +4,6 @@ namespace GOAP
     {
         Use_Item = 0,
 
-        //  Collect_Item_To_Inventory,
         Collect_And_Equip,
         UnEquip_To_Inventory,
         Equip_From_Inventory,

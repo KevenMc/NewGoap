@@ -16,8 +16,6 @@ namespace GOAP
             public List<StatEffect> statEffects;
         }
 
-        public ItemSO defaultItem;
-
         public List<InventoryItem> items = new List<InventoryItem>();
 
         public void Init() { }

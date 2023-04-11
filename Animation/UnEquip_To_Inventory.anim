@@ -240,7 +240,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 1.0833334
-    functionName: Equip_To_Inventory
+    functionName: UnEquip_To_Inventory
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

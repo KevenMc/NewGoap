@@ -137,8 +137,9 @@ namespace GOAP
                     movingToLocation = true;
                     break;
 
-                case ActionType.Use_Item:
+                // case ActionType.Use_Item:
                 case ActionType.UnEquip_To_Inventory:
+                case ActionType.Make_Blueprint_From_Inventory:
                 case ActionType.Collect_And_Equip:
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
@@ -146,10 +147,7 @@ namespace GOAP
                 case ActionType.Blueprint_Require_Item:
                     ExecuteAction();
                     break;
-                case ActionType.Make_Blueprint_From_Inventory:
-                    blueprintHandler.CompleteBlueprintNoStation(currentAction.blueprint);
-                    // hasCompletedBlueprint = true;
-                    break;
+
                 default:
                     Debug.Log(
                         "I don't know how to do that : "
@@ -162,14 +160,21 @@ namespace GOAP
             }
         }
 
-        public void Use_Item()
+        // public void Use_Item()
+        // {
+        //     inventory.UseItem(equippedItem.itemData, agent);
+        //     Destroy(equippedItem.gameObject);
+        //     agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
+        // }
+
+        public void Make_Blueprint_From_Inventory()
         {
-            inventory.UseItem(equippedItem.itemData, agent);
-            Destroy(equippedItem.gameObject);
-            agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
+            blueprintHandler.CompleteBlueprintNoStation(currentAction.blueprint);
+            agent.animator.SetBool(ActionType.Make_Blueprint_From_Inventory.ToString(), false);
+            currentAction.parentAction.canComplete = true;
         }
 
-        public void Collect_To_Equip()
+        public void Collect_And_Equip()
         {
             equippedItem = currentAction.item;
             currentAction.item.transform.SetParent(agent.equipLocation.transform);
@@ -178,7 +183,7 @@ namespace GOAP
             currentAction.parentAction.canComplete = true;
         }
 
-        public void Equip_To_Inventory()
+        public void UnEquip_To_Inventory()
         {
             agent.inventoryHandler.AddItem(currentAction.item.itemData);
             Destroy(currentAction.item.gameObject);
@@ -186,13 +191,6 @@ namespace GOAP
             currentAction.parentAction.canComplete = true;
         }
 
-        public void PickUpItem()
-        {
-            Debug.Log("Should now collect item : " + currentAction.item.itemData);
-            inventory.AddItem(currentAction.item.itemData);
-            Destroy(currentAction.item.gameObject);
-            hasCollectedItem = true;
-            agent.animator.SetBool("Collect_Item_To_Inventory", false);
-        }
+        public void Equip_From_Inventory() { }
     }
 }
