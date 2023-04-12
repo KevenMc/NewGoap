@@ -85,10 +85,19 @@ namespace GOAP
 
             if (inventoryItem != null && inventoryItem.quantity > 0)
             {
-                foreach (var statEffect in itemData.statEffects)
+                if (!StatManager.instance.statsToModify.ContainsKey(useAgent.statHandler))
                 {
-                    useAgent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
+                    StatManager.instance.statsToModify[useAgent.statHandler] =
+                        new List<StatEffect>();
                 }
+                foreach (StatEffect statEffect in itemData.statEffects)
+                {
+                    StatManager.instance.statsToModify[useAgent.statHandler].Add(statEffect);
+                }
+                // foreach (var statEffect in itemData.statEffects)
+                // {
+                //     useAgent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
+                // }
 
                 RemoveItem(itemData);
             }

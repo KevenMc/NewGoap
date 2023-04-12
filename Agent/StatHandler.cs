@@ -1,3 +1,4 @@
+using System;
 using System.Net.Mail;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,22 +16,35 @@ namespace GOAP
         public List<Stat> currentGoals = new List<Stat>();
         public Stat currentGoal;
 
+        public class StatHeader
+        {
+            public StatType statType;
+            public int priority;
+            public Boolean isUrgent;
+
+            public StatHeader(Stat stat)
+            {
+                this.statType = stat.statType;
+                this.priority = stat.priority;
+                this.isUrgent = stat.isUrgent;
+            }
+        }
+
         public void Init()
         {
             CompileStatPassports();
             UpdateGoals();
-            Debug.Log("NOW REGISTER STATMANAGER");
             StatManager.instance.RegisterSubscriber(this);
         }
 
         private void OnEnable()
         {
-            StatManager.instance.RegisterSubscriber(this);
+            RegisterStatHandler();
         }
 
         private void OnDisable()
         {
-            StatManager.instance.UnregisterSubscriber(this);
+            UnregisterStatHandler();
         }
 
         public void Start() { }
@@ -50,7 +64,6 @@ namespace GOAP
             foreach (Stat stat in stats)
             {
                 statsByStatType[stat.statType] = stat;
-                Debug.Log("Adding " + stat.statType + " to stat dict");
             }
         }
 
@@ -62,19 +75,14 @@ namespace GOAP
                 .ToList();
         }
 
-        public void ModifyStat(StatType statType, float value)
+        public void RegisterStatHandler()
         {
-            Stat stat = stats.Find(x => x.statType == statType);
-            if (stat != null)
-            {
-                stat.current += value;
-            }
-            else
-            {
-                Debug.LogWarning(
-                    "StatHandler: Could not find stat with type " + statType.ToString()
-                );
-            }
+            StatManager.instance.RegisterSubscriber(this);
+        }
+
+        public void UnregisterStatHandler()
+        {
+            StatManager.instance.UnregisterSubscriber(this);
         }
     }
 }

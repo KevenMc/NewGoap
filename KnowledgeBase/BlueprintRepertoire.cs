@@ -41,7 +41,7 @@ namespace GOAP
         {
             foreach (Blueprint blueprint in knownBlueprints)
             {
-                foreach (ItemSO.StatEffect statEffect in blueprint.craftedItem.statEffects)
+                foreach (StatEffect statEffect in blueprint.craftedItem.statEffects)
                 {
                     StatType statType = statEffect.statType;
                     if (!blueprintsByStatType.ContainsKey(statType))

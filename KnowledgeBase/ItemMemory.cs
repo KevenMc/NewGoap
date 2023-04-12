@@ -24,7 +24,7 @@ namespace GOAP
             }
             itemLocations[itemData].Add(item);
 
-            foreach (ItemSO.StatEffect statEffect in itemData.statEffects)
+            foreach (StatEffect statEffect in itemData.statEffects)
             {
                 StatType statType = statEffect.statType;
                 if (!itemsByStat.ContainsKey(statType))
