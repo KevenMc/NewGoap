@@ -4,9 +4,11 @@ using UnityEngine;
 
 namespace GOAP
 {
-    public class ActionPlannerManager : AbstractManager<ActionPlanner>
+    public class ActionPlannerManager : AbstractManager<Agent>
     {
         public static ActionPlannerManager instance;
+
+        public ActionPlanner actionPlanner;
 
         private void Awake()
         {
@@ -21,9 +23,9 @@ namespace GOAP
             }
         }
 
-        protected override void PerformTask(ActionPlanner subscriber)
+        protected override void PerformTask(Agent subscriber)
         {
-            subscriber.PlanAction();
+            actionPlanner.PlanAction(subscriber);
         }
     }
 }

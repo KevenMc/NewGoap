@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,7 @@ using System.Linq;
 namespace GOAP
 {
     [RequireComponent(typeof(StatHandler))]
-    [RequireComponent(typeof(ActionPlanner))]
+    // [RequireComponent(typeof(ActionPlanner))]
     [RequireComponent(typeof(InventoryHandler))]
     [RequireComponent(typeof(KnowledgeHandler))]
     [RequireComponent(typeof(BlueprintHandler))]
@@ -14,7 +15,8 @@ namespace GOAP
     public class Agent : MonoBehaviour
     {
         public StatHandler statHandler;
-        public ActionPlanner actionPlanner;
+
+        // public ActionPlanner actionPlanner;
         public InventoryHandler inventoryHandler;
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
@@ -22,6 +24,7 @@ namespace GOAP
         public Animator animator;
         public string currentGoal;
         public float distanceToArrive = 1f;
+        public Boolean requiresNewAction = true;
         public GameObject equipLocation;
 
         private void Start()
@@ -32,7 +35,7 @@ namespace GOAP
         public void Init()
         {
             statHandler = GetComponent<StatHandler>();
-            actionPlanner = GetComponent<ActionPlanner>();
+            // actionPlanner = GetComponent<ActionPlanner>();
             inventoryHandler = GetComponent<InventoryHandler>();
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
@@ -41,11 +44,14 @@ namespace GOAP
             Animator animator = GetComponent<Animator>();
 
             statHandler.Init();
-            actionPlanner.Init();
+            // actionPlanner.Init();
             inventoryHandler.Init();
             knowledgeHandler.Init();
             blueprintHandler.Init();
             actionHandler.Init();
+            Debug.Log("Now set actionplanner manager");
+
+            RegisterActionPlanner();
         }
 
         public void SetMasterAction(Action action)
@@ -55,6 +61,21 @@ namespace GOAP
             actionHandler.ResetExecution();
             actionHandler.SetActionList();
             actionHandler.ExecuteAction();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterActionPlanner();
+        }
+
+        public void RegisterActionPlanner()
+        {
+            ActionPlannerManager.instance.RegisterSubscriber(this);
+        }
+
+        public void UnregisterActionPlanner()
+        {
+            ActionPlannerManager.instance.UnregisterSubscriber(this);
         }
     }
 }

@@ -9,41 +9,10 @@ namespace GOAP
 {
     public class ActionPlanner : MonoBehaviour
     {
-        private Agent agent;
+        private Agent currentAgent;
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
         public Boolean requiresNewAction = true;
-        public float moveDistance = 1f;
-
-        public void Init()
-        {
-            RegisterActionPlanner();
-        }
-
-        private void OnEnable()
-        {
-            Init();
-        }
-
-        private void OnDisable()
-        {
-            UnregisterActionPlanner();
-        }
-
-        public void RegisterActionPlanner()
-        {
-            ActionPlannerManager.instance.RegisterSubscriber(this);
-        }
-
-        public void UnregisterActionPlanner()
-        {
-            ActionPlannerManager.instance.UnregisterSubscriber(this);
-        }
-
-        private void Start()
-        {
-            agent = GetComponent<Agent>();
-        }
 
         public void SetGoal(Stat goal)
         {
@@ -51,11 +20,14 @@ namespace GOAP
             actionList.Add(new Action(goal));
             masterAction = actionList[0];
             requiresNewAction = true;
-            agent.currentGoal = goal.statType.ToString();
+            Debug.Log(goal.statType.ToString());
+            Debug.Log(currentAgent);
+            currentAgent.currentGoal = goal.statType.ToString();
         }
 
-        public void PlanAction()
+        public void PlanAction(Agent agent)
         {
+            currentAgent = agent;
             agent.statHandler.UpdateGoals();
             List<Stat> currentGoals = agent.statHandler.currentGoals;
 
@@ -68,6 +40,7 @@ namespace GOAP
             if (topStat.IsUrgent() && agent.statHandler.currentGoal != topStat)
             {
                 agent.statHandler.currentGoal = topStat;
+                Debug.Log(topStat.ToString());
 
                 SetGoal(topStat);
                 Debug.Log(topStat.ToString());
@@ -89,6 +62,7 @@ namespace GOAP
                     }
                 }
             }
+            currentAgent = null;
         }
 
         public Boolean RecursiveFindAction()
@@ -183,7 +157,7 @@ namespace GOAP
         private void ExtendActionPlanFromInventory(Action action)
         {
             return;
-            List<ItemSO> inventoryItems = agent.inventoryHandler.returnGoalItems(
+            List<ItemSO> inventoryItems = currentAgent.inventoryHandler.returnGoalItems(
                 action.goal.statType
             );
             foreach (ItemSO itemData in inventoryItems)
@@ -208,12 +182,14 @@ namespace GOAP
 
         private void ExtendActionPlanFromItemMemory(Action action)
         {
-            List<Item> memoryItems = agent.knowledgeHandler.itemMemory.returnGoalItems(action.goal);
+            List<Item> memoryItems = currentAgent.knowledgeHandler.itemMemory.returnGoalItems(
+                action.goal
+            );
 
             foreach (Item item in memoryItems)
             {
                 Boolean isAtLocation =
-                    agent.distanceToArrive
+                    currentAgent.distanceToArrive
                     >= GetDistance(transform.position, item.transform.position);
 
                 Action updateAction = action;
@@ -272,7 +248,7 @@ namespace GOAP
         {
             List<Blueprint> matchingBlueprints = new List<Blueprint>();
             foreach (
-                Blueprint blueprint in agent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
+                Blueprint blueprint in currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
                     action.goal
                 )
             )

@@ -28,7 +28,7 @@ namespace GOAP
 
         public void Init()
         {
-            RegisterActionPlanner();
+            RegisterActionHandler();
         }
 
         private void OnEnable()
@@ -38,16 +38,16 @@ namespace GOAP
 
         private void OnDisable()
         {
-            UnregisterActionPlanner();
+            UnregisterActionHandler();
         }
 
-        public void RegisterActionPlanner()
+        public void RegisterActionHandler()
         {
             ActionManager.instance.RegisterSubscriber(this);
             MovementManager.instance.RegisterSubscriber(this);
         }
 
-        public void UnregisterActionPlanner()
+        public void UnregisterActionHandler()
         {
             ActionManager.instance.UnregisterSubscriber(this);
             MovementManager.instance.UnregisterSubscriber(this);
@@ -104,12 +104,6 @@ namespace GOAP
             movingToLocation = false;
         }
 
-        private IEnumerator PauseForOneSecond()
-        {
-            // Pause for one second
-            yield return new WaitForSeconds(1f);
-        }
-
         public void ExecuteAction()
         {
             currentAction = actionsToPerform.Last();
@@ -125,11 +119,6 @@ namespace GOAP
 
             switch (currentAction.actionType)
             {
-                // case ActionType.Use_Item:
-                //     inventory.UseItem(action.itemData, agent);
-                //     hasUsedItem = true;
-                //     break;
-
                 case ActionType.Move_To_Location:
                     MoveTo(currentAction.location);
                     ActionManager.instance.RegisterSubscriber(this);

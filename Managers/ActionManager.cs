@@ -30,7 +30,7 @@ namespace GOAP
                     case ActionType.Move_To_Location:
                         if (subscriber.HasArrivedAtLocation())
                         {
-                            subscriber.UnregisterActionPlanner();
+                            subscriber.UnregisterActionHandler();
                             subscriber.ExecuteAction();
                         }
                         break;
