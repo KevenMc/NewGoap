@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace GOAP
 {
@@ -13,6 +14,7 @@ namespace GOAP
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
         public Boolean requiresNewAction = true;
+        public Vector3 currentLocation;
 
         public void SetGoal(Stat goal)
         {
@@ -27,6 +29,7 @@ namespace GOAP
 
         public void PlanAction(Agent agent)
         {
+            currentLocation = agent.transform.position;
             currentAgent = agent;
             agent.statHandler.UpdateGoals();
             List<Stat> currentGoals = agent.statHandler.currentGoals;
@@ -80,7 +83,15 @@ namespace GOAP
                 requiresNewAction = false;
                 return true;
             }
-            ExtendAction(actionList[0]);
+            Parallel.ForEach(
+                actionList,
+                action =>
+                {
+                    ExtendAction(action);
+                }
+            );
+
+            // ExtendAction(actionList[0]);
             return RecursiveFindAction();
         }
 
@@ -189,8 +200,7 @@ namespace GOAP
             foreach (Item item in memoryItems)
             {
                 Boolean isAtLocation =
-                    currentAgent.distanceToArrive
-                    >= GetDistance(transform.position, item.transform.position);
+                    currentAgent.distanceToArrive >= GetDistance(currentLocation, item.location);
 
                 Action updateAction = action;
                 if (action.goal.statType != StatType.Have_Item_Equipped)
@@ -235,7 +245,7 @@ namespace GOAP
                     updateAction.Init(
                         ActionType.Move_To_Location,
                         new Stat(StatType.Move_To_Location, item.itemData),
-                        item.transform.position,
+                        item.location,
                         true
                     );
                 }

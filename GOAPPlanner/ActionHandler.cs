@@ -190,16 +190,18 @@ namespace GOAP
             currentAction.parentAction.canComplete = true;
         }
 
-        public void Equip_From_Inventory()
-        {
-            equippedItem = currentAction.item;
-            currentAction.item.transform.SetParent(agent.equipLocation.transform);
-            currentAction.item.transform.localPosition = new Vector3();
-        }
+        // public void Equip_From_Inventory()
+        // {
+        //     equippedItem = currentAction.item;
+        //     currentAction.item.transform.SetParent(agent.equipLocation.transform);
+        //     currentAction.item.transform.localPosition = new Vector3();
+        //     agent.animator.SetBool(ActionType.Equip_From_Inventory.ToString(), false);
+        // }
 
         public void InstantiateEquippedItem()
         {
             inventoryHandler.InstantiateEquippedItem(currentAction.itemData.itemPrefab);
+            agent.animator.SetBool(ActionType.Equip_From_Inventory.ToString(), false);
         }
     }
 }

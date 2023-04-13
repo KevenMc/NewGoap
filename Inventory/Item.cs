@@ -6,6 +6,12 @@ namespace GOAP
 {
     public class Item : MonoBehaviour
     {
+        public Vector3 location;
         public ItemSO itemData;
+
+        private void OnEnable()
+        {
+            location = transform.position;
+        }
     }
 }
