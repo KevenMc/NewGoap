@@ -69,10 +69,13 @@ namespace GOAP
 
         public void UpdateGoals()
         {
-            currentGoals = stats
-                .Where(stat => stat.current >= stat.trigger)
-                .OrderByDescending(stat => stat.priority)
-                .ToList();
+            currentGoals.Clear();
+            currentGoals.AddRange(
+                stats
+                    .Where(stat => stat.current >= stat.trigger)
+                    .OrderByDescending(stat => stat.priority)
+                    .ToList()
+            );
         }
 
         public void RegisterStatHandler()

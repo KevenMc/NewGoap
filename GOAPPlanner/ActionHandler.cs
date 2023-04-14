@@ -106,15 +106,13 @@ namespace GOAP
             Debug.Log(
                 "Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
                     + currentAction.actionName
+                    + " : "
+                    + currentAction?.goal?.statType
             );
             if (!currentAction.isOwnMaster || currentAction.parentAction.CanComplete())
             {
                 Debug.Log("Adding : " + currentAction.parentAction);
                 actionsToPerform.Add(currentAction.parentAction);
-            }
-            else
-            {
-                Debug.Log("Cannot0000000000000000000000000000000000000000000000000000000000");
             }
 
             switch (currentAction.actionType)
@@ -141,6 +139,8 @@ namespace GOAP
                     break;
 
                 case ActionType.Blueprint_Require_Item:
+                case ActionType.Require_Item_In_Inventory:
+                    currentAction.parentAction.canComplete = true;
                     ExecuteAction();
                     break;
 
@@ -162,7 +162,8 @@ namespace GOAP
             Destroy(agent.equippedItem.gameObject);
             agent.equippedItem = null;
             agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
-            Debug.Log("Now use item");
+
+            ExecuteAction();
         }
 
         public void Use_Station()

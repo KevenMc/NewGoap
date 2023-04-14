@@ -20,23 +20,32 @@ namespace GOAP
 
         public void Init() { }
 
-        public List<ItemSO> ReturnGoalItems(StatType statType)
+        public List<ItemSO> ReturnGoalItems(Stat goal)
         {
             if (items == null)
             {
                 Debug.LogWarning("Inventory items list is null!");
                 return new List<ItemSO>();
             }
-
-            return items
-                .Where(
-                    inventoryItem =>
-                        inventoryItem.itemData.statEffects.Any(
-                            statEffect => statEffect.statType == statType
-                        )
-                )
-                .Select(inventoryItem => inventoryItem.itemData)
-                .ToList();
+            if (goal.statType == StatType.Have_Item_In_Inventory)
+            {
+                return items
+                    .Where(inventoryItem => inventoryItem.itemData == goal.itemData)
+                    .Select(inventoryItem => inventoryItem.itemData)
+                    .ToList();
+            }
+            else
+            {
+                return items
+                    .Where(
+                        inventoryItem =>
+                            inventoryItem.itemData.statEffects.Any(
+                                statEffect => statEffect.statType == goal.statType
+                            )
+                    )
+                    .Select(inventoryItem => inventoryItem.itemData)
+                    .ToList();
+            }
         }
 
         public void AddItem(ItemSO itemData, int quantity = 1)

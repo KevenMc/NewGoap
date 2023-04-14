@@ -18,4 +18,4 @@ MonoBehaviour:
   useItemAnimation: {fileID: 7400000, guid: b9fdd2f6b9b215883877409bc978f53e, type: 2}
   statEffects:
   - statType: 100
-    value: -50
+    value: -5

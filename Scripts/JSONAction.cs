@@ -11,6 +11,7 @@ namespace GOAP
         public string masterAction;
         public float actionCost;
         public string childAction;
+        public bool canComplete;
 
         public JSONAction(Action action)
         {
@@ -21,6 +22,7 @@ namespace GOAP
             }
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
+            this.canComplete = action.canComplete;
             if (action.childActions.Count > 0)
             {
                 if (action.childActions[0].subActions.Count > 0)
@@ -49,6 +51,7 @@ namespace GOAP
         public string parentAction;
         public string masterAction;
         public float actionCost;
+        public bool canComplete;
 
         public JSONActionEndNode(Action action)
         {
@@ -56,6 +59,7 @@ namespace GOAP
             this.parentAction = action.parentAction.actionName;
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
+            this.canComplete = action.canComplete;
         }
     }
 
@@ -65,6 +69,8 @@ namespace GOAP
         public string parentAction;
         public string masterAction;
         public float actionCost;
+        public bool canComplete;
+
         public string[] subActions;
 
         public JSONActionWithSubAction(Action action)
@@ -73,6 +79,8 @@ namespace GOAP
             this.parentAction = action.parentAction.actionName;
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
+            this.canComplete = action.canComplete;
+
             string[] subActions = new string[action.subActions.Count];
             int i = 0;
             foreach (Action subAction in action.subActions)

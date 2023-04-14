@@ -7,6 +7,7 @@ namespace GOAP
         Collect_And_Equip,
         UnEquip_To_Inventory,
         Equip_From_Inventory,
+        Require_Item_In_Inventory,
         Move_To_Location,
         Interact_With_Station,
         Make_Blueprint_From_Inventory,
