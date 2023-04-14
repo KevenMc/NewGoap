@@ -6,8 +6,6 @@ namespace GOAP
 {
     public class BlueprintHandler : MonoBehaviour
     {
-        public InventoryHandler inventoryHandler;
-
         public void Init() { }
     }
 }

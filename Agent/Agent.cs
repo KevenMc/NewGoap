@@ -3,15 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.AI;
 
 namespace GOAP
 {
     [RequireComponent(typeof(StatHandler))]
-    // [RequireComponent(typeof(ActionPlanner))]
     [RequireComponent(typeof(InventoryHandler))]
     [RequireComponent(typeof(KnowledgeHandler))]
     [RequireComponent(typeof(BlueprintHandler))]
     [RequireComponent(typeof(MovementHandler))]
+    [RequireComponent(typeof(ActionHandler))]
+    // [RequireComponent(typeof(NavMeshAgent))]
     public class Agent : MonoBehaviour
     {
         public StatHandler statHandler;
@@ -21,6 +23,7 @@ namespace GOAP
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
         public ActionHandler actionHandler;
+        public NavMeshAgent navMeshAgent;
         public Animator animator;
         public string currentGoal;
         public float distanceToArrive = 1f;
@@ -41,8 +44,7 @@ namespace GOAP
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
             actionHandler = GetComponent<ActionHandler>();
-
-            Animator animator = GetComponent<Animator>();
+            navMeshAgent = GetComponent<NavMeshAgent>();
 
             statHandler.Init();
             // actionPlanner.Init();
