@@ -14,7 +14,6 @@ namespace GOAP
         private Agent currentAgent;
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
-        public Boolean requiresNewAction = true;
         public Vector3 currentLocation;
 
         public void SetGoal(Stat goal)
@@ -22,7 +21,7 @@ namespace GOAP
             actionList.Clear();
             actionList.Add(new Action(goal));
             masterAction = actionList[0];
-            requiresNewAction = true;
+            currentAgent.requiresNewAction = true;
             Debug.Log(goal.statType.ToString());
             Debug.Log(currentAgent);
             currentAgent.currentGoal = goal.statType.ToString();
@@ -54,7 +53,7 @@ namespace GOAP
                     return;
                 }
             }
-            else if (requiresNewAction)
+            else if (currentAgent.requiresNewAction)
             {
                 foreach (Stat stat in currentGoals)
                 {
@@ -81,7 +80,7 @@ namespace GOAP
             {
                 RecursiveShowActions(actionList[0]);
                 SaveMasterActionToFile("json.json");
-                requiresNewAction = false;
+                currentAgent.requiresNewAction = false;
                 return true;
             }
 
@@ -267,7 +266,7 @@ namespace GOAP
                 Action updateAction = action;
                 updateAction = new Action(updateAction);
                 updateAction.Init(
-                    ActionType.Use_Station,
+                    ActionType.Interact_With_Station,
                     new Stat(StatType.Use_Station, station.stationData),
                     station.stationData
                 );

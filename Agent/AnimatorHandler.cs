@@ -35,12 +35,17 @@ namespace GOAP
 
         public void InstantiateEquippedItem()
         {
-            actionHandler.InstantiateEquippedItem();
+            actionHandler.Equip_From_Inventory();
         }
 
         public void Use_Item()
         {
             actionHandler.Use_Item();
+        }
+
+        public void Use_Station()
+        {
+            actionHandler.Use_Station();
         }
     }
 }

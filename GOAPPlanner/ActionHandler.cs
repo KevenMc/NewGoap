@@ -96,6 +96,12 @@ namespace GOAP
         public void ExecuteAction()
         {
             currentAction = actionsToPerform.Last();
+            if (currentAction.parentAction == null)
+            {
+                Debug.Log("There is no more action to execute");
+                agent.requiresNewAction = true;
+                return;
+            }
             actionsToPerform.Remove(currentAction);
             Debug.Log(
                 "Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -123,6 +129,7 @@ namespace GOAP
                 case ActionType.UnEquip_To_Inventory:
                 case ActionType.Make_Blueprint_From_Inventory:
                 case ActionType.Collect_And_Equip:
+                case ActionType.Interact_With_Station:
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
 
@@ -156,6 +163,20 @@ namespace GOAP
             agent.equippedItem = null;
             agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
             Debug.Log("Now use item");
+        }
+
+        public void Use_Station()
+        {
+            agent.animator.SetBool(ActionType.Interact_With_Station.ToString(), false);
+
+            if (!StatManager.instance.statsToModify.ContainsKey(agent.statHandler))
+            {
+                StatManager.instance.statsToModify[agent.statHandler] = new List<StatEffect>();
+            }
+            foreach (StatEffect statEffect in currentAction.stationData.statEffects)
+            {
+                StatManager.instance.statsToModify[agent.statHandler].Add(statEffect);
+            }
         }
 
         public void Make_Blueprint_From_Inventory()
@@ -196,15 +217,7 @@ namespace GOAP
             currentAction.parentAction.canComplete = true;
         }
 
-        // public void Equip_From_Inventory()
-        // {
-        //     equippedItem = currentAction.item;
-        //     currentAction.item.transform.SetParent(agent.equipLocation.transform);
-        //     currentAction.item.transform.localPosition = new Vector3();
-        //     agent.animator.SetBool(ActionType.Equip_From_Inventory.ToString(), false);
-        // }
-
-        public void InstantiateEquippedItem()
+        public void Equip_From_Inventory()
         {
             agent.InstantiateEquippedItem(currentAction.itemData.itemPrefab);
             agent.animator.SetBool(ActionType.Equip_From_Inventory.ToString(), false);
