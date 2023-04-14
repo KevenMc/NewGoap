@@ -6,7 +6,7 @@ namespace GOAP
 {
     public class InventoryHandler : MonoBehaviour
     {
-        public Agent agent;
+        // public Agent agent;
 
         [System.Serializable]
         public class InventoryItem
@@ -16,20 +16,11 @@ namespace GOAP
             public List<StatEffect> statEffects;
         }
 
-        public GameObject equippedItem;
-
-        public void InstantiateEquippedItem(GameObject itemPrefab)
-        {
-            equippedItem = Instantiate(itemPrefab);
-            equippedItem.transform.SetParent(agent.equipLocation.transform);
-            equippedItem.transform.localPosition = new Vector3();
-        }
-
         public List<InventoryItem> items = new List<InventoryItem>();
 
         public void Init() { }
 
-        public List<ItemSO> returnGoalItems(StatType statType)
+        public List<ItemSO> ReturnGoalItems(StatType statType)
         {
             if (items == null)
             {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace GOAP
 {
@@ -35,7 +36,7 @@ namespace GOAP
             }
         }
 
-        public List<Item> returnGoalItems(Stat goal)
+        public List<Item> ReturnGoalItems(Stat goal)
         {
             StatType goalStatType = goal.statType;
             List<Item> items = new List<Item>();

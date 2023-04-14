@@ -10,6 +10,7 @@ namespace GOAP
     {
         public StatType statType;
         public ItemSO itemData;
+        public StationSO stationData;
         public float current;
         public float trigger;
         public float increment;
@@ -39,6 +40,12 @@ namespace GOAP
         {
             this.statType = statType;
             this.itemData = itemData;
+        }
+
+        public Stat(StatType statType, StationSO stationData)
+        {
+            this.statType = statType;
+            this.stationData = stationData;
         }
 
         public Stat(

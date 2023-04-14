@@ -145,6 +145,7 @@ namespace GOAP
         {
             ExtendActionPlanFromInventory(action);
             ExtendActionPlanFromItemMemory(action);
+            ExtendActionPlanFromStationMemory(action);
             ExtendActionPlanFromBlueprintRepertoire(action);
 
             if (action.childActions.Count == 0 && !action.CanComplete())
@@ -170,7 +171,7 @@ namespace GOAP
 
         private void ExtendActionPlanFromInventory(Action action)
         {
-            List<ItemSO> inventoryItems = currentAgent.inventoryHandler.returnGoalItems(
+            List<ItemSO> inventoryItems = currentAgent.inventoryHandler.ReturnGoalItems(
                 action.goal.statType
             );
             foreach (ItemSO itemData in inventoryItems)
@@ -192,7 +193,7 @@ namespace GOAP
 
         private void ExtendActionPlanFromItemMemory(Action action)
         {
-            List<Item> memoryItems = currentAgent.knowledgeHandler.itemMemory.returnGoalItems(
+            List<Item> memoryItems = currentAgent.knowledgeHandler.itemMemory.ReturnGoalItems(
                 action.goal
             );
 
@@ -248,6 +249,36 @@ namespace GOAP
                         true
                     );
                 }
+
+                actionList.Add(updateAction);
+            }
+        }
+
+        private void ExtendActionPlanFromStationMemory(Action action)
+        {
+            List<Station> memoryStations =
+                currentAgent.knowledgeHandler.stationMemory.ReturnGoalStations(action.goal);
+
+            foreach (Station station in memoryStations)
+            {
+                Boolean isAtLocation =
+                    currentAgent.distanceToArrive >= GetDistance(currentLocation, station.location);
+
+                Action updateAction = action;
+                updateAction = new Action(updateAction);
+                updateAction.Init(
+                    ActionType.Use_Station,
+                    new Stat(StatType.Use_Station, station.stationData),
+                    station.stationData
+                );
+
+                updateAction = new Action(updateAction);
+                updateAction.Init(
+                    ActionType.Move_To_Location,
+                    new Stat(StatType.Move_To_Location, station.stationData),
+                    station.location,
+                    true
+                );
 
                 actionList.Add(updateAction);
             }
@@ -326,8 +357,6 @@ namespace GOAP
         public void SaveMasterActionToFile(string filePath)
         {
             JSONAction jSONAction = new JSONAction(masterAction);
-            // Debug.Log(jSONAction);
-
 
             // Convert the dictionary to JSON
             string jsonData = JsonUtility.ToJson(jSONAction);

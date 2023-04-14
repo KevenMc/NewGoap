@@ -8,6 +8,7 @@ namespace GOAP
         UnEquip_To_Inventory,
         Equip_From_Inventory,
         Move_To_Location,
+        Use_Station,
         Make_Blueprint_From_Inventory,
         Blueprint_Require_Item
     }

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3d61f078a02e2112a9b02fa65ba2359, type: 3}
   m_Name: Pizza
   m_EditorClassIdentifier: 
-  blueprintName: 
-  description: 
+  blueprintName: Pizza
+  description: Make pizza from dough sauce and cheese
   requiredItems:
   - itemData: {fileID: 11400000, guid: 6e13532a14d1883aa9351e584d8a1bf2, type: 2}
     destroyOnCraft: 1

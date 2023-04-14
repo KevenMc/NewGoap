@@ -9,17 +9,5 @@ namespace GOAP
         public InventoryHandler inventoryHandler;
 
         public void Init() { }
-
-        public void CompleteBlueprintNoStation(Blueprint blueprint)
-        {
-            foreach (Blueprint.ItemRequirement item in blueprint.requiredItems)
-            {
-                if (item.destroyOnCraft)
-                {
-                    inventoryHandler.RemoveItem(item.itemData);
-                }
-            }
-            inventoryHandler.AddItem(blueprint.craftedItem);
-        }
     }
 }

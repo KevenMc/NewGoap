@@ -25,6 +25,7 @@ namespace GOAP
         #region
         public float actionCost = 1;
         public ItemSO itemData;
+        public StationSO stationData;
         public Item item;
         public Vector3 location;
         public Blueprint blueprint;
@@ -61,6 +62,22 @@ namespace GOAP
             this.actionName = actionType.ToString() + " : " + itemData.itemName;
             this.canComplete = canComplete;
             this.actionCost += this.parentAction.actionCost + itemData.itemUseCost;
+        }
+
+        // Init method to use STATION
+        public void Init(
+            ActionType actionType,
+            Stat goal,
+            StationSO stationData,
+            Boolean canComplete = false
+        )
+        {
+            Debug.Log("Init for station");
+            this.actionType = actionType;
+            this.stationData = stationData;
+            this.actionName = actionType.ToString() + " : " + stationData.stationName;
+            this.canComplete = canComplete;
+            this.actionCost += this.parentAction.actionCost;
         }
 
         // Init method to collect item

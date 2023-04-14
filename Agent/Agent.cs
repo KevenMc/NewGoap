@@ -26,6 +26,7 @@ namespace GOAP
         public float distanceToArrive = 1f;
         public Boolean requiresNewAction = true;
         public GameObject equipLocation;
+        public GameObject equippedItem;
 
         private void Start()
         {
@@ -59,6 +60,13 @@ namespace GOAP
             actionHandler.masterAction = action;
             actionHandler.SetActionList();
             actionHandler.ExecuteAction();
+        }
+
+        public void InstantiateEquippedItem(GameObject itemPrefab)
+        {
+            equippedItem = Instantiate(itemPrefab);
+            equippedItem.transform.SetParent(equipLocation.transform);
+            equippedItem.transform.localPosition = new Vector3();
         }
 
         private void OnDisable()

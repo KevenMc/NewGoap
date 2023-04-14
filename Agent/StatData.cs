@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace GOAP
@@ -8,12 +9,14 @@ namespace GOAP
         Have_Item_Equipped,
         Have_Item_In_Inventory,
         Move_To_Location,
+        Use_Station,
         Blueprint,
         Hunger = 100,
         Thirst = 101,
         Energy = 102
     }
 
+    [Serializable]
     public class StatEffect
     {
         public StatType statType;

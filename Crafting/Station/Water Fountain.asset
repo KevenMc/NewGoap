@@ -9,16 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c2fd4fe9dcedc233aecd9d7fffd41b7, type: 3}
-  m_Name: CowBean
+  m_Script: {fileID: 11500000, guid: c875bead14309bf7ab003bce95aad7fd, type: 3}
+  m_Name: Water Fountain
   m_EditorClassIdentifier: 
-  passportName: CowBean
-  stats:
+  stationName: Water fountain
+  description: 
+  stationType: 0
+  statEffects:
   - statType: 101
-    itemData: {fileID: 0}
-    stationData: {fileID: 0}
-    current: 0
-    trigger: 0
-    increment: 1
-    priority: 2
-    isUrgent: 0
+    value: -10

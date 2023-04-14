@@ -9,12 +9,13 @@ namespace GOAP
         public string stationName;
         public string description;
         public StationType stationType;
-        public int maxResources = 0;
+
+        // public int maxResources = 0;
+        public List<StatEffect> statEffects;
 
         public enum StationType
         {
-            Stove = 0,
-            AppleTree = 1,
+            Null = 0
         }
     }
 }

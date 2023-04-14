@@ -152,16 +152,29 @@ namespace GOAP
         public void Use_Item()
         {
             inventoryHandler.UseItem(currentAction.itemData, agent);
-            Destroy(inventoryHandler.equippedItem.gameObject);
+            Destroy(agent.equippedItem.gameObject);
+            agent.equippedItem = null;
             agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
             Debug.Log("Now use item");
         }
 
         public void Make_Blueprint_From_Inventory()
         {
-            blueprintHandler.CompleteBlueprintNoStation(currentAction.blueprint);
+            CompleteBlueprintNoStation();
             agent.animator.SetBool(ActionType.Make_Blueprint_From_Inventory.ToString(), false);
             currentAction.parentAction.canComplete = true;
+        }
+
+        public void CompleteBlueprintNoStation()
+        {
+            foreach (Blueprint.ItemRequirement item in currentAction.blueprint.requiredItems)
+            {
+                if (item.destroyOnCraft)
+                {
+                    inventoryHandler.RemoveItem(item.itemData);
+                }
+            }
+            inventoryHandler.AddItem(currentAction.blueprint.craftedItem);
         }
 
         public void Collect_And_Equip()
@@ -169,7 +182,7 @@ namespace GOAP
             equippedItem = currentAction.item;
             currentAction.item.transform.SetParent(agent.equipLocation.transform);
             currentAction.item.transform.localPosition = new Vector3();
-            inventoryHandler.equippedItem = equippedItem.gameObject;
+            agent.equippedItem = equippedItem.gameObject;
 
             agent.animator.SetBool(ActionType.Collect_And_Equip.ToString(), false);
             currentAction.parentAction.canComplete = true;
@@ -193,7 +206,7 @@ namespace GOAP
 
         public void InstantiateEquippedItem()
         {
-            inventoryHandler.InstantiateEquippedItem(currentAction.itemData.itemPrefab);
+            agent.InstantiateEquippedItem(currentAction.itemData.itemPrefab);
             agent.animator.SetBool(ActionType.Equip_From_Inventory.ToString(), false);
         }
     }
