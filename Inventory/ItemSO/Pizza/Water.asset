@@ -10,12 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8831ba4ae774c74ca41727f7f051f5e, type: 3}
-  m_Name: Energy Soda
+  m_Name: Water
   m_EditorClassIdentifier: 
-  itemName: Energy Soda
+  itemName: Water
   itemUseCost: 0
-  itemPrefab: {fileID: 3284008012009069360, guid: d21da52bede44866abe7e12f415aa08d, type: 3}
-  useItemAnimation: {fileID: 7400000, guid: b9fdd2f6b9b215883877409bc978f53e, type: 2}
-  statEffects:
-  - statType: 102
-    value: -100
+  itemPrefab: {fileID: 7728782186762033283, guid: 1a2d8faa62531fe00b79df451d809f63, type: 3}
+  useItemAnimation: {fileID: 0}
+  statEffects: []

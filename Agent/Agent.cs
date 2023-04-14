@@ -49,7 +49,6 @@ namespace GOAP
             knowledgeHandler.Init();
             blueprintHandler.Init();
             actionHandler.Init();
-            Debug.Log("Now set actionplanner manager");
 
             RegisterActionPlanner();
         }
@@ -58,7 +57,6 @@ namespace GOAP
         {
             Debug.Log("Set master action");
             actionHandler.masterAction = action;
-            actionHandler.ResetExecution();
             actionHandler.SetActionList();
             actionHandler.ExecuteAction();
         }

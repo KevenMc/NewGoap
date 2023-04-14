@@ -9,6 +9,9 @@ namespace GOAP
         public Dictionary<StatType, List<Blueprint>> blueprintsByStatType =
             new Dictionary<StatType, List<Blueprint>>();
 
+        public Dictionary<ItemSO, List<Blueprint>> blueprintsByCraftedItem =
+            new Dictionary<ItemSO, List<Blueprint>>();
+
         public BlueprintRepertoire() { }
 
         public BlueprintRepertoire(List<Blueprint> blueprints)
@@ -41,6 +44,12 @@ namespace GOAP
         {
             foreach (Blueprint blueprint in knownBlueprints)
             {
+                if (!blueprintsByCraftedItem.ContainsKey(blueprint.craftedItem))
+                {
+                    blueprintsByCraftedItem[blueprint.craftedItem] = new List<Blueprint>();
+                }
+                blueprintsByCraftedItem[blueprint.craftedItem].Add(blueprint);
+
                 foreach (StatEffect statEffect in blueprint.craftedItem.statEffects)
                 {
                     StatType statType = statEffect.statType;
@@ -69,8 +78,12 @@ namespace GOAP
             switch (goal.statType)
             {
                 case StatType.Have_Item_Equipped:
-                    Debug.Log("I am searching for an item of type : " + goal.itemData.itemName);
+                    if (blueprintsByCraftedItem.ContainsKey(goal.itemData))
+                    {
+                        matchingBlueprints.AddRange(blueprintsByCraftedItem[goal.itemData]);
+                    }
                     break;
+
                 default:
                     if (blueprintsByStatType.ContainsKey(goal.statType))
                     {

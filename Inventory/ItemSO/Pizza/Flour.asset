@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8831ba4ae774c74ca41727f7f051f5e, type: 3}
-  m_Name: Water Bottle
+  m_Name: Flour
   m_EditorClassIdentifier: 
-  itemName: Water Bottle
+  itemName: Flour
   itemUseCost: 0
-  statEffects:
-  - statType: 101
-    value: -500
+  itemPrefab: {fileID: 4551831667444487335, guid: 4b61c5b80845fc4939a6384778002ab6, type: 3}
+  useItemAnimation: {fileID: 0}
+  statEffects: []

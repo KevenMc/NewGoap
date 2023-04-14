@@ -60,15 +60,5 @@ namespace GOAP
 
             return items;
         }
-
-        // public List<Item> GetItemLocations(StatType statType)
-        // {
-        //     List<Item> items = new List<Item>();
-        //     if (itemsByStat.ContainsKey(statType))
-        //     {
-        //         items.AddRange(itemsByStat[statType]);
-        //     }
-        //     return items;
-        // }
     }
 }

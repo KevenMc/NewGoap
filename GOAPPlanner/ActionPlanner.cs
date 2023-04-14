@@ -1,3 +1,4 @@
+using System.Data;
 using System;
 using System.ComponentModel;
 using System.Collections.Generic;
@@ -83,20 +84,22 @@ namespace GOAP
                 requiresNewAction = false;
                 return true;
             }
-            Parallel.ForEach(
-                actionList,
-                action =>
-                {
-                    ExtendAction(action);
-                }
-            );
 
-            // ExtendAction(actionList[0]);
+            // Parallel.ForEach(
+            //     actionList,
+            //     action =>
+            //     {
+            //         ExtendAction(action);
+            //     }
+            // );
+
+            ExtendAction(actionList[0]);
             return RecursiveFindAction();
         }
 
         public Boolean CanCompleteMasterAction(Action action)
         {
+            Debug.Log("can complete action? : " + action.actionName);
             List<Boolean> returnList = new List<bool>();
             returnList.Add(true);
             if (action.subActions.Count > 0)
@@ -167,25 +170,21 @@ namespace GOAP
 
         private void ExtendActionPlanFromInventory(Action action)
         {
-            return;
             List<ItemSO> inventoryItems = currentAgent.inventoryHandler.returnGoalItems(
                 action.goal.statType
             );
             foreach (ItemSO itemData in inventoryItems)
             {
-                Action newEquipAction = new Action(action);
-                newEquipAction.Init(ActionType.Use_Item, action.goal, itemData, false);
+                Action newInventoryAction = new Action(action);
+                newInventoryAction.Init(ActionType.Use_Item, action.goal, itemData, false);
 
-                Action newInventoryAction = new Action(newEquipAction);
-                newInventoryAction.Init(
+                Action newEquipAction = new Action(newInventoryAction);
+                newEquipAction.Init(
                     ActionType.Equip_From_Inventory,
-                    newEquipAction.goal,
+                    newInventoryAction.goal,
                     itemData,
                     true
                 );
-
-                // action = new Action(action);
-                // action.Init(ActionType.Equip_From_Inventory, action.goal, itemData); //save  this for later
 
                 actionList.Add(newEquipAction);
             }
@@ -263,7 +262,12 @@ namespace GOAP
                 )
             )
             {
-                if (blueprint.craftedItem != null)
+                Debug.Log(
+                    "Searching for blueprint recipe : "
+                        + blueprint
+                        + " : -------------------------------------------------------------"
+                );
+                if (action.actionType != ActionType.Blueprint_Require_Item)
                 {
                     action = new Action(action);
                     action.Init(ActionType.Use_Item, action.goal, blueprint.craftedItem);

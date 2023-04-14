@@ -10,7 +10,6 @@ namespace GOAP
     {
         public UnityEngine.AI.NavMeshAgent navMeshAgent;
         private Vector3 target;
-
         public Agent agent;
         public BlueprintHandler blueprintHandler;
         public InventoryHandler inventoryHandler;
@@ -18,13 +17,8 @@ namespace GOAP
         public Action currentAction;
         public ReverseIterate<Action> actionServer = new ReverseIterate<Action>();
         private List<Action> actionsToPerform = new List<Action>();
-        public bool movingToLocation = false;
-        public bool hasCollectedItem = false;
-        public bool hasUsedItem = false;
-        public bool isExecutingPlan = false;
-        public bool hasCompletedBlueprint = false;
+
         public Item equippedItem;
-        public bool stop = false;
 
         public void Init()
         {
@@ -99,11 +93,6 @@ namespace GOAP
             return false;
         }
 
-        public void ResetExecution()
-        {
-            movingToLocation = false;
-        }
-
         public void ExecuteAction()
         {
             currentAction = actionsToPerform.Last();
@@ -114,7 +103,12 @@ namespace GOAP
             );
             if (!currentAction.isOwnMaster || currentAction.parentAction.CanComplete())
             {
+                Debug.Log("Adding : " + currentAction.parentAction);
                 actionsToPerform.Add(currentAction.parentAction);
+            }
+            else
+            {
+                Debug.Log("Cannot0000000000000000000000000000000000000000000000000000000000");
             }
 
             switch (currentAction.actionType)
@@ -123,7 +117,6 @@ namespace GOAP
                     MoveTo(currentAction.location);
                     ActionManager.instance.RegisterSubscriber(this);
 
-                    movingToLocation = true;
                     break;
 
                 case ActionType.Equip_From_Inventory:

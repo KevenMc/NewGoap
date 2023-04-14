@@ -7,6 +7,7 @@ namespace GOAP
     public class JSONAction
     {
         public string actionName;
+        public string parentAction;
         public string masterAction;
         public float actionCost;
         public string childAction;
@@ -14,6 +15,10 @@ namespace GOAP
         public JSONAction(Action action)
         {
             this.actionName = action.actionName;
+            if (action.parentAction != null)
+            {
+                this.parentAction = action.parentAction.actionName;
+            }
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
             if (action.childActions.Count > 0)
@@ -41,13 +46,14 @@ namespace GOAP
     public class JSONActionEndNode
     {
         public string actionName;
+        public string parentAction;
         public string masterAction;
-
         public float actionCost;
 
         public JSONActionEndNode(Action action)
         {
             this.actionName = action.actionName;
+            this.parentAction = action.parentAction.actionName;
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
         }
@@ -56,6 +62,7 @@ namespace GOAP
     public class JSONActionWithSubAction
     {
         public string actionName;
+        public string parentAction;
         public string masterAction;
         public float actionCost;
         public string[] subActions;
@@ -63,6 +70,7 @@ namespace GOAP
         public JSONActionWithSubAction(Action action)
         {
             this.actionName = action.actionName;
+            this.parentAction = action.parentAction.actionName;
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
             string[] subActions = new string[action.subActions.Count];
