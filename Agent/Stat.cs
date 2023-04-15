@@ -67,7 +67,7 @@ namespace GOAP
 
         public override string ToString()
         {
-            string retString = "Satisfy : " + statType.ToString() + "\n";
+            string retString = "Satisfy : " + statType.ToString() + " : \n";
             if (itemData != null)
                 retString += "Item type : " + itemData.itemName;
             return retString;

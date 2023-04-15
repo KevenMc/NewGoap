@@ -2,7 +2,7 @@ namespace GOAP
 {
     public enum ActionType
     {
-        Use_Item = 0,
+        Use_Item,
 
         Collect_And_Equip,
         UnEquip_To_Inventory,

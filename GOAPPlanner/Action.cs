@@ -41,11 +41,19 @@ namespace GOAP
             Debug.Log("Master action is : " + this.masterAction.actionName);
         }
 
-        public Action(Action parentAction)
+        public Action(Action parentAction, Boolean isSubAction = false)
         {
             this.parentAction = parentAction;
-            this.masterAction = parentAction.masterAction;
-            parentAction.childActions.Add(this);
+            if (isSubAction)
+            {
+                this.masterAction = parentAction;
+                parentAction.subActions.Add(this);
+            }
+            else
+            {
+                this.masterAction = parentAction.masterAction;
+                parentAction.childActions.Add(this);
+            }
         }
 
         // Init method to use item from inventory
@@ -57,6 +65,7 @@ namespace GOAP
         )
         {
             Debug.Log("Init for item from inventory");
+            this.goal = goal;
             this.actionType = actionType;
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;
@@ -73,6 +82,7 @@ namespace GOAP
         )
         {
             Debug.Log("Init for station");
+            this.goal = goal;
             this.actionType = actionType;
             this.stationData = stationData;
             this.actionName = actionType.ToString() + " : " + stationData.stationName;
@@ -83,6 +93,7 @@ namespace GOAP
         // Init method to collect item
         public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
         {
+            this.goal = goal;
             Debug.Log("Init for collect item");
             this.actionType = actionType;
             this.goal = goal;
@@ -101,6 +112,7 @@ namespace GOAP
         )
         {
             Debug.Log("Init blueprint for location");
+            this.goal = goal;
             this.actionType = actionType;
             this.location = location;
             this.actionName = actionType.ToString() + " : " + location;
@@ -112,6 +124,7 @@ namespace GOAP
         public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
         {
             Debug.Log("Init for blueprint");
+            this.goal = goal;
             this.actionType = actionType;
             this.blueprint = blueprint;
             this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
@@ -128,6 +141,7 @@ namespace GOAP
         )
         {
             Debug.Log("Init for blueprint sub-action");
+            this.goal = goal;
             this.actionType = actionType;
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;

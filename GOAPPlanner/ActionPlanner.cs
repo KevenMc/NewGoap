@@ -1,11 +1,11 @@
-using System.Data;
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+using System.ComponentModel;
+using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -76,28 +76,20 @@ namespace GOAP
                 return false;
             }
             SortActionList(actionList);
-            if (actionList[0].actionType == ActionType.Require_Item_In_Inventory) { }
-            if (actionList[0].CanComplete() && CanCompleteMasterAction(masterAction))
+            if (actionList[0].isSubAction)
             {
                 Debug.Log(
-                    "BUT I HAVE THIS ITEM I SHOULD PASS : "
-                        + actionList[0].canComplete
-                        + " : "
-                        + CanCompleteMasterAction(masterAction)
+                    "-=======8885555555555555555544444444444444444444444444444444444444444444444444444444444444444444444444433333333333332222222"
                 );
+            }
+            if (actionList[0].CanComplete() && CanCompleteMasterAction(masterAction))
+            {
                 RecursiveShowActions(actionList[0]);
                 SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
+
                 return true;
             }
-
-            // Parallel.ForEach(
-            //     actionList,
-            //     action =>
-            //     {
-            //         ExtendAction(action);
-            //     }
-            // );
 
             ExtendAction(actionList[0]);
             return RecursiveFindAction();
@@ -185,6 +177,10 @@ namespace GOAP
             {
                 foreach (ItemSO itemData in inventoryItems)
                 {
+                    Debug.Log(
+                        "999999999999999999999999999999999999999999999999999999999999 : "
+                            + action.actionName
+                    );
                     Action newInventoryAction = new Action(action);
                     newInventoryAction.Init(
                         ActionType.Require_Item_In_Inventory,
@@ -192,11 +188,9 @@ namespace GOAP
                         itemData,
                         true
                     );
-                    Debug.Log(
-                        "55555555555555555555555555555555555555555555555555555555 : "
-                            + itemData.itemName
-                    );
+
                     actionList.Add(newInventoryAction);
+                    SaveMasterActionToFile("Temp.json");
                 }
             }
             else
@@ -231,25 +225,50 @@ namespace GOAP
                     currentAgent.distanceToArrive >= GetDistance(currentLocation, item.location);
 
                 Action updateAction = action;
-                if (action.goal.statType != StatType.Have_Item_Equipped)
-                {
-                    updateAction = new Action(updateAction);
-                    updateAction.Init(
-                        ActionType.Use_Item,
-                        new Stat(StatType.Have_Item_Equipped, item.itemData),
-                        item.itemData
-                    );
+                // if (action.goal.statType != StatType.Have_Item_Equipped)
+                // {
+                //     updateAction = new Action(updateAction);
+                //     updateAction.Init(
+                //         ActionType.Use_Item,
+                //         new Stat(StatType.Have_Item_Equipped, item.itemData),
+                //         item.itemData
+                //     );
 
-                    updateAction = new Action(updateAction);
-                    updateAction.Init(
-                        ActionType.Collect_And_Equip,
-                        new Stat(StatType.Move_To_Location, item.itemData),
-                        item,
-                        isAtLocation
-                    );
-                }
-                else
+                //     updateAction = new Action(updateAction);
+                //     updateAction.Init(
+                //         ActionType.Collect_And_Equip,
+                //         new Stat(StatType.Move_To_Location, item.itemData),
+                //         item,
+                //         isAtLocation
+                //     );
+                // }
+                // else
+                // {
+                //     updateAction = new Action(updateAction);
+                //     updateAction.Init(
+                //         ActionType.UnEquip_To_Inventory,
+                //         new Stat(StatType.Have_Item_Equipped, item.itemData),
+                //         item,
+                //         false
+                //     );
+
+                //     updateAction = new Action(updateAction);
+                //     updateAction.Init(
+                //         ActionType.Collect_And_Equip,
+                //         new Stat(StatType.Move_To_Location, item.itemData),
+                //         item,
+                //         isAtLocation
+                //     );
+                // }
+                Debug.Log(
+                    "==============000000000000000000000000000000000000000======================================================================"
+                );
+                Debug.Log(action.goal.statType);
+                if (action.goal.statType == StatType.Have_Item_In_Inventory)
                 {
+                    Debug.Log(
+                        "==============000000000000000000000000000000000000000======================================================================"
+                    );
                     updateAction = new Action(updateAction);
                     updateAction.Init(
                         ActionType.UnEquip_To_Inventory,
@@ -321,70 +340,39 @@ namespace GOAP
                 )
             )
             {
-                if (action.actionType != ActionType.Blueprint_Require_Item) //For each Blueprint, make a "make blueprint"
-                {
-                    action = new Action(action);
-                    action.Init(ActionType.Use_Item, action.goal, blueprint.craftedItem);
+                // Create action to either Use or Have the crafted item
+                Action newInventoryAction = new Action(action); //use item once equipped
+                newInventoryAction.Init(
+                    ActionType.Use_Item,
+                    new Stat(StatType.Have_Item_Equipped, blueprint.craftedItem),
+                    blueprint.craftedItem,
+                    false
+                );
 
-                    action = new Action(action);
-                    action.Init(
-                        ActionType.Equip_From_Inventory,
-                        action.goal,
-                        blueprint.craftedItem
+                Action newEquipAction = new Action(newInventoryAction); //equip item once made
+                newEquipAction.Init(
+                    ActionType.Equip_From_Inventory,
+                    new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
+                    blueprint.craftedItem,
+                    false
+                );
+
+                Action bluePrintAction = new Action(newEquipAction); //make item one all required items are satisfied
+                bluePrintAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+
+                foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+                {
+                    Action bluePrintSubAction = new Action(bluePrintAction, true); //each item in subaction
+                    bluePrintSubAction.Init(
+                        ActionType.Require_Item_In_Inventory,
+                        new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
+                        itemRequirement.itemData
                     );
+
+                    actionList.Add(bluePrintSubAction);
                 }
-                #region
-                Action blueprintActionFromCollect = new Action(action);
-                blueprintActionFromCollect.Init(
-                    ActionType.Make_Blueprint_From_Inventory,
-                    blueprint
-                );
-
-                Action blueprintActionFromInventory = new Action(action);
-                blueprintActionFromInventory.Init(
-                    ActionType.Make_Blueprint_From_Inventory,
-                    blueprint
-                );
-                foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems)
-                {
-                    {
-                        Stat itemRequirementStat = new Stat(
-                            StatType.Have_Item_Equipped,
-                            itemRequirement.itemData
-                        );
-
-                        Action itemAction = new Action(itemRequirementStat);
-                        itemAction.Init(
-                            ActionType.Blueprint_Require_Item,
-                            itemRequirement.itemData,
-                            blueprintActionFromCollect
-                        );
-
-                        blueprintActionFromCollect.subActions.Add(itemAction);
-                        itemAction.isSubAction = true;
-                        actionList.Add(itemAction);
-                    }
-
-                    {
-                        Stat itemRequirementStat = new Stat(
-                            StatType.Have_Item_In_Inventory,
-                            itemRequirement.itemData
-                        );
-
-                        Action itemAction = new Action(itemRequirementStat);
-                        itemAction.Init(
-                            ActionType.Blueprint_Require_Item,
-                            itemRequirement.itemData,
-                            blueprintActionFromInventory
-                        );
-
-                        blueprintActionFromInventory.subActions.Add(itemAction);
-                        itemAction.isSubAction = true;
-                        actionList.Add(itemAction);
-                    }
-                }
-                #endregion
             }
+            SaveMasterActionToFile("Pizza.json");
         }
 
         #endregion
@@ -421,7 +409,7 @@ namespace GOAP
             Debug.Log("json data : " + jsonData);
 
             // Save the JSON data to a file
-            File.WriteAllText(filePath, jsonData);
+            File.WriteAllText("Assets/" + filePath, jsonData);
 
             Debug.Log("MasterAction saved to file: " + filePath);
         }

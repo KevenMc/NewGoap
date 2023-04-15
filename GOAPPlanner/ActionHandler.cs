@@ -141,7 +141,10 @@ namespace GOAP
                 case ActionType.Blueprint_Require_Item:
                 case ActionType.Require_Item_In_Inventory:
                     currentAction.parentAction.canComplete = true;
+                    Debug.Log("Now executing a new action, this action is empty");
+                    Debug.Log(actionsToPerform.Count);
                     ExecuteAction();
+                    Debug.Log("Executed");
                     break;
 
                 default:

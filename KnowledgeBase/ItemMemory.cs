@@ -40,10 +40,14 @@ namespace GOAP
         {
             StatType goalStatType = goal.statType;
             List<Item> items = new List<Item>();
-
+            Debug.Log(
+                "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+            );
+            Debug.Log(goalStatType);
             switch (goalStatType)
             {
                 case StatType.Have_Item_Equipped:
+                case StatType.Have_Item_In_Inventory:
                     if (itemLocations.ContainsKey(goal.itemData))
                     {
                         items.AddRange(itemLocations[goal.itemData]);
