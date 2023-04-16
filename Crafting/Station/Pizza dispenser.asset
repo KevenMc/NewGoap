@@ -14,7 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueprintName: Pizza dispenser
   description: get pizza from pizza stall
-  requiredItems: []
-  requiredTools: []
+  requiredItems:
+  - itemData: {fileID: 11400000, guid: 6e13532a14d1883aa9351e584d8a1bf2, type: 2}
+    destroyOnCraft: 1
+  - itemData: {fileID: 11400000, guid: 55b6552ba58fc34b5ba264beb04fa8f3, type: 2}
+    destroyOnCraft: 1
+  - itemData: {fileID: 11400000, guid: ade1f1ad658e89f7cb5919275cbe4ee7, type: 2}
+    destroyOnCraft: 1
+  requiredTool: {fileID: 11400000, guid: 862df7609cc3101fdabc21e6994ebebd, type: 2}
   craftingStation: {fileID: 11400000, guid: 2fb4e2bd4fccbe72fa0dc817ad924b60, type: 2}
   craftedItem: {fileID: 11400000, guid: 600d5b4fd0392101b9a6d406dae03e99, type: 2}

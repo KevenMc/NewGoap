@@ -11,6 +11,7 @@ namespace GOAP
         public Stat goal; //this is the goal that is being satisfied by completing the immediate child action
         public ActionType actionType;
         public Action masterAction;
+        public Action grandMasterAction;
         public Boolean isOwnMaster = false;
         public bool hasMasterAction = true;
         public Action parentAction = null;
@@ -37,13 +38,17 @@ namespace GOAP
             this.hasMasterAction = false;
             this.isOwnMaster = true;
             this.masterAction = this;
+            this.grandMasterAction = this;
             this.actionName = goal.ToString();
+
             Debug.Log("Master action is : " + this.masterAction.actionName);
+            Debug.Log("action is : " + this.actionName);
         }
 
         public Action(Action parentAction, Boolean isSubAction = false)
         {
             this.parentAction = parentAction;
+            this.grandMasterAction = parentAction.grandMasterAction;
             if (isSubAction)
             {
                 this.masterAction = parentAction;
@@ -64,7 +69,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
-            Debug.Log("Init for item from inventory");
+            // Debug.Log("Init for item from inventory");
             this.goal = goal;
             this.actionType = actionType;
             this.itemData = itemData;
@@ -81,7 +86,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
-            Debug.Log("Init for station");
+            // Debug.Log("Init for station");
             this.goal = goal;
             this.actionType = actionType;
             this.stationData = stationData;
@@ -94,7 +99,7 @@ namespace GOAP
         public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
         {
             this.goal = goal;
-            Debug.Log("Init for collect item");
+            // Debug.Log("Init for collect item");
             this.actionType = actionType;
             this.goal = goal;
             this.item = item;
@@ -111,7 +116,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
-            Debug.Log("Init blueprint for location");
+            // Debug.Log("Init blueprint for location");
             this.goal = goal;
             this.actionType = actionType;
             this.location = location;
@@ -123,11 +128,18 @@ namespace GOAP
         // Init method for blueprint
         public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
         {
-            Debug.Log("Init for blueprint");
+            // Debug.Log("Init for blueprint");
             this.actionType = actionType;
             this.blueprint = blueprint;
             this.stationData = blueprint.craftingStation;
-            this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
+            if (actionType == ActionType.Move_To_Item_Location)
+            {
+                this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
+            }
+            if (actionType == ActionType.Move_To_Station_Location)
+            {
+                this.actionName = actionType.ToString() + " : " + blueprint.craftingStation;
+            }
             this.canComplete = canComplete;
             this.actionCost += this.parentAction.actionCost;
             Debug.Log(this.actionName);
@@ -141,7 +153,7 @@ namespace GOAP
             Boolean canComplete = false
         )
         {
-            Debug.Log("Init for blueprint sub-action");
+            // Debug.Log("Init for blueprint sub-action");
             this.actionType = actionType;
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;

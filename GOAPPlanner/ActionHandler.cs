@@ -117,7 +117,7 @@ namespace GOAP
 
             switch (currentAction.actionType)
             {
-                case ActionType.Move_To_Location:
+                case ActionType.Move_To_Item_Location:
                     MoveTo(currentAction.location);
                     ActionManager.instance.RegisterSubscriber(this);
 

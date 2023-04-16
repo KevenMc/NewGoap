@@ -22,7 +22,7 @@ namespace GOAP
 
         public List<ItemSO> ReturnGoalItems(Stat goal)
         {
-            if (items == null)
+            if (items == null || goal.statType != null)
             {
                 Debug.LogWarning("Inventory items list is null!");
                 return new List<ItemSO>();

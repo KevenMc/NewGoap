@@ -21,6 +21,6 @@ MonoBehaviour:
     destroyOnCraft: 1
   - itemData: {fileID: 11400000, guid: d7d5ea269dcb44c2a93d417d6334f7f4, type: 2}
     destroyOnCraft: 1
-  requiredTools: []
+  requiredTool: {fileID: 0}
   craftingStation: {fileID: 0}
   craftedItem: {fileID: 11400000, guid: 6e13532a14d1883aa9351e584d8a1bf2, type: 2}

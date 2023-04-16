@@ -91,9 +91,11 @@ namespace GOAP
 
             string[] subActions = new string[action.subActions.Count];
             int i = 0;
+            Debug.Log(actionName);
             foreach (Action subAction in action.subActions)
             {
                 subActions[i] = JsonUtility.ToJson(new JSONAction(subAction));
+
                 i++;
             }
             this.subActions = subActions;

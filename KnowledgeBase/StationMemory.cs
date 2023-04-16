@@ -44,16 +44,17 @@ namespace GOAP
             Debug.Log(
                 "ReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStations"
             );
-            Debug.Log(goalStatType);
+            Debug.Log(goalStatType + " : " + goal.itemData);
             switch (goalStatType)
             {
-                case StatType.Have_Item_In_Inventory:
-                case StatType.Have_Item_Equipped:
-                    if (stationLocations.ContainsKey(goal.stationData))
-                    {
-                        stations.AddRange(stationLocations[goal.stationData]);
-                    }
-                    break;
+                // case StatType.Have_Item_In_Inventory:
+                // case StatType.Have_Item_Equipped:
+                //     Debug.Log(goal.statType);
+                //     if (stationLocations.ContainsKey(goal.stationData))
+                //     {
+                //         stations.AddRange(stationLocations[goal.stationData]);
+                //     }
+                //     break;
                 case StatType.Use_Station:
                     if (stationLocations.ContainsKey(goal.stationData))
                     {

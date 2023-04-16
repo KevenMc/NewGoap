@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace GOAP
         private Agent currentAgent;
         public List<Action> actionList = new List<Action>();
         public Action masterAction;
+        public Action grandMasterAction;
         public Vector3 currentLocation;
 
         public void SetGoal(Stat goal)
@@ -21,9 +23,10 @@ namespace GOAP
             actionList.Clear();
             actionList.Add(new Action(goal));
             masterAction = actionList[0];
+            grandMasterAction = masterAction;
             currentAgent.requiresNewAction = true;
             Debug.Log(goal.ToString());
-            Debug.Log(currentAgent);
+            // Debug.Log(currentAgent);
             currentAgent.currentGoal = goal.statType.ToString();
         }
 
@@ -43,10 +46,10 @@ namespace GOAP
             if (topStat.IsUrgent() && agent.statHandler.currentGoal != topStat)
             {
                 agent.statHandler.currentGoal = topStat;
-                Debug.Log(topStat.ToString());
+                // Debug.Log(topStat.ToString());
 
                 SetGoal(topStat);
-                Debug.Log(topStat.ToString());
+                // Debug.Log(topStat.ToString());
                 if (RecursiveFindAction())
                 {
                     agent.SetMasterAction(masterAction);
@@ -73,54 +76,88 @@ namespace GOAP
             if (actionList.Count == 0)
             {
                 Debug.Log("No possible plan of action can be found");
+                SaveMasterActionToFile("json.json");
+
                 return false;
             }
 
             SortActionList(actionList);
 
-            if (actionList[0].CanComplete() && CanCompleteMasterAction(masterAction))
+            if (CanCompleteMasterAction(actionList[0].grandMasterAction))
             {
                 Debug.Log(
-                    actionList[0].actionName
-                        + " : "
-                        + actionList[0].masterAction.actionName
-                        + "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                        + CanCompleteMasterAction(masterAction)
+                    "I CAN FINISH THIS WHOLE TASK NOW *******************************************************"
                 );
-                RecursiveShowActions(actionList[0]);
                 SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
 
                 return true;
             }
+            // if (actionList[0].CanComplete() && CanCompleteMasterAction2(grandMasterAction))
+            // {
+            //     RecursiveShowActions(actionList[0]);
+            //     SaveMasterActionToFile("json.json");
+            //     currentAgent.requiresNewAction = false;
+
+            //     return true;
+            // }
 
             ExtendAction(actionList[0]);
             return RecursiveFindAction();
         }
 
-        public Boolean CanCompleteMasterAction(Action action)
+        public bool CanCompleteAll(Action action)
         {
-            Debug.Log("can complete action? : " + action.actionName);
-            List<Boolean> returnList = new List<bool>();
-            returnList.Add(true);
-            if (action.subActions.Count > 0)
+            if (action.subActions.Count == 0 && action.childActions.Count == 0)
             {
-                SortActionList(action.subActions);
-                foreach (Action subAction in action.subActions)
+                return false;
+            }
+            return CanCompleteMasterAction2(action);
+        }
+
+        public Boolean CanCompleteMasterAction2(Action action)
+        {
+            foreach (Action childAction in action.childActions)
+            {
+                if (!CanCompleteMasterAction2(childAction))
                 {
-                    Boolean can = CanCompleteMasterAction(subAction);
-                    Debug.Log(
-                        "£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££"
-                    );
-                    Debug.Log(subAction.actionName + " : " + can);
-                    Debug.Log("^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                    returnList.Add(can);
+                    return false;
                 }
             }
-            else if (action.childActions.Count > 0)
+            foreach (Action subAction in action.subActions)
             {
-                returnList.Add(CanCompleteMasterAction(action.childActions.Last()));
+                Debug.Log(subAction.actionName);
+                if (!CanCompleteMasterAction2(subAction))
+                {
+                    return false;
+                }
             }
+
+            return action.canComplete;
+        }
+
+        public Boolean CanCompleteMasterAction(Action action)
+        {
+            if (action.subActions.Count + action.childActions.Count == 0)
+            {
+                return action.canComplete;
+            }
+
+            // Debug.Log("can complete action? : " + action.actionName);
+            List<Boolean> returnList = new List<bool>();
+            returnList.Add(true);
+
+            SortActionList(action.subActions);
+            foreach (Action subAction in action.subActions)
+            {
+                returnList.Add(CanCompleteMasterAction(subAction));
+            }
+
+            foreach (Action childAction in action.childActions)
+            {
+                returnList.Add(CanCompleteMasterAction(childAction));
+            }
+
             return returnList.All(b => b); //return if ALL children and subActions canComplete
         }
 
@@ -128,19 +165,19 @@ namespace GOAP
         {
             if (action.parentAction != null)
             {
-                Debug.Log(
-                    action.actionName
-                        + " -> "
-                        + action.parentAction.actionName
-                        + " | => "
-                        + action.masterAction.actionName
-                        + " | SubAction : "
-                        + action.masterAction.isSubAction
-                        + " - "
-                        + action.subActions.Count
-                        + " | Cost : "
-                        + action.actionCost
-                );
+                // Debug.Log(
+                //     action.actionName
+                //         + " -> "
+                //         + action.parentAction.actionName
+                //         + " | => "
+                //         + action.masterAction.actionName
+                //         + " | SubAction : "
+                //         + action.masterAction.isSubAction
+                //         + " - "
+                //         + action.subActions.Count
+                //         + " | Cost : "
+                //         + action.actionCost
+                // );
 
                 RecursiveShowActions(action.parentAction);
             }
@@ -152,7 +189,7 @@ namespace GOAP
         {
             ExtendActionPlanFromInventory(action);
             ExtendActionPlanFromItemMemory(action);
-            // ExtendActionPlanFromStationMemory(action);
+            ExtendActionPlanFromStationMemory(action);
             ExtendActionPlanFromBlueprintRepertoire(action);
 
             if (action.childActions.Count == 0 && !action.CanComplete())
@@ -164,7 +201,7 @@ namespace GOAP
 
         public void RecursiveDropActions(Action action)
         {
-            Debug.Log("This action line is a dead end : " + action.actionName);
+            // Debug.Log("This action line is a dead end : " + action.actionName);
             if (action.parentAction == null)
             {
                 return;
@@ -251,7 +288,7 @@ namespace GOAP
         private void ExtendActionPlanFromItemMemory(Action action)
         {
             Action updateAction = action;
-            Debug.Log(action.actionName);
+            // Debug.Log(action.actionName);
 
             switch (action.goal.statType)
             {
@@ -283,7 +320,7 @@ namespace GOAP
                             updateAction = new Action(updateAction);
                             updateAction.Init(
                                 ActionType.Collect_And_Equip,
-                                new Stat(StatType.Move_To_Location, item.itemData),
+                                new Stat(StatType.Move_To_Item_Location, item.itemData),
                                 item,
                                 isAtLocation
                             );
@@ -292,8 +329,8 @@ namespace GOAP
                             {
                                 updateAction = new Action(updateAction);
                                 updateAction.Init(
-                                    ActionType.Move_To_Location,
-                                    new Stat(StatType.Move_To_Location, item.itemData),
+                                    ActionType.Move_To_Item_Location,
+                                    new Stat(StatType.Move_To_Item_Location, item.itemData),
                                     item.location,
                                     true
                                 );
@@ -328,7 +365,7 @@ namespace GOAP
                             updateAction = new Action(updateAction);
                             updateAction.Init(
                                 ActionType.Collect_And_Equip,
-                                new Stat(StatType.Move_To_Location, item.itemData),
+                                new Stat(StatType.Move_To_Item_Location, item.itemData),
                                 item,
                                 isAtLocation
                             );
@@ -337,8 +374,8 @@ namespace GOAP
                             {
                                 updateAction = new Action(updateAction);
                                 updateAction.Init(
-                                    ActionType.Move_To_Location,
-                                    new Stat(StatType.Move_To_Location, item.itemData),
+                                    ActionType.Move_To_Item_Location,
+                                    new Stat(StatType.Move_To_Item_Location, item.itemData),
                                     item.location,
                                     true
                                 );
@@ -357,9 +394,6 @@ namespace GOAP
 
             foreach (Station station in memoryStations)
             {
-                Debug.Log(
-                    "memoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStationsmemoryStations"
-                );
                 Boolean isAtLocation =
                     currentAgent.distanceToArrive >= GetDistance(currentLocation, station.location);
 
@@ -373,8 +407,8 @@ namespace GOAP
 
                 updateAction = new Action(updateAction);
                 updateAction.Init(
-                    ActionType.Move_To_Location,
-                    new Stat(StatType.Move_To_Location, station.stationData),
+                    ActionType.Move_To_Item_Location,
+                    new Stat(StatType.Move_To_Item_Location, station.stationData),
                     station.location,
                     true
                 );
@@ -388,101 +422,6 @@ namespace GOAP
             Action updateAction = action;
 
             List<Blueprint> matchingBlueprints = new List<Blueprint>();
-
-            // switch (action.goal.statType)
-            // {
-            //     case StatType.Have_Item_In_Inventory:
-            //         Debug.Log(
-            //             "11111111111111111111111111111111111111111111111111111111111111111111111111111111"
-            //         );
-            //         matchingBlueprints =
-            //             currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
-            //                 action.goal
-            //             );
-
-            //         foreach (Blueprint blueprint in matchingBlueprints)
-            //         {
-            //             if (blueprint.craftingStation != null)
-            //             {
-            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
-            //                 updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
-
-            //                 updateAction = new Action(updateAction);
-            //                 updateAction.Init(ActionType.Move_To_Location, blueprint);
-            //             }
-
-            //             Action bluePrintAction = new Action(updateAction); //make item one all required items are satisfied
-            //             bluePrintAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
-
-            //             foreach (
-            //                 Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
-            //             ) // add required items to subaction
-            //             {
-            //                 Action bluePrintSubAction = new Action(bluePrintAction, true); //each item in subaction
-            //                 bluePrintSubAction.Init(
-            //                     ActionType.Require_Item_In_Inventory,
-            //                     new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-            //                     itemRequirement.itemData
-            //                 );
-
-            //                 actionList.Add(bluePrintSubAction);
-            //             }
-            //         }
-            //         break;
-
-            //     case StatType.Have_Item_Equipped:
-            //         Debug.Log(
-            //             "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
-            //         );
-            //         matchingBlueprints =
-            //             currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
-            //                 action.goal
-            //             );
-
-            //         foreach (Blueprint blueprint in matchingBlueprints)
-            //         {
-            //             if (blueprint.craftingStation != null)
-            //             {
-            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
-            //                 updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
-
-            //                 updateAction = new Action(updateAction);
-            //                 updateAction.Init(ActionType.Move_To_Location, blueprint);
-            //             }
-            //             else
-            //             {
-            //                 updateAction = new Action(updateAction); //equip item once made
-            //                 updateAction.Init(
-            //                     ActionType.Equip_From_Inventory,
-            //                     new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
-            //                     blueprint.craftedItem,
-            //                     false
-            //                 );
-
-            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
-            //                 updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
-            //             }
-
-            //             foreach (
-            //                 Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
-            //             ) // add required items to subaction
-            //             {
-            //                 Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
-            //                 bluePrintSubAction.Init(
-            //                     ActionType.Require_Item_In_Inventory,
-            //                     new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-            //                     itemRequirement.itemData
-            //                 );
-
-            //                 actionList.Add(bluePrintSubAction);
-            //             }
-            //         }
-            //         break;
-
-            //     default:
-
-            //         break;
-            // }
 
             matchingBlueprints =
                 currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
@@ -528,7 +467,7 @@ namespace GOAP
 
                 if (blueprint.craftingStation != null)
                 {
-                    updateAction = new Action(updateAction); //make item one all required items are satisfied
+                    updateAction = new Action(updateAction); //make item once all required items are satisfied
                     updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
 
                     if (blueprint.requiredTool != null)
@@ -542,7 +481,11 @@ namespace GOAP
                     }
 
                     updateAction = new Action(updateAction);
-                    updateAction.Init(ActionType.Move_To_Location, blueprint);
+                    updateAction.Init(ActionType.Move_To_Station_Location, blueprint);
+                    Debug.Log(
+                        ")))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))"
+                    );
+                    Debug.Log(updateAction.actionName);
                 }
                 else
                 {
@@ -558,12 +501,6 @@ namespace GOAP
                             blueprint.requiredTool
                         );
                     }
-                }
-
-                if (blueprint.requiredItems.Count == 0)
-                {
-                    updateAction.canComplete = true;
-                    actionList.Add(updateAction);
                 }
 
                 foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
@@ -584,9 +521,17 @@ namespace GOAP
                     updateAction.Init(
                         ActionType.Require_Item_In_Inventory,
                         new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                        blueprint.requiredTool
+                        blueprint.requiredTool,
+                        false
                     );
                     actionList.Add(updateAction);
+                }
+
+                if (blueprint.requiredItems.Count == 0 && blueprint.requiredTool == null)
+                {
+                    // updateAction.canComplete = true;
+                    actionList.Add(updateAction);
+                    SaveMasterActionToFile("test.json");
                 }
             }
             SaveMasterActionToFile("Pizza.json");
@@ -623,7 +568,7 @@ namespace GOAP
                 .Replace("\"{", "{")
                 .Replace("}\"", "}");
 
-            Debug.Log("json data : " + jsonData);
+            // Debug.Log("json data : " + jsonData);
 
             // Save the JSON data to a file
             File.WriteAllText("Assets/" + filePath, jsonData);

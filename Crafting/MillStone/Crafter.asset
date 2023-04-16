@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: efd188137bc580afbad4bd606f92f012, type: 3}
-  m_Name: Pizza Chef
+  m_Name: Crafter
   m_EditorClassIdentifier: 
   blueprints:
-  - {fileID: 11400000, guid: dace91249c2a7e88db90022832463272, type: 2}
-  - {fileID: 11400000, guid: 734f62d7d6efb7d378ebdd5397603573, type: 2}
-  - {fileID: 11400000, guid: 22707964b4a1bc3aabd566ed4872b6d1, type: 2}
-  - {fileID: 11400000, guid: 93864cede1e5862888708fee0f1a3de2, type: 2}
+  - {fileID: 11400000, guid: d3d7ae4b78c6c0930af136096ab4f3ec, type: 2}
+  - {fileID: 11400000, guid: 2d2bef717f18423978d16d396c789efa, type: 2}
+  - {fileID: 11400000, guid: 0cd1c4465e7b964d48750fc85a7372b6, type: 2}
+  - {fileID: 11400000, guid: 27cf3e842cb5db63885adcdc663152c8, type: 2}
