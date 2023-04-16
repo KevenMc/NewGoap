@@ -389,107 +389,124 @@ namespace GOAP
 
             List<Blueprint> matchingBlueprints = new List<Blueprint>();
 
-            switch (action.goal.statType)
+            // switch (action.goal.statType)
+            // {
+            //     case StatType.Have_Item_In_Inventory:
+            //         Debug.Log(
+            //             "11111111111111111111111111111111111111111111111111111111111111111111111111111111"
+            //         );
+            //         matchingBlueprints =
+            //             currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
+            //                 action.goal
+            //             );
+
+            //         foreach (Blueprint blueprint in matchingBlueprints)
+            //         {
+            //             if (blueprint.craftingStation != null)
+            //             {
+            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
+            //                 updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+
+            //                 updateAction = new Action(updateAction);
+            //                 updateAction.Init(ActionType.Move_To_Location, blueprint);
+            //             }
+
+            //             Action bluePrintAction = new Action(updateAction); //make item one all required items are satisfied
+            //             bluePrintAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+
+            //             foreach (
+            //                 Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
+            //             ) // add required items to subaction
+            //             {
+            //                 Action bluePrintSubAction = new Action(bluePrintAction, true); //each item in subaction
+            //                 bluePrintSubAction.Init(
+            //                     ActionType.Require_Item_In_Inventory,
+            //                     new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
+            //                     itemRequirement.itemData
+            //                 );
+
+            //                 actionList.Add(bluePrintSubAction);
+            //             }
+            //         }
+            //         break;
+
+            //     case StatType.Have_Item_Equipped:
+            //         Debug.Log(
+            //             "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
+            //         );
+            //         matchingBlueprints =
+            //             currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
+            //                 action.goal
+            //             );
+
+            //         foreach (Blueprint blueprint in matchingBlueprints)
+            //         {
+            //             if (blueprint.craftingStation != null)
+            //             {
+            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
+            //                 updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+
+            //                 updateAction = new Action(updateAction);
+            //                 updateAction.Init(ActionType.Move_To_Location, blueprint);
+            //             }
+            //             else
+            //             {
+            //                 updateAction = new Action(updateAction); //equip item once made
+            //                 updateAction.Init(
+            //                     ActionType.Equip_From_Inventory,
+            //                     new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
+            //                     blueprint.craftedItem,
+            //                     false
+            //                 );
+
+            //                 updateAction = new Action(updateAction); //make item one all required items are satisfied
+            //                 updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+            //             }
+
+            //             foreach (
+            //                 Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
+            //             ) // add required items to subaction
+            //             {
+            //                 Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
+            //                 bluePrintSubAction.Init(
+            //                     ActionType.Require_Item_In_Inventory,
+            //                     new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
+            //                     itemRequirement.itemData
+            //                 );
+
+            //                 actionList.Add(bluePrintSubAction);
+            //             }
+            //         }
+            //         break;
+
+            //     default:
+
+            //         break;
+            // }
+
+            matchingBlueprints =
+                currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
+                    action.goal
+                );
+
+            foreach (Blueprint blueprint in matchingBlueprints)
             {
-                case StatType.Have_Item_In_Inventory:
-                    Debug.Log(
-                        "11111111111111111111111111111111111111111111111111111111111111111111111111111111"
-                    );
-                    matchingBlueprints =
-                        currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
-                            action.goal
+                switch (action.goal.statType)
+                {
+                    case StatType.Have_Item_In_Inventory:
+                        break;
+
+                    case StatType.Have_Item_Equipped:
+                        updateAction = new Action(updateAction); //equip item once made
+                        updateAction.Init(
+                            ActionType.Equip_From_Inventory,
+                            new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
+                            blueprint.craftedItem,
+                            false
                         );
+                        break;
 
-                    foreach (Blueprint blueprint in matchingBlueprints)
-                    {
-                        if (blueprint.craftingStation != null)
-                        {
-                            updateAction = new Action(updateAction); //make item one all required items are satisfied
-                            updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
-
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(ActionType.Move_To_Location, blueprint);
-                        }
-
-                        Action bluePrintAction = new Action(updateAction); //make item one all required items are satisfied
-                        bluePrintAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
-
-                        foreach (
-                            Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
-                        ) // add required items to subaction
-                        {
-                            Action bluePrintSubAction = new Action(bluePrintAction, true); //each item in subaction
-                            bluePrintSubAction.Init(
-                                ActionType.Require_Item_In_Inventory,
-                                new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-                                itemRequirement.itemData
-                            );
-
-                            actionList.Add(bluePrintSubAction);
-                        }
-                    }
-                    break;
-
-                case StatType.Have_Item_Equipped:
-                    Debug.Log(
-                        "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
-                    );
-                    matchingBlueprints =
-                        currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
-                            action.goal
-                        );
-
-                    foreach (Blueprint blueprint in matchingBlueprints)
-                    {
-                        if (blueprint.craftingStation != null)
-                        {
-                            updateAction = new Action(updateAction); //make item one all required items are satisfied
-                            updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
-
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(ActionType.Move_To_Location, blueprint);
-                        }
-                        else
-                        {
-                            updateAction = new Action(updateAction); //equip item once made
-                            updateAction.Init(
-                                ActionType.Equip_From_Inventory,
-                                new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
-                                blueprint.craftedItem,
-                                false
-                            );
-
-                            updateAction = new Action(updateAction); //make item one all required items are satisfied
-                            updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
-                        }
-
-                        foreach (
-                            Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
-                        ) // add required items to subaction
-                        {
-                            Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
-                            bluePrintSubAction.Init(
-                                ActionType.Require_Item_In_Inventory,
-                                new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-                                itemRequirement.itemData
-                            );
-
-                            actionList.Add(bluePrintSubAction);
-                        }
-                    }
-                    break;
-
-                default:
-                    Debug.Log(
-                        "3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"
-                    );
-                    matchingBlueprints =
-                        currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
-                            action.goal
-                        );
-
-                    foreach (Blueprint blueprint in matchingBlueprints)
-                    {
+                    default:
                         // Create action to either Use or Have the crafted item
                         updateAction = new Action(updateAction); //use item once equipped
                         updateAction.Init(
@@ -506,86 +523,71 @@ namespace GOAP
                             blueprint.craftedItem,
                             false
                         );
+                        break;
+                }
 
-                        if (blueprint.craftingStation != null)
-                        {
-                            updateAction = new Action(updateAction); //make item one all required items are satisfied
-                            updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+                if (blueprint.craftingStation != null)
+                {
+                    updateAction = new Action(updateAction); //make item one all required items are satisfied
+                    updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
 
-                            ///
-                            ///
-                            ///
-                            if (blueprint.requiredTool != null)
-                            {
-                                updateAction = new Action(updateAction); //each item in subaction
-                                updateAction.Init(
-                                    ActionType.Equip_From_Inventory,
-                                    new Stat(
-                                        StatType.Have_Item_In_Inventory,
-                                        blueprint.requiredTool
-                                    ), //have item is required item
-                                    blueprint.requiredTool
-                                );
-                            }
-                            ///
-
-
-
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(ActionType.Move_To_Location, blueprint);
-                        }
-                        else
-                        {
-                            updateAction = new Action(updateAction); //make item one all required items are satisfied
-                            updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
-
-                            if (blueprint.requiredTool != null)
-                            {
-                                updateAction = new Action(updateAction); //each item in subaction
-                                updateAction.Init(
-                                    ActionType.Equip_From_Inventory,
-                                    new Stat(
-                                        StatType.Have_Item_In_Inventory,
-                                        blueprint.requiredTool
-                                    ), //have item is required item
-                                    blueprint.requiredTool
-                                );
-                            }
-                        }
-
-                        if (blueprint.requiredItems.Count == 0)
-                        {
-                            updateAction.canComplete = true;
-                            actionList.Add(updateAction);
-                        }
-
-                        foreach (
-                            Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems
-                        ) // add required items to subaction
-                        {
-                            Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
-                            bluePrintSubAction.Init(
-                                ActionType.Require_Item_In_Inventory,
-                                new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-                                itemRequirement.itemData
-                            );
-
-                            actionList.Add(bluePrintSubAction);
-                        }
-
-                        if (blueprint.requiredTool != null)
-                        {
-                            updateAction = new Action(updateAction, true); //each item in subaction
-                            updateAction.Init(
-                                ActionType.Require_Item_In_Inventory,
-                                new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                                blueprint.requiredTool
-                            );
-                            actionList.Add(updateAction);
-                        }
+                    if (blueprint.requiredTool != null)
+                    {
+                        updateAction = new Action(updateAction); //each item in subaction
+                        updateAction.Init(
+                            ActionType.Equip_From_Inventory,
+                            new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
+                            blueprint.requiredTool
+                        );
                     }
 
-                    break;
+                    updateAction = new Action(updateAction);
+                    updateAction.Init(ActionType.Move_To_Location, blueprint);
+                }
+                else
+                {
+                    updateAction = new Action(updateAction); //make item one all required items are satisfied
+                    updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+
+                    if (blueprint.requiredTool != null)
+                    {
+                        updateAction = new Action(updateAction); //each item in subaction
+                        updateAction.Init(
+                            ActionType.Equip_From_Inventory,
+                            new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
+                            blueprint.requiredTool
+                        );
+                    }
+                }
+
+                if (blueprint.requiredItems.Count == 0)
+                {
+                    updateAction.canComplete = true;
+                    actionList.Add(updateAction);
+                }
+
+                foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+                {
+                    Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
+                    bluePrintSubAction.Init(
+                        ActionType.Require_Item_In_Inventory,
+                        new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
+                        itemRequirement.itemData
+                    );
+
+                    actionList.Add(bluePrintSubAction);
+                }
+
+                if (blueprint.requiredTool != null)
+                {
+                    updateAction = new Action(updateAction, true); //each item in subaction
+                    updateAction.Init(
+                        ActionType.Require_Item_In_Inventory,
+                        new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
+                        blueprint.requiredTool
+                    );
+                    actionList.Add(updateAction);
+                }
             }
             SaveMasterActionToFile("Pizza.json");
         }
