@@ -9,7 +9,7 @@ namespace GOAP
         public string blueprintName;
         public string description;
         public List<ItemRequirement> requiredItems;
-        public List<ItemRequirement> requiredTools;
+        public ItemSO requiredTool;
         public StationSO craftingStation;
         public ItemSO craftedItem;
 

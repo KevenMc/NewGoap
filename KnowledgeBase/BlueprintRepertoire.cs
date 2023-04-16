@@ -77,6 +77,7 @@ namespace GOAP
 
             switch (goal.statType)
             {
+                case StatType.Have_Item_In_Inventory:
                 case StatType.Have_Item_Equipped:
                     if (blueprintsByCraftedItem.ContainsKey(goal.itemData))
                     {

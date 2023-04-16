@@ -34,6 +34,7 @@ namespace GOAP
             this.increment = stat.increment;
             this.priority = stat.priority;
             this.isUrgent = stat.isUrgent;
+            this.itemData = stat.itemData;
         }
 
         public Stat(StatType statType, ItemSO itemData)

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -27,24 +27,28 @@ namespace GOAP
                 Debug.LogWarning("Inventory items list is null!");
                 return new List<ItemSO>();
             }
-            if (goal.statType == StatType.Have_Item_In_Inventory)
+
+            switch (goal.statType)
             {
-                return items
-                    .Where(inventoryItem => inventoryItem.itemData == goal.itemData)
-                    .Select(inventoryItem => inventoryItem.itemData)
-                    .ToList();
-            }
-            else
-            {
-                return items
-                    .Where(
-                        inventoryItem =>
-                            inventoryItem.itemData.statEffects.Any(
-                                statEffect => statEffect.statType == goal.statType
-                            )
-                    )
-                    .Select(inventoryItem => inventoryItem.itemData)
-                    .ToList();
+                case StatType.Have_Item_In_Inventory:
+                case StatType.Have_Item_Equipped:
+                    return items
+                        .Where(inventoryItem => inventoryItem.itemData == goal.itemData)
+                        .Select(inventoryItem => inventoryItem.itemData)
+                        .ToList();
+                    break;
+
+                default:
+                    return items
+                        .Where(
+                            inventoryItem =>
+                                inventoryItem.itemData.statEffects.Any(
+                                    statEffect => statEffect.statType == goal.statType
+                                )
+                        )
+                        .Select(inventoryItem => inventoryItem.itemData)
+                        .ToList();
+                    break;
             }
         }
 

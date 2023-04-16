@@ -36,31 +36,25 @@ namespace GOAP
             }
         }
 
-        public List<Item> ReturnGoalItems(Stat goal)
+        public List<Item> ReturnGoalItemsByStat(Stat goal)
         {
-            StatType goalStatType = goal.statType;
             List<Item> items = new List<Item>();
-            Debug.Log(
-                "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
-            );
-            Debug.Log(goalStatType);
-            switch (goalStatType)
+
+            if (itemsByStat.ContainsKey(goal.statType))
             {
-                case StatType.Have_Item_Equipped:
-                case StatType.Have_Item_In_Inventory:
-                    if (itemLocations.ContainsKey(goal.itemData))
-                    {
-                        items.AddRange(itemLocations[goal.itemData]);
-                    }
-                    break;
-                default:
+                items.AddRange(itemsByStat[goal.statType]);
+            }
 
-                    if (itemsByStat.ContainsKey(goalStatType))
-                    {
-                        items.AddRange(itemsByStat[goalStatType]);
-                    }
+            return items;
+        }
 
-                    break;
+        public List<Item> ReturnGoalItemsByItem(Stat goal)
+        {
+            List<Item> items = new List<Item>();
+
+            if (itemLocations.ContainsKey(goal.itemData))
+            {
+                items.AddRange(itemLocations[goal.itemData]);
             }
 
             return items;

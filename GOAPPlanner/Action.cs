@@ -124,12 +124,13 @@ namespace GOAP
         public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
         {
             Debug.Log("Init for blueprint");
-            this.goal = goal;
             this.actionType = actionType;
             this.blueprint = blueprint;
+            this.stationData = blueprint.craftingStation;
             this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
             this.canComplete = canComplete;
             this.actionCost += this.parentAction.actionCost;
+            Debug.Log(this.actionName);
         }
 
         // Init method for blueprint sub-actions
@@ -141,7 +142,6 @@ namespace GOAP
         )
         {
             Debug.Log("Init for blueprint sub-action");
-            this.goal = goal;
             this.actionType = actionType;
             this.itemData = itemData;
             this.actionName = actionType.ToString() + " : " + itemData.itemName;

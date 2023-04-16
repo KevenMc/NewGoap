@@ -17,7 +17,7 @@ namespace GOAP
         public JSONAction(Action action)
         {
             this.actionName = action.actionName;
-            this.actionGoal = action.goal.ToString();
+            // this.actionGoal = action?.goal.ToString();
             if (action.parentAction != null)
             {
                 this.parentAction = action.parentAction.actionName;
@@ -60,7 +60,7 @@ namespace GOAP
         public JSONActionEndNode(Action action)
         {
             this.actionName = action.actionName;
-            this.actionGoal = action.goal.ToString();
+            // this.actionGoal = action?.goal.ToString();
             this.parentAction = action.parentAction.actionName;
             this.masterAction = action.masterAction.actionName;
             this.actionCost = action.actionCost;
