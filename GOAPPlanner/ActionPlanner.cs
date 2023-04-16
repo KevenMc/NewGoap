@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -83,24 +84,19 @@ namespace GOAP
 
             SortActionList(actionList);
 
-            if (CanCompleteMasterAction(actionList[0].grandMasterAction))
+            if (
+                actionList[0].CanComplete()
+                && CanCompleteMasterAction(actionList[0].grandMasterAction)
+            )
             {
                 Debug.Log(
-                    "I CAN FINISH THIS WHOLE TASK NOW *******************************************************"
+                    "this is a complete plan#######################################################################################################################################################"
                 );
                 SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
 
                 return true;
             }
-            // if (actionList[0].CanComplete() && CanCompleteMasterAction2(grandMasterAction))
-            // {
-            //     RecursiveShowActions(actionList[0]);
-            //     SaveMasterActionToFile("json.json");
-            //     currentAgent.requiresNewAction = false;
-
-            //     return true;
-            // }
 
             ExtendAction(actionList[0]);
             return RecursiveFindAction();
@@ -187,6 +183,7 @@ namespace GOAP
 
         public void ExtendAction(Action action)
         {
+            Debug.Log(action.actionName);
             ExtendActionPlanFromInventory(action);
             ExtendActionPlanFromItemMemory(action);
             ExtendActionPlanFromStationMemory(action);
@@ -303,12 +300,17 @@ namespace GOAP
 
                         foreach (Item item in memoryItems)
                         {
+                            Debug.Log(
+                                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                            );
+                            Debug.Log(item);
                             Boolean isAtLocation =
                                 currentAgent.distanceToArrive
                                 >= GetDistance(currentLocation, item.location);
 
                             if (updateAction.goal.statType == StatType.Have_Item_In_Inventory)
                             {
+                                Debug.Log("haver");
                                 updateAction = new Action(updateAction);
                                 updateAction.Init(
                                     ActionType.UnEquip_To_Inventory,
@@ -335,7 +337,9 @@ namespace GOAP
                                     true
                                 );
                             }
+                            Debug.Log("adding that item");
                             actionList.Add(updateAction);
+                            SaveMasterActionToFile("qwer.json");
                         }
                     }
                     break;
@@ -433,16 +437,24 @@ namespace GOAP
                 switch (action.goal.statType)
                 {
                     case StatType.Have_Item_In_Inventory:
+
+                        updateAction = new Action(updateAction); //equip item once made
+                        updateAction.Init(ActionType.UnEquip_To_Inventory, blueprint);
+
+                        updateAction = new Action(updateAction); //equip item once made
+                        updateAction.Init(ActionType.Equip_From_Station, blueprint);
+
                         break;
 
                     case StatType.Have_Item_Equipped:
                         updateAction = new Action(updateAction); //equip item once made
                         updateAction.Init(
-                            ActionType.Equip_From_Inventory,
+                            ActionType.Equip_From_Station,
                             new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
                             blueprint.craftedItem,
                             false
                         );
+
                         break;
 
                     default:
@@ -465,6 +477,20 @@ namespace GOAP
                         break;
                 }
 
+                if (blueprint.requiredTool != null)
+                {
+                    updateAction = new Action(updateAction, true); //each item in subaction
+                    updateAction.Init(
+                        ActionType.UnEquip_To_Inventory,
+                        new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
+                        blueprint.requiredTool,
+                        false
+                    );
+
+                    actionList.Add(updateAction);
+                    SaveMasterActionToFile("tool.json");
+                }
+
                 if (blueprint.craftingStation != null)
                 {
                     updateAction = new Action(updateAction); //make item once all required items are satisfied
@@ -482,10 +508,6 @@ namespace GOAP
 
                     updateAction = new Action(updateAction);
                     updateAction.Init(ActionType.Move_To_Station_Location, blueprint);
-                    Debug.Log(
-                        ")))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))"
-                    );
-                    Debug.Log(updateAction.actionName);
                 }
                 else
                 {
@@ -524,14 +546,9 @@ namespace GOAP
                         blueprint.requiredTool,
                         false
                     );
-                    actionList.Add(updateAction);
-                }
 
-                if (blueprint.requiredItems.Count == 0 && blueprint.requiredTool == null)
-                {
-                    // updateAction.canComplete = true;
                     actionList.Add(updateAction);
-                    SaveMasterActionToFile("test.json");
+                    SaveMasterActionToFile("tool.json");
                 }
             }
             SaveMasterActionToFile("Pizza.json");

@@ -48,6 +48,8 @@ namespace GOAP
         public Action(Action parentAction, Boolean isSubAction = false)
         {
             this.parentAction = parentAction;
+            this.actionName = actionType.ToString();
+
             this.grandMasterAction = parentAction.grandMasterAction;
             if (isSubAction)
             {
@@ -136,13 +138,16 @@ namespace GOAP
             {
                 this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
             }
-            if (actionType == ActionType.Move_To_Station_Location)
+            else if (actionType == ActionType.Move_To_Station_Location)
             {
                 this.actionName = actionType.ToString() + " : " + blueprint.craftingStation;
             }
+            else
+            {
+                this.actionName = actionType.ToString();
+            }
             this.canComplete = canComplete;
             this.actionCost += this.parentAction.actionCost;
-            Debug.Log(this.actionName);
         }
 
         // Init method for blueprint sub-actions
