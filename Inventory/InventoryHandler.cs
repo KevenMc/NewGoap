@@ -22,7 +22,7 @@ namespace GOAP
 
         public List<ItemSO> ReturnGoalItems(Stat goal)
         {
-            if (items == null || goal.statType != null)
+            if (items == null)
             {
                 Debug.LogWarning("Inventory items list is null!");
                 return new List<ItemSO>();
@@ -36,7 +36,6 @@ namespace GOAP
                         .Where(inventoryItem => inventoryItem.itemData == goal.itemData)
                         .Select(inventoryItem => inventoryItem.itemData)
                         .ToList();
-                    break;
 
                 default:
                     return items
@@ -48,7 +47,6 @@ namespace GOAP
                         )
                         .Select(inventoryItem => inventoryItem.itemData)
                         .ToList();
-                    break;
             }
         }
 

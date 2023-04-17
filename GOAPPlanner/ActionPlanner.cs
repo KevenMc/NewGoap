@@ -78,6 +78,7 @@ namespace GOAP
             {
                 Debug.Log("No possible plan of action can be found");
                 SaveMasterActionToFile("json.json");
+                currentAgent.requiresNewAction = false;
 
                 return false;
             }
@@ -89,9 +90,7 @@ namespace GOAP
                 && CanCompleteMasterAction(actionList[0].grandMasterAction)
             )
             {
-                Debug.Log(
-                    "this is a complete plan#######################################################################################################################################################"
-                );
+                Debug.Log("Task planning complete");
                 SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
 
@@ -226,7 +225,7 @@ namespace GOAP
                         Action updateAction = RequireItemInInventory(action, updateGoal);
 
                         actionList.Add(updateAction);
-                        SaveMasterActionToFile("Temp.json");
+                        // SaveMasterActionToFile("Temp.json");
                     }
 
                     break;
@@ -239,7 +238,7 @@ namespace GOAP
                         Action updateAction = EquipFromInventory(action, updateGoal, true);
 
                         actionList.Add(updateAction);
-                        SaveMasterActionToFile("Temp.json");
+                        // SaveMasterActionToFile("Temp.json");
                     }
 
                     break;
@@ -634,8 +633,9 @@ namespace GOAP
 
             List<Action> subActions = new List<Action>();
 
-            // updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
-            // Action subAction = RequireItemSubAction(updateAction, updateGoal);
+            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            Action subAction = RequireItemSubAction(updateAction, updateGoal);
+
             Action subAction = new Action(updateGoal);
             foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
             {
