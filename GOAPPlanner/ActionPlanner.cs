@@ -636,7 +636,6 @@ namespace GOAP
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
             Action subAction = RequireItemSubAction(updateAction, updateGoal);
 
-            Action subAction = new Action(updateGoal);
             foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
