@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -222,15 +222,10 @@ namespace GOAP
 
                     foreach (ItemSO itemData in inventoryItems)
                     {
-                        Action newInventoryAction = new Action(action);
-                        newInventoryAction.Init(
-                            ActionType.Require_Item_In_Inventory,
-                            action.goal,
-                            itemData,
-                            true
-                        );
+                        Stat updateGoal = new Stat(StatType.Satisfied, itemData);
+                        Action updateAction = RequireItemInInventory(action, updateGoal);
 
-                        actionList.Add(newInventoryAction);
+                        actionList.Add(updateAction);
                         SaveMasterActionToFile("Temp.json");
                     }
 
@@ -240,15 +235,10 @@ namespace GOAP
 
                     foreach (ItemSO itemData in inventoryItems)
                     {
-                        Action newInventoryAction = new Action(action);
-                        newInventoryAction.Init(
-                            ActionType.Equip_From_Inventory,
-                            action.goal,
-                            itemData,
-                            true
-                        );
+                        Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemData);
+                        Action updateAction = EquipFromInventory(action, updateGoal, true);
 
-                        actionList.Add(newInventoryAction);
+                        actionList.Add(updateAction);
                         SaveMasterActionToFile("Temp.json");
                     }
 
@@ -259,23 +249,13 @@ namespace GOAP
                     {
                         foreach (ItemSO itemData in inventoryItems)
                         {
-                            Action newInventoryAction = new Action(action);
-                            newInventoryAction.Init(
-                                ActionType.Use_Item,
-                                action.goal,
-                                itemData,
-                                false
-                            );
+                            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, itemData);
+                            Action updateAction = UseEquippedItem(action, updateGoal);
 
-                            Action newEquipAction = new Action(newInventoryAction);
-                            newEquipAction.Init(
-                                ActionType.Equip_From_Inventory,
-                                newInventoryAction.goal,
-                                itemData,
-                                true
-                            );
+                            updateGoal = new Stat(StatType.Satisfied, itemData);
+                            updateAction = EquipFromInventory(updateAction, updateGoal);
 
-                            actionList.Add(newEquipAction);
+                            actionList.Add(updateAction);
                         }
                     }
                     break;
@@ -285,108 +265,49 @@ namespace GOAP
         private void ExtendActionPlanFromItemMemory(Action action)
         {
             Action updateAction = action;
-            // Debug.Log(action.actionName);
-
+            List<Item> memoryItems = new List<Item>();
             switch (action.goal.statType)
             {
                 case StatType.Have_Item_In_Inventory:
                 case StatType.Have_Item_Equipped:
+                    memoryItems.AddRange(
+                        currentAgent.knowledgeHandler.itemMemory.ItemsByItem(action.goal)
+                    );
 
+                    foreach (Item item in memoryItems)
                     {
-                        List<Item> memoryItems =
-                            currentAgent.knowledgeHandler.itemMemory.ReturnGoalItemsByItem(
-                                action.goal
-                            );
+                        Stat updateGoal = new Stat(StatType.Have_Item_Equipped, item.itemData);
 
-                        foreach (Item item in memoryItems)
+                        if (updateAction.goal.statType == StatType.Have_Item_In_Inventory)
                         {
-                            Debug.Log(
-                                "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-                            );
-                            Debug.Log(item);
-                            Boolean isAtLocation =
-                                currentAgent.distanceToArrive
-                                >= GetDistance(currentLocation, item.location);
-
-                            if (updateAction.goal.statType == StatType.Have_Item_In_Inventory)
-                            {
-                                Debug.Log("haver");
-                                updateAction = new Action(updateAction);
-                                updateAction.Init(
-                                    ActionType.UnEquip_To_Inventory,
-                                    new Stat(StatType.Have_Item_Equipped, item.itemData),
-                                    item,
-                                    false
-                                );
-                            }
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(
-                                ActionType.Collect_And_Equip,
-                                new Stat(StatType.Move_To_Item_Location, item.itemData),
-                                item,
-                                isAtLocation
-                            );
-
-                            if (!isAtLocation)
-                            {
-                                updateAction = new Action(updateAction);
-                                updateAction.Init(
-                                    ActionType.Move_To_Item_Location,
-                                    new Stat(StatType.Move_To_Item_Location, item.itemData),
-                                    item.location,
-                                    true
-                                );
-                            }
-                            Debug.Log("adding that item");
-                            actionList.Add(updateAction);
-                            SaveMasterActionToFile("qwer.json");
+                            updateAction = UnEquipItem(updateAction, updateGoal);
                         }
+
+                        updateAction = MoveToEquipItem(updateAction, item);
+
+                        actionList.Add(updateAction);
                     }
                     break;
 
                 default: //Move to item -> equip item -> use item
+                    memoryItems.AddRange(
+                        currentAgent.knowledgeHandler.itemMemory.ItemsByStat(action.goal)
+                    );
 
+                    foreach (Item item in memoryItems)
                     {
-                        List<Item> memoryItems =
-                            currentAgent.knowledgeHandler.itemMemory.ReturnGoalItemsByStat(
-                                action.goal
-                            );
+                        Boolean isAtLocation =
+                            currentAgent.distanceToArrive
+                            >= GetDistance(currentLocation, item.location);
 
-                        foreach (Item item in memoryItems)
-                        {
-                            Boolean isAtLocation =
-                                currentAgent.distanceToArrive
-                                >= GetDistance(currentLocation, item.location);
+                        Stat updateGoal = new Stat(StatType.Have_Item_Equipped, item.itemData);
+                        updateAction = UseEquippedItem(action, updateGoal);
 
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(
-                                ActionType.Use_Item,
-                                action.goal,
-                                item.itemData,
-                                false
-                            );
+                        updateAction = MoveToEquipItem(updateAction, item);
 
-                            updateAction = new Action(updateAction);
-                            updateAction.Init(
-                                ActionType.Collect_And_Equip,
-                                new Stat(StatType.Move_To_Item_Location, item.itemData),
-                                item,
-                                isAtLocation
-                            );
-
-                            if (!isAtLocation)
-                            {
-                                updateAction = new Action(updateAction);
-                                updateAction.Init(
-                                    ActionType.Move_To_Item_Location,
-                                    new Stat(StatType.Move_To_Item_Location, item.itemData),
-                                    item.location,
-                                    true
-                                );
-                            }
-                            actionList.Add(updateAction);
-                        }
+                        actionList.Add(updateAction);
                     }
+
                     break;
             }
         }
@@ -398,24 +319,11 @@ namespace GOAP
 
             foreach (Station station in memoryStations)
             {
-                Boolean isAtLocation =
-                    currentAgent.distanceToArrive >= GetDistance(currentLocation, station.location);
+                Stat updateGoal = new Stat(StatType.Use_Station, station);
+                Action updateAction = InteractWithStation(action, updateGoal);
 
-                Action updateAction = action;
-                updateAction = new Action(updateAction);
-                updateAction.Init(
-                    ActionType.Interact_With_Station,
-                    new Stat(StatType.Use_Station, station.stationData),
-                    station.stationData
-                );
-
-                updateAction = new Action(updateAction);
-                updateAction.Init(
-                    ActionType.Move_To_Item_Location,
-                    new Stat(StatType.Move_To_Item_Location, station.stationData),
-                    station.location,
-                    true
-                );
+                updateGoal = new Stat(StatType.Satisfied, station);
+                updateAction = MoveToLocation(updateAction, updateGoal);
 
                 actionList.Add(updateAction);
             }
@@ -423,135 +331,329 @@ namespace GOAP
 
         public void ExtendActionPlanFromBlueprintRepertoire(Action action)
         {
+            Stat updateGoal = new Stat();
             Action updateAction = action;
+            List<Action> updateActions = new List<Action>();
 
-            List<Blueprint> matchingBlueprints = new List<Blueprint>();
-
-            matchingBlueprints =
+            List<Blueprint> matchingBlueprints =
                 currentAgent.knowledgeHandler.blueprintRepertoire.GetBlueprintsWithGoalStatType(
                     action.goal
                 );
 
             foreach (Blueprint blueprint in matchingBlueprints)
             {
-                switch (action.goal.statType)
+                switch ((blueprint.requiredTool, blueprint.craftingStation))
                 {
-                    case StatType.Have_Item_In_Inventory:
+                    case (null, null): //make blueprint from inventory with no tools
+                        switch (action.goal.statType)
+                        {
+                            case StatType.Have_Item_In_Inventory:
+                                break;
 
-                        updateAction = new Action(updateAction); //equip item once made
-                        updateAction.Init(ActionType.UnEquip_To_Inventory, blueprint);
+                            default:
+                                if (action.goal.statType != StatType.Have_Item_Equipped)
+                                {
+                                    updateGoal = new Stat(
+                                        StatType.Have_Item_Equipped,
+                                        blueprint.craftedItem
+                                    );
+                                    updateAction = UseEquippedItem(updateAction, updateGoal);
+                                }
 
-                        updateAction = new Action(updateAction); //equip item once made
-                        updateAction.Init(ActionType.Equip_From_Station, blueprint);
-
+                                updateGoal = new Stat(
+                                    StatType.Have_Item_In_Inventory,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = EquipFromInventory(updateAction, updateGoal);
+                                break;
+                        }
+                        updateActions = MakeFromInventory(updateAction, blueprint);
+                        actionList.AddRange(updateActions);
                         break;
 
-                    case StatType.Have_Item_Equipped:
-                        updateAction = new Action(updateAction); //equip item once made
-                        updateAction.Init(
-                            ActionType.Equip_From_Station,
-                            new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
-                            blueprint.craftedItem,
-                            false
-                        );
+                    case (_, null): //blueprint from inventory using a tool
+                        switch (action.goal.statType)
+                        {
+                            case StatType.Have_Item_In_Inventory:
 
+                                break;
+
+                            default:
+                                if (action.goal.statType != StatType.Have_Item_Equipped)
+                                {
+                                    updateGoal = new Stat(
+                                        StatType.Have_Item_Equipped,
+                                        blueprint.craftedItem
+                                    );
+                                    updateAction = UseEquippedItem(updateAction, updateGoal);
+                                }
+
+                                updateGoal = new Stat(
+                                    StatType.Have_Item_In_Inventory,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = EquipFromInventory(updateAction, updateGoal);
+
+                                break;
+                        }
+                        updateActions = MakeFromInventoryWithTool(updateAction, blueprint);
+                        actionList.AddRange(updateActions);
                         break;
 
-                    default:
-                        // Create action to either Use or Have the crafted item
-                        updateAction = new Action(updateAction); //use item once equipped
-                        updateAction.Init(
-                            ActionType.Use_Item,
-                            new Stat(StatType.Have_Item_Equipped, blueprint.craftedItem),
-                            blueprint.craftedItem,
-                            false
-                        );
+                    case (null, _): //blueprint from station with no tools
+                        switch (action.goal.statType)
+                        {
+                            case StatType.Have_Item_In_Inventory:
+                                updateGoal = new Stat(
+                                    StatType.Have_Item_Equipped,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = UnEquipItem(updateAction, updateGoal);
 
-                        updateAction = new Action(updateAction); //equip item once made
-                        updateAction.Init(
-                            ActionType.Equip_From_Inventory,
-                            new Stat(StatType.Have_Item_In_Inventory, blueprint.craftedItem), //have item is crafted item
-                            blueprint.craftedItem,
-                            false
-                        );
+                                break;
+
+                            case StatType.Have_Item_Equipped:
+
+                                break;
+
+                            default:
+                                updateGoal = new Stat(
+                                    StatType.Item_Is_At_Station,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = UseEquippedItem(updateAction, updateGoal);
+
+                                break;
+                        }
+                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint.craftedItem);
+                        updateAction = EquipFromStation(updateAction, updateGoal);
+                        updateActions = MakeFromStation(updateAction, blueprint);
+                        actionList.AddRange(updateActions);
                         break;
-                }
 
-                if (blueprint.requiredTool != null)
-                {
-                    updateAction = new Action(updateAction, true); //each item in subaction
-                    updateAction.Init(
-                        ActionType.UnEquip_To_Inventory,
-                        new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                        blueprint.requiredTool,
-                        false
-                    );
+                    case (_, _): //blueprint from station using a tool
+                        switch (action.goal.statType)
+                        {
+                            case StatType.Have_Item_In_Inventory:
+                                updateGoal = new Stat(
+                                    StatType.Have_Item_Equipped,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = UnEquipItem(updateAction, updateGoal);
 
-                    actionList.Add(updateAction);
-                    SaveMasterActionToFile("tool.json");
-                }
+                                break;
 
-                if (blueprint.craftingStation != null)
-                {
-                    updateAction = new Action(updateAction); //make item once all required items are satisfied
-                    updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+                            case StatType.Have_Item_Equipped:
 
-                    if (blueprint.requiredTool != null)
-                    {
-                        updateAction = new Action(updateAction); //each item in subaction
-                        updateAction.Init(
-                            ActionType.Equip_From_Inventory,
-                            new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                            blueprint.requiredTool
-                        );
-                    }
+                                break;
 
-                    updateAction = new Action(updateAction);
-                    updateAction.Init(ActionType.Move_To_Station_Location, blueprint);
-                }
-                else
-                {
-                    updateAction = new Action(updateAction); //make item one all required items are satisfied
-                    updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+                            default:
+                                updateGoal = new Stat(
+                                    StatType.Item_Is_At_Station,
+                                    blueprint.craftedItem
+                                );
+                                updateAction = UseEquippedItem(updateAction, updateGoal);
 
-                    if (blueprint.requiredTool != null)
-                    {
-                        updateAction = new Action(updateAction); //each item in subaction
-                        updateAction.Init(
-                            ActionType.Equip_From_Inventory,
-                            new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                            blueprint.requiredTool
-                        );
-                    }
-                }
-
-                foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
-                {
-                    Action bluePrintSubAction = new Action(updateAction, true); //each item in subaction
-                    bluePrintSubAction.Init(
-                        ActionType.Require_Item_In_Inventory,
-                        new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData), //have item is required item
-                        itemRequirement.itemData
-                    );
-
-                    actionList.Add(bluePrintSubAction);
-                }
-
-                if (blueprint.requiredTool != null)
-                {
-                    updateAction = new Action(updateAction, true); //each item in subaction
-                    updateAction.Init(
-                        ActionType.Require_Item_In_Inventory,
-                        new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool), //have item is required item
-                        blueprint.requiredTool,
-                        false
-                    );
-
-                    actionList.Add(updateAction);
-                    SaveMasterActionToFile("tool.json");
+                                break;
+                        }
+                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint.craftedItem);
+                        updateAction = EquipFromStation(updateAction, updateGoal);
+                        updateActions = MakeFromStationWithTool(updateAction, blueprint);
+                        actionList.AddRange(updateActions);
+                        break;
                 }
             }
-            SaveMasterActionToFile("Pizza.json");
+        }
+
+        #endregion
+
+        #region Basic Action methods
+        private static Action UseEquippedItem(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Use_Item, goal, goal.itemData, false);
+            return updateAction;
+        }
+
+        private static Action EquipFromInventory(Action action, Stat goal, Boolean hasItem = false)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Equip_From_Inventory, goal, goal.itemData, hasItem);
+            return updateAction;
+        }
+
+        private static Action EquipFromStation(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Equip_From_Station, goal, goal.itemData);
+            return updateAction;
+        }
+
+        private static Action UnEquipItem(Action updateAction, Stat goal)
+        {
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.UnEquip_To_Inventory, goal, goal.itemData, false);
+            return updateAction;
+        }
+
+        private static Action RequireItemInInventory(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Require_Item_In_Inventory, goal, goal.itemData, true);
+            return updateAction;
+        }
+
+        private static Action RequireItemSubAction(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action, true);
+            updateAction.Init(ActionType.Require_Item_In_Inventory, goal, goal.itemData);
+            return updateAction;
+        }
+
+        private static Action MoveToEquipItem(Action action, Item item)
+        {
+            Stat updateGoal = new Stat(StatType.Move_To_Item_Location, item);
+            Action updateAction = CollectAndEquip(action, updateGoal);
+
+            updateGoal = new Stat(StatType.Satisfied, item);
+            updateAction = MoveToLocation(updateAction, updateGoal);
+            return updateAction;
+        }
+
+        private static Action CollectAndEquip(Action updateAction, Stat goal)
+        {
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.Collect_And_Equip, goal, goal.item);
+            return updateAction;
+        }
+
+        private static Action MoveToLocation(
+            Action updateAction,
+            Stat goal,
+            Boolean canMoveToLocation = true
+        )
+        {
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.Move_To_Location, goal, goal.location, canMoveToLocation);
+            return updateAction;
+        }
+        #endregion
+
+        #region Interactive Action Methods
+
+        private List<Action> MakeFromInventory(Action action, Blueprint blueprint)
+        {
+            List<Action> updateActions = new List<Action>();
+
+            Action updateAction = new Action(action); //make item one all required items are satisfied
+            updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+
+            List<Action> subActions = new List<Action>();
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            {
+                Stat updateGoal = new Stat(
+                    StatType.Have_Item_In_Inventory,
+                    itemRequirement.itemData
+                );
+                Action subAction = RequireItemSubAction(updateAction, updateGoal);
+
+                updateActions.Add(subAction);
+            }
+
+            return updateActions;
+        }
+
+        private List<Action> MakeFromInventoryWithTool(Action action, Blueprint blueprint)
+        {
+            List<Action> updateActions = new List<Action>();
+
+            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
+            Action updateAction = UnEquipItem(action, updateGoal);
+
+            updateAction = new Action(updateAction); //make item one all required items are satisfied
+            updateAction.Init(ActionType.Make_Blueprint_From_Inventory, blueprint);
+
+            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            updateAction = EquipFromInventory(updateAction, updateGoal);
+
+            List<Action> subActions = new List<Action>();
+
+            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            Action subAction = RequireItemSubAction(updateAction, updateGoal);
+
+            updateActions.Add(subAction);
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            {
+                updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
+                subAction = RequireItemSubAction(updateAction, updateGoal);
+
+                updateActions.Add(subAction);
+            }
+
+            return updateActions;
+        }
+
+        private List<Action> MakeFromStation(Action action, Blueprint blueprint)
+        {
+            List<Action> updateActions = new List<Action>();
+
+            Action updateAction = new Action(action); //make item one all required items are satisfied
+            updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+
+            Stat updateGoal = new Stat(StatType.Be_At_Station, blueprint.craftingStation);
+            updateAction = MoveToLocation(updateAction, updateGoal, false);
+
+            List<Action> subActions = new List<Action>();
+
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            {
+                updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
+                Action subAction = RequireItemSubAction(updateAction, updateGoal);
+
+                updateActions.Add(subAction);
+            }
+
+            return updateActions;
+        }
+
+        private List<Action> MakeFromStationWithTool(Action action, Blueprint blueprint)
+        {
+            List<Action> updateActions = new List<Action>();
+
+            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
+            Action updateAction = UnEquipItem(action, updateGoal);
+
+            updateAction = new Action(updateAction); //make item one all required items are satisfied
+            updateAction.Init(ActionType.Make_Blueprint_From_Station, blueprint);
+
+            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            updateAction = EquipFromInventory(updateAction, updateGoal);
+
+            updateGoal = new Stat(StatType.Be_At_Station, blueprint.craftingStation);
+            updateAction = MoveToLocation(updateAction, updateGoal, false);
+
+            List<Action> subActions = new List<Action>();
+
+            // updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            // Action subAction = RequireItemSubAction(updateAction, updateGoal);
+            Action subAction = new Action(updateGoal);
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            {
+                updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
+                subAction = RequireItemSubAction(updateAction, updateGoal);
+
+                updateActions.Add(subAction);
+            }
+
+            return updateActions;
+        }
+
+        private static Action InteractWithStation(Action action, Stat goal)
+        {
+            Action updateAction = action;
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.Interact_With_Station, goal, goal.station.stationData);
+            return updateAction;
         }
 
         #endregion

@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   passportName: CowBean
   stats:
-  - statType: 1
-    itemData: {fileID: 11400000, guid: ade1f1ad658e89f7cb5919275cbe4ee7, type: 2}
+  - statType: 100
+    itemData: {fileID: 11400000, guid: 600d5b4fd0392101b9a6d406dae03e99, type: 2}
+    item: {fileID: 0}
+    location: {x: 0, y: 0, z: 0}
     stationData: {fileID: 0}
     current: 1
     trigger: 0

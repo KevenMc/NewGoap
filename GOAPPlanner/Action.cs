@@ -53,8 +53,10 @@ namespace GOAP
             this.grandMasterAction = parentAction.grandMasterAction;
             if (isSubAction)
             {
+                Debug.Log("Adding subaction");
                 this.masterAction = parentAction;
                 parentAction.subActions.Add(this);
+                Debug.Log(parentAction.subActions.Count);
             }
             else
             {
@@ -134,7 +136,7 @@ namespace GOAP
             this.actionType = actionType;
             this.blueprint = blueprint;
             this.stationData = blueprint.craftingStation;
-            if (actionType == ActionType.Move_To_Item_Location)
+            if (actionType == ActionType.Move_To_Location)
             {
                 this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
             }

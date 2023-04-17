@@ -36,7 +36,7 @@ namespace GOAP
             }
         }
 
-        public List<Item> ReturnGoalItemsByStat(Stat goal)
+        public List<Item> ItemsByStat(Stat goal)
         {
             List<Item> items = new List<Item>();
 
@@ -48,7 +48,7 @@ namespace GOAP
             return items;
         }
 
-        public List<Item> ReturnGoalItemsByItem(Stat goal)
+        public List<Item> ItemsByItem(Stat goal)
         {
             List<Item> items = new List<Item>();
 

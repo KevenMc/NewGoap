@@ -8,7 +8,7 @@ namespace GOAP
         UnEquip_To_Inventory,
         Equip_From_Inventory,
         Require_Item_In_Inventory,
-        Move_To_Item_Location,
+        Move_To_Location,
         Move_To_Station_Location,
         Interact_With_Station,
         Equip_From_Station,

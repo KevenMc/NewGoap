@@ -10,12 +10,20 @@ namespace GOAP
     {
         public StatType statType;
         public ItemSO itemData;
+        public Item item;
+        public Station station;
+        public Vector3 location;
         public StationSO stationData;
         public float current;
         public float trigger;
         public float increment;
         public int priority;
         public Boolean isUrgent = false;
+
+        public Stat()
+        {
+            this.statType = StatType.Null;
+        }
 
         public Stat(StatType statType, float current, float trigger, float increment, int priority)
         {
@@ -41,6 +49,22 @@ namespace GOAP
         {
             this.statType = statType;
             this.itemData = itemData;
+        }
+
+        public Stat(StatType statType, Item item)
+        {
+            this.statType = statType;
+            this.itemData = item.itemData;
+            this.item = item;
+            this.location = item.location;
+        }
+
+        public Stat(StatType statType, Station station)
+        {
+            this.statType = statType;
+            this.station = station;
+            this.stationData = station.stationData;
+            this.location = station.location;
         }
 
         public Stat(StatType statType, StationSO stationData)

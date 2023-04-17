@@ -13,7 +13,4 @@ MonoBehaviour:
   m_Name: Pizza Chef
   m_EditorClassIdentifier: 
   blueprints:
-  - {fileID: 11400000, guid: dace91249c2a7e88db90022832463272, type: 2}
-  - {fileID: 11400000, guid: 734f62d7d6efb7d378ebdd5397603573, type: 2}
-  - {fileID: 11400000, guid: 22707964b4a1bc3aabd566ed4872b6d1, type: 2}
-  - {fileID: 11400000, guid: 93864cede1e5862888708fee0f1a3de2, type: 2}
+  - {fileID: 11400000, guid: ab8196d4d61a8ede7ad1cc5a1bd7b4a2, type: 2}
