@@ -77,7 +77,7 @@ namespace GOAP
             if (actionList.Count == 0)
             {
                 Debug.Log("No possible plan of action can be found");
-                SaveMasterActionToFile("json.json");
+                // SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
 
                 return false;
@@ -91,7 +91,7 @@ namespace GOAP
             )
             {
                 Debug.Log("Task planning complete");
-                SaveMasterActionToFile("json.json");
+                // SaveMasterActionToFile("json.json");
                 currentAgent.requiresNewAction = false;
 
                 return true;
