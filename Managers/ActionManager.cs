@@ -28,7 +28,6 @@ namespace GOAP
                 switch (subscriber.currentAction.actionType)
                 {
                     case ActionType.Move_To_Location:
-                    case ActionType.Move_To_Station_Location:
                         if (subscriber.HasArrivedAtLocation())
                         {
                             subscriber.UnregisterActionHandler();

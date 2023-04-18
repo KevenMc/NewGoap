@@ -11,6 +11,7 @@ namespace GOAP
         public StatType statType;
         public ItemSO itemData;
         public Item item;
+        public Blueprint blueprint;
         public Station station;
         public Vector3 location;
         public StationSO stationData;
@@ -71,6 +72,13 @@ namespace GOAP
         {
             this.statType = statType;
             this.stationData = stationData;
+        }
+
+        public Stat(StatType statType, Blueprint blueprint)
+        {
+            this.statType = statType;
+            this.blueprint = blueprint;
+            this.stationData = blueprint.craftingStation;
         }
 
         public Stat(

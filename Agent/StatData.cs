@@ -11,7 +11,7 @@ namespace GOAP
         Have_Item_In_Inventory,
         Item_Is_At_Station,
         Be_At_Station,
-        Move_To_Item_Location,
+        Move_To_Location,
         Move_To_Station_Location,
         Use_Station,
         Blueprint,

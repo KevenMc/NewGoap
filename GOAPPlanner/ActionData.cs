@@ -9,7 +9,7 @@ namespace GOAP
         Equip_From_Inventory,
         Require_Item_In_Inventory,
         Move_To_Location,
-        Move_To_Station_Location,
+        Require_Move_To_Location,
         Interact_With_Station,
         Equip_From_Station,
         Make_Blueprint_From_Inventory,

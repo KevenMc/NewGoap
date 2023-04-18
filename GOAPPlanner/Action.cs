@@ -19,6 +19,7 @@ namespace GOAP
         public List<Action> subActions = new List<Action>();
         public bool canComplete = false;
         public Boolean isSubAction = false;
+        public Boolean isLastSubAction = false;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
         public AnimationClip animation;
         #endregion
@@ -57,6 +58,13 @@ namespace GOAP
                 this.masterAction = parentAction;
                 parentAction.subActions.Add(this);
                 Debug.Log(parentAction.subActions.Count);
+                if (actionType == ActionType.Require_Move_To_Location)
+                {
+                    this.isLastSubAction = true;
+                    Debug.Log(
+                        "44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444"
+                    );
+                }
             }
             else
             {
@@ -66,111 +74,136 @@ namespace GOAP
         }
 
         // Init method to use item from inventory
-        public void Init(
-            ActionType actionType,
-            Stat goal,
-            ItemSO itemData,
-            Boolean canComplete = false
-        )
+        public void Init(ActionType actionType, Stat goal, Boolean canComplete = false)
         {
             // Debug.Log("Init for item from inventory");
             this.goal = goal;
             this.actionType = actionType;
-            this.itemData = itemData;
-            this.actionName = actionType.ToString() + " : " + itemData.itemName;
-            this.canComplete = canComplete;
-            this.actionCost += this.parentAction.actionCost + itemData.itemUseCost;
-        }
-
-        // Init method to use STATION
-        public void Init(
-            ActionType actionType,
-            Stat goal,
-            StationSO stationData,
-            Boolean canComplete = false
-        )
-        {
-            // Debug.Log("Init for station");
-            this.goal = goal;
-            this.actionType = actionType;
-            this.stationData = stationData;
-            this.actionName = actionType.ToString() + " : " + stationData.stationName;
-            this.canComplete = canComplete;
-            this.actionCost += this.parentAction.actionCost;
-        }
-
-        // Init method to collect item
-        public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
-        {
-            this.goal = goal;
-            // Debug.Log("Init for collect item");
-            this.actionType = actionType;
-            this.goal = goal;
-            this.item = item;
-            this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
-            this.canComplete = canComplete;
-            this.actionCost += this.parentAction.actionCost;
-        }
-
-        // Init method to move to location
-        public void Init(
-            ActionType actionType,
-            Stat goal,
-            Vector3 location,
-            Boolean canComplete = false
-        )
-        {
-            // Debug.Log("Init blueprint for location");
-            this.goal = goal;
-            this.actionType = actionType;
-            this.location = location;
-            this.actionName = actionType.ToString() + " : " + location;
-            this.canComplete = canComplete;
-            this.actionCost += this.parentAction.actionCost;
-        }
-
-        // Init method for blueprint
-        public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
-        {
-            // Debug.Log("Init for blueprint");
-            this.actionType = actionType;
-            this.blueprint = blueprint;
-            this.stationData = blueprint.craftingStation;
-            if (actionType == ActionType.Move_To_Location)
+            this.itemData = goal.itemData;
+            this.item = goal.item;
+            this.stationData = goal.stationData;
+            this.location = goal.location;
+            this.blueprint = goal.blueprint;
+            switch (goal.itemData, goal.item, goal.stationData, goal.station, goal.blueprint)
             {
-                this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
+                case (_, null, null, null, null):
+                    this.actionName = actionType.ToString() + " : " + goal.itemData;
+                    break;
+
+                case (null, _, null, null, null):
+                    this.actionName = actionType.ToString() + " : " + goal.item;
+                    break;
+                case (null, null, _, null, null):
+                    this.actionName = actionType.ToString() + " : " + goal.stationData;
+                    break;
+                case (null, null, null, _, null):
+                    this.actionName = actionType.ToString() + " : " + goal.station;
+                    break;
+                case (null, null, null, null, _):
+                    this.actionName = actionType.ToString() + " : " + goal.blueprint;
+                    break;
+                default:
+                    this.actionName = actionType.ToString();
+                    break;
             }
-            else if (actionType == ActionType.Move_To_Station_Location)
-            {
-                this.actionName = actionType.ToString() + " : " + blueprint.craftingStation;
-            }
-            else
-            {
-                this.actionName = actionType.ToString();
-            }
+
             this.canComplete = canComplete;
+            if (actionType == ActionType.Require_Move_To_Location)
+            {
+                this.isLastSubAction = true;
+                Debug.Log(
+                    "44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444"
+                );
+            }
             this.actionCost += this.parentAction.actionCost;
         }
 
-        // Init method for blueprint sub-actions
-        public void Init(
-            ActionType actionType,
-            ItemSO itemData,
-            Action parentAction,
-            Boolean canComplete = false
-        )
-        {
-            // Debug.Log("Init for blueprint sub-action");
-            this.actionType = actionType;
-            this.itemData = itemData;
-            this.actionName = actionType.ToString() + " : " + itemData.itemName;
-            this.parentAction = parentAction;
-            this.masterAction = this;
-            this.hasMasterAction = false;
-            this.isOwnMaster = true;
-            this.canComplete = canComplete;
-            this.actionCost += this.parentAction.actionCost;
-        }
+        // // Init method to use STATION
+        // public void Init(
+        //     ActionType actionType,
+        //     Stat goal,
+        //     StationSO stationData,
+        //     Boolean canComplete = false
+        // )
+        // {
+        //     // Debug.Log("Init for station");
+        //     this.goal = goal;
+        //     this.actionType = actionType;
+        //     this.stationData = stationData;
+        //     this.actionName = actionType.ToString() + " : " + stationData.stationName;
+        //     this.canComplete = canComplete;
+        //     this.actionCost += this.parentAction.actionCost;
+        // }
+
+        // // Init method to collect item
+        // public void Init(ActionType actionType, Stat goal, Item item, Boolean canComplete = false)
+        // {
+        //     this.goal = goal;
+        //     // Debug.Log("Init for collect item");
+        //     this.actionType = actionType;
+        //     this.goal = goal;
+        //     this.actionName = actionType.ToString() + " : " + item.itemData.itemName;
+        //     this.canComplete = canComplete;
+        //     this.actionCost += this.parentAction.actionCost;
+        // }
+
+        // // Init method to move to location
+        // public void Init(
+        //     ActionType actionType,
+        //     Stat goal,
+        //     Vector3 location,
+        //     Boolean canComplete = false
+        // )
+        // {
+        //     // Debug.Log("Init blueprint for location");
+        //     this.goal = goal;
+        //     this.actionType = actionType;
+        //     this.actionName = actionType.ToString() + " : " + location;
+        //     this.canComplete = canComplete;
+        //     this.actionCost += this.parentAction.actionCost;
+        // }
+
+        // // Init method for blueprint
+        // public void Init(ActionType actionType, Blueprint blueprint, Boolean canComplete = false)
+        // {
+        //     // Debug.Log("Init for blueprint");
+        //     this.actionType = actionType;
+        //     this.stationData = blueprint.craftingStation;
+        //     if (actionType == ActionType.Move_To_Location)
+        //     {
+        //         this.actionName = actionType.ToString() + " : " + blueprint.blueprintName;
+        //     }
+        //     // else if (actionType == ActionType.Move_To_Station_Location)
+        //     // {
+        //     //     this.actionName = actionType.ToString() + " : " + blueprint.craftingStation;
+        //     // }
+        //     else
+        //     {
+        //         this.actionName = actionType.ToString();
+        //     }
+        //     this.canComplete = canComplete;
+        //     this.actionCost += this.parentAction.actionCost;
+        // }
+
+        // // Init method for blueprint sub-actions
+        // public void Init(
+        //     ActionType actionType,
+        //     ItemSO itemData,
+        //     Action parentAction,
+        //     Boolean canComplete = false
+        // )
+        // {
+        //     // Debug.Log("Init for blueprint sub-action");
+        //     this.actionType = actionType;
+        //     this.itemData = itemData;
+        //     this.actionName = actionType.ToString() + " : " + itemData.itemName;
+        //     this.parentAction = parentAction;
+        //     this.masterAction = this;
+        //     this.hasMasterAction = false;
+        //     this.isOwnMaster = true;
+        //     this.canComplete = canComplete;
+        //     this.actionCost += this.parentAction.actionCost;
+        // }
 
         public Boolean CanComplete()
         {

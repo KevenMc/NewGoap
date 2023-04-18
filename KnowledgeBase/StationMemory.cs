@@ -41,10 +41,7 @@ namespace GOAP
         {
             StatType goalStatType = goal.statType;
             List<Station> stations = new List<Station>();
-            Debug.Log(
-                "ReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStationsReturnGoalStations"
-            );
-            Debug.Log(goalStatType + " : " + goal.itemData);
+
             switch (goalStatType)
             {
                 // case StatType.Have_Item_In_Inventory:
@@ -56,8 +53,13 @@ namespace GOAP
                 //     }
                 //     break;
                 case StatType.Use_Station:
+                case StatType.Be_At_Station:
                     if (stationLocations.ContainsKey(goal.stationData))
                     {
+                        Debug.Log(
+                            "]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+                        );
+                        Debug.Log(goal.stationData);
                         stations.AddRange(stationLocations[goal.stationData]);
                     }
                     break;
