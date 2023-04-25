@@ -7,23 +7,12 @@ namespace GOAP
     public class JSONAction
     {
         public string actionName;
-        public string actionGoal;
-        public string parentAction;
-        public string masterAction;
-        public float actionCost;
         public string childAction;
         public bool canComplete;
 
         public JSONAction(Action action)
         {
             this.actionName = action.actionName;
-            // this.actionGoal = action?.goal.ToString();
-            if (action.parentAction != null)
-            {
-                this.parentAction = action.parentAction.actionName;
-            }
-            this.masterAction = action.masterAction.actionName;
-            this.actionCost = action.actionCost;
             this.canComplete = action.canComplete;
             if (action.childActions.Count > 0)
             {
@@ -50,20 +39,11 @@ namespace GOAP
     public class JSONActionEndNode
     {
         public string actionName;
-        public string actionGoal;
-
-        public string parentAction;
-        public string masterAction;
-        public float actionCost;
         public bool canComplete;
 
         public JSONActionEndNode(Action action)
         {
             this.actionName = action.actionName;
-            // this.actionGoal = action?.goal.ToString();
-            this.parentAction = action.parentAction.actionName;
-            this.masterAction = action.masterAction.actionName;
-            this.actionCost = action.actionCost;
             this.canComplete = action.canComplete;
         }
     }
@@ -71,11 +51,6 @@ namespace GOAP
     public class JSONActionWithSubAction
     {
         public string actionName;
-        public string actionGoal;
-
-        public string parentAction;
-        public string masterAction;
-        public float actionCost;
         public bool canComplete;
 
         public string[] subActions;
@@ -83,15 +58,9 @@ namespace GOAP
         public JSONActionWithSubAction(Action action)
         {
             this.actionName = action.actionName;
-            // this.actionGoal = action.goal.ToString();
-            this.parentAction = action.parentAction.actionName;
-            this.masterAction = action.masterAction.actionName;
-            this.actionCost = action.actionCost;
             this.canComplete = action.canComplete;
-
             string[] subActions = new string[action.subActions.Count];
             int i = 0;
-            Debug.Log(actionName);
             foreach (Action subAction in action.subActions)
             {
                 subActions[i] = JsonUtility.ToJson(new JSONAction(subAction));

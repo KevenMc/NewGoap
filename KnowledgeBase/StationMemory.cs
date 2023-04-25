@@ -56,10 +56,6 @@ namespace GOAP
                 case StatType.Be_At_Station:
                     if (stationLocations.ContainsKey(goal.stationData))
                     {
-                        Debug.Log(
-                            "]]]]]]]]]]]]]][[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
-                        );
-                        Debug.Log(goal.stationData);
                         stations.AddRange(stationLocations[goal.stationData]);
                     }
                     break;

@@ -6,23 +6,11 @@ namespace GOAP
 {
     public class InventoryHandler : MonoBehaviour
     {
-        // public Agent agent;
-
-        [System.Serializable]
-        public class InventoryItem
-        {
-            public ItemSO itemData;
-            public int quantity;
-            public List<StatEffect> statEffects;
-        }
-
-        public List<InventoryItem> items = new List<InventoryItem>();
-
         public void Init() { }
 
-        public List<ItemSO> ReturnGoalItems(Stat goal)
+        public List<ItemSO> ReturnGoalItems(Stat goal, Inventory inventory)
         {
-            if (items == null)
+            if (inventory.items == null)
             {
                 Debug.LogWarning("Inventory items list is null!");
                 return new List<ItemSO>();
@@ -32,13 +20,13 @@ namespace GOAP
             {
                 case StatType.Have_Item_In_Inventory:
                 case StatType.Have_Item_Equipped:
-                    return items
+                    return inventory.items
                         .Where(inventoryItem => inventoryItem.itemData == goal.itemData)
                         .Select(inventoryItem => inventoryItem.itemData)
                         .ToList();
 
                 default:
-                    return items
+                    return inventory.items
                         .Where(
                             inventoryItem =>
                                 inventoryItem.itemData.statEffects.Any(
@@ -50,10 +38,10 @@ namespace GOAP
             }
         }
 
-        public void AddItem(ItemSO itemData, int quantity = 1)
+        public void AddItem(ItemSO itemData, Inventory inventory, int quantity = 1)
         {
             Debug.Log("Adding item to inventory : " + itemData.itemName);
-            var inventoryItem = items.Find(x => x.itemData == itemData);
+            var inventoryItem = inventory.items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null)
             {
@@ -61,13 +49,15 @@ namespace GOAP
             }
             else
             {
-                items.Add(new InventoryItem { itemData = itemData, quantity = quantity });
+                inventory.items.Add(
+                    new Inventory.InventoryItem { itemData = itemData, quantity = quantity }
+                );
             }
         }
 
-        public void RemoveItem(ItemSO itemData, int quantity = 1)
+        public void RemoveItem(ItemSO itemData, Inventory inventory, int quantity = 1)
         {
-            var inventoryItem = items.Find(x => x.itemData == itemData);
+            var inventoryItem = inventory.items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null)
             {
@@ -75,15 +65,15 @@ namespace GOAP
 
                 if (inventoryItem.quantity <= 0)
                 {
-                    items.Remove(inventoryItem);
+                    inventory.items.Remove(inventoryItem);
                 }
             }
         }
 
-        public void UseItem(ItemSO itemData, Agent useAgent)
+        public void UseItem(ItemSO itemData, Inventory inventory, Agent useAgent)
         {
             Debug.Log("Using an item " + itemData.itemName);
-            var inventoryItem = items.Find(x => x.itemData == itemData);
+            var inventoryItem = inventory.items.Find(x => x.itemData == itemData);
 
             if (inventoryItem != null && inventoryItem.quantity > 0)
             {
@@ -101,7 +91,7 @@ namespace GOAP
                 //     useAgent.statHandler.ModifyStat(statEffect.statType, statEffect.value);
                 // }
 
-                RemoveItem(itemData);
+                RemoveItem(itemData, inventory);
             }
         }
     }

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GOAP
@@ -18,6 +13,7 @@ namespace GOAP
         public Action masterAction;
         public Action grandMasterAction;
         public Vector3 currentLocation;
+        public List<List<Action>> duplicateActions = new List<List<Action>>();
 
         public void SetGoal(Stat goal)
         {
@@ -26,8 +22,6 @@ namespace GOAP
             masterAction = actionList[0];
             grandMasterAction = masterAction;
             currentAgent.requiresNewAction = true;
-            Debug.Log(goal.ToString());
-            // Debug.Log(currentAgent);
             currentAgent.currentGoal = goal.statType.ToString();
         }
 
@@ -47,11 +41,9 @@ namespace GOAP
             if (topStat.IsUrgent() && agent.statHandler.currentGoal != topStat)
             {
                 agent.statHandler.currentGoal = topStat;
-                // Debug.Log(topStat.ToString());
 
                 SetGoal(topStat);
-                // Debug.Log(topStat.ToString());
-                if (RecursiveFindAction())
+                if (IterateThroughActions())
                 {
                     agent.SetMasterAction(masterAction);
                     return;
@@ -62,7 +54,7 @@ namespace GOAP
                 foreach (Stat stat in currentGoals)
                 {
                     SetGoal(stat);
-                    if (RecursiveFindAction())
+                    if (IterateThroughActions())
                     {
                         agent.SetMasterAction(masterAction);
                         return;
@@ -72,65 +64,31 @@ namespace GOAP
             currentAgent = null;
         }
 
-        public Boolean RecursiveFindAction()
+        public Boolean IterateThroughActions()
         {
-            SaveMasterActionToFile("json.json");
-
-            if (actionList.Count == 0)
+            while (true)
             {
-                Debug.Log("No possible plan of action can be found");
                 SaveMasterActionToFile("json.json");
-                currentAgent.requiresNewAction = false;
 
-                return false;
-            }
-
-            SortActionList(actionList);
-
-            if (
-                actionList[0].CanComplete()
-                && CanCompleteMasterAction(actionList[0].grandMasterAction)
-            )
-            {
-                Debug.Log("Task planning complete");
-                SaveMasterActionToFile("json.json");
-                currentAgent.requiresNewAction = false;
-
-                return true;
-            }
-
-            ExtendAction(actionList[0]);
-            return RecursiveFindAction();
-        }
-
-        public bool CanCompleteAll(Action action)
-        {
-            if (action.subActions.Count == 0 && action.childActions.Count == 0)
-            {
-                return false;
-            }
-            return CanCompleteMasterAction2(action);
-        }
-
-        public Boolean CanCompleteMasterAction2(Action action)
-        {
-            foreach (Action childAction in action.childActions)
-            {
-                if (!CanCompleteMasterAction2(childAction))
+                if (actionList.Count == 0)
                 {
+                    currentAgent.requiresNewAction = false;
                     return false;
                 }
-            }
-            foreach (Action subAction in action.subActions)
-            {
-                Debug.Log(subAction.actionName);
-                if (!CanCompleteMasterAction2(subAction))
-                {
-                    return false;
-                }
-            }
 
-            return action.canComplete;
+                SortActionList(actionList);
+
+                if (
+                    actionList[0].CanComplete()
+                    && CanCompleteMasterAction(actionList[0].grandMasterAction)
+                )
+                {
+                    currentAgent.requiresNewAction = false;
+                    return true;
+                }
+
+                ExtendAction(actionList[0]);
+            }
         }
 
         public Boolean CanCompleteMasterAction(Action action)
@@ -140,7 +98,6 @@ namespace GOAP
                 return action.canComplete;
             }
 
-            // Debug.Log("can complete action? : " + action.actionName);
             List<Boolean> returnList = new List<bool>();
             returnList.Add(true);
 
@@ -158,48 +115,20 @@ namespace GOAP
             return returnList.All(b => b); //return if ALL children and subActions canComplete
         }
 
-        public void RecursiveShowActions(Action action)
-        {
-            if (action.parentAction != null)
-            {
-                // Debug.Log(
-                //     action.actionName
-                //         + " -> "
-                //         + action.parentAction.actionName
-                //         + " | => "
-                //         + action.masterAction.actionName
-                //         + " | SubAction : "
-                //         + action.masterAction.isSubAction
-                //         + " - "
-                //         + action.subActions.Count
-                //         + " | Cost : "
-                //         + action.actionCost
-                // );
-
-                RecursiveShowActions(action.parentAction);
-            }
-        }
-
-        #region
-
+        #region Extend Actions
         public void ExtendAction(Action action)
         {
-            Debug.Log(action.actionName);
-            ExtendActionPlanFromInventory(action);
-            ExtendActionPlanFromItemMemory(action);
-            ExtendActionPlanFromStationMemory(action);
-            ExtendActionPlanFromBlueprintRepertoire(action);
+            PlanFromInventory(action);
+            PlanFromKnownInventories(action);
+            PlanFromKnownItems(action);
+            PlanFromStationMemory(action);
+            PlanFromBlueprintRepertoire(action);
 
-            if (action.childActions.Count == 0 && !action.CanComplete())
-            {
-                // RecursiveDropActions(action);
-            }
             actionList.Remove(action);
         }
 
         public void RecursiveDropActions(Action action)
         {
-            // Debug.Log("This action line is a dead end : " + action.actionName);
             if (action.parentAction == null)
             {
                 return;
@@ -211,59 +140,47 @@ namespace GOAP
             }
         }
 
-        private void ExtendActionPlanFromInventory(Action action)
+        private void PlanFromInventory(Action action)
         {
             List<ItemSO> inventoryItems = currentAgent.inventoryHandler.ReturnGoalItems(
-                action.goal
+                action.goal,
+                currentAgent.inventory
             );
 
             switch (action.goal.statType)
             {
                 case StatType.Have_Item_In_Inventory:
-
                     foreach (ItemSO itemData in inventoryItems)
                     {
                         Stat updateGoal = new Stat(StatType.Satisfied, itemData);
                         Action updateAction = RequireItemInInventory(action, updateGoal);
-
                         actionList.Add(updateAction);
-                        // SaveMasterActionToFile("Temp.json");
                     }
-
                     break;
 
                 case StatType.Have_Item_Equipped:
-
                     foreach (ItemSO itemData in inventoryItems)
                     {
                         Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemData);
                         Action updateAction = EquipFromInventory(action, updateGoal, true);
-
                         actionList.Add(updateAction);
-                        // SaveMasterActionToFile("Temp.json");
                     }
-
                     break;
 
                 default:
-
+                    foreach (ItemSO itemData in inventoryItems)
                     {
-                        foreach (ItemSO itemData in inventoryItems)
-                        {
-                            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, itemData);
-                            Action updateAction = UseEquippedItem(action, updateGoal);
-
-                            updateGoal = new Stat(StatType.Satisfied, itemData);
-                            updateAction = EquipFromInventory(updateAction, updateGoal);
-
-                            actionList.Add(updateAction);
-                        }
+                        Stat updateGoal = new Stat(StatType.Have_Item_Equipped, itemData);
+                        Action updateAction = UseEquippedItem(action, updateGoal);
+                        updateGoal = new Stat(StatType.Satisfied, itemData);
+                        updateAction = EquipFromInventory(updateAction, updateGoal, true);
+                        actionList.Add(updateAction);
                     }
                     break;
             }
         }
 
-        private void ExtendActionPlanFromItemMemory(Action action)
+        private void PlanFromKnownItems(Action action)
         {
             Action updateAction = action;
             List<Item> memoryItems = new List<Item>();
@@ -274,18 +191,14 @@ namespace GOAP
                     memoryItems.AddRange(
                         currentAgent.knowledgeHandler.itemMemory.ItemsByItem(action.goal)
                     );
-
                     foreach (Item item in memoryItems)
                     {
                         Stat updateGoal = new Stat(StatType.Have_Item_Equipped, item.itemData);
-
                         if (updateAction.goal.statType == StatType.Have_Item_In_Inventory)
                         {
                             updateAction = UnEquipItem(updateAction, updateGoal);
                         }
-
                         updateAction = MoveToEquipItem(updateAction, item);
-
                         actionList.Add(updateAction);
                     }
                     break;
@@ -294,7 +207,6 @@ namespace GOAP
                     memoryItems.AddRange(
                         currentAgent.knowledgeHandler.itemMemory.ItemsByStat(action.goal)
                     );
-
                     foreach (Item item in memoryItems)
                     {
                         Boolean isAtLocation =
@@ -303,17 +215,14 @@ namespace GOAP
 
                         Stat updateGoal = new Stat(StatType.Have_Item_Equipped, item.itemData);
                         updateAction = UseEquippedItem(action, updateGoal);
-
                         updateAction = MoveToEquipItem(updateAction, item);
-
                         actionList.Add(updateAction);
                     }
-
                     break;
             }
         }
 
-        private void ExtendActionPlanFromStationMemory(Action action)
+        private void PlanFromStationMemory(Action action)
         {
             List<Station> memoryStations =
                 currentAgent.knowledgeHandler.stationMemory.ReturnGoalStations(action.goal);
@@ -321,12 +230,8 @@ namespace GOAP
             {
                 foreach (Station station in memoryStations)
                 {
-                    //  updateGoal = new Stat(StatType.Use_Station, station);
-                    //  updateAction = InteractWithStation(action, updateGoal);
-
                     Stat updateGoal = new Stat(StatType.Satisfied, station);
                     Action updateAction = MoveToLocation(action, updateGoal);
-
                     actionList.Add(updateAction);
                 }
             }
@@ -336,16 +241,14 @@ namespace GOAP
                 {
                     Stat updateGoal = new Stat(StatType.Use_Station, station);
                     Action updateAction = InteractWithStation(action, updateGoal);
-
                     updateGoal = new Stat(StatType.Satisfied, station);
                     updateAction = MoveToLocation(updateAction, updateGoal);
-
                     actionList.Add(updateAction);
                 }
             }
         }
 
-        public void ExtendActionPlanFromBlueprintRepertoire(Action action)
+        public void PlanFromBlueprintRepertoire(Action action)
         {
             Stat updateGoal = new Stat();
             Action updateAction = action;
@@ -391,7 +294,6 @@ namespace GOAP
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
-
                                 break;
 
                             default:
@@ -403,13 +305,11 @@ namespace GOAP
                                     );
                                     updateAction = UseEquippedItem(updateAction, updateGoal);
                                 }
-
                                 updateGoal = new Stat(
                                     StatType.Have_Item_In_Inventory,
                                     blueprint.craftedItem
                                 );
                                 updateAction = EquipFromInventory(updateAction, updateGoal);
-
                                 break;
                         }
                         updateActions = MakeFromInventoryWithTool(updateAction, blueprint);
@@ -425,11 +325,9 @@ namespace GOAP
                                     blueprint.craftedItem
                                 );
                                 updateAction = UnEquipItem(updateAction, updateGoal);
-
                                 break;
 
                             case StatType.Have_Item_Equipped:
-
                                 break;
 
                             default:
@@ -441,7 +339,7 @@ namespace GOAP
 
                                 break;
                         }
-                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint.craftedItem);
+                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint);
                         updateAction = EquipFromStation(updateAction, updateGoal);
                         updateActions = MakeFromStation(updateAction, blueprint);
                         actionList.AddRange(updateActions);
@@ -456,11 +354,9 @@ namespace GOAP
                                     blueprint.craftedItem
                                 );
                                 updateAction = UnEquipItem(updateAction, updateGoal);
-
                                 break;
 
                             case StatType.Have_Item_Equipped:
-
                                 break;
 
                             default:
@@ -472,7 +368,7 @@ namespace GOAP
 
                                 break;
                         }
-                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint.craftedItem);
+                        updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint);
                         updateAction = EquipFromStation(updateAction, updateGoal);
                         updateActions = MakeFromStationWithTool(updateAction, blueprint);
                         actionList.AddRange(updateActions);
@@ -539,7 +435,7 @@ namespace GOAP
         private static Action CollectAndEquip(Action updateAction, Stat goal)
         {
             updateAction = new Action(updateAction);
-            updateAction.Init(ActionType.Collect_And_Equip, goal, goal.item);
+            updateAction.Init(ActionType.Collect_And_Equip, goal);
             return updateAction;
         }
 
@@ -562,17 +458,16 @@ namespace GOAP
         }
         #endregion
 
-        #region Interactive Action Methods
-
+        #region Blueprint Action Methods
         private List<Action> MakeFromInventory(Action action, Blueprint blueprint)
         {
             List<Action> updateActions = new List<Action>();
+            List<Action> subActions = new List<Action>();
 
             Action updateAction = new Action(action); //make item one all required items are satisfied
             Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
             updateAction.Init(ActionType.Make_Blueprint_From_Inventory, updateGoal);
 
-            List<Action> subActions = new List<Action>();
             foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
@@ -587,6 +482,7 @@ namespace GOAP
         private List<Action> MakeFromInventoryWithTool(Action action, Blueprint blueprint)
         {
             List<Action> updateActions = new List<Action>();
+            List<Action> subActions = new List<Action>();
 
             Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
             Action updateAction = UnEquipItem(action, updateGoal);
@@ -598,13 +494,11 @@ namespace GOAP
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
             updateAction = EquipFromInventory(updateAction, updateGoal);
 
-            List<Action> subActions = new List<Action>();
-
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
             Action subAction = RequireItemSubAction(updateAction, updateGoal);
 
             updateActions.Add(subAction);
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 subAction = RequireItemSubAction(updateAction, updateGoal);
@@ -621,18 +515,15 @@ namespace GOAP
 
             Stat updateGoal = new Stat(StatType.Blueprint, blueprint);
             Action updateAction = new Action(action); //make item one all required items are satisfied
-            updateAction.Init(ActionType.Make_Blueprint_From_Station, updateGoal);
-
-            // updateGoal = new Stat(StatType.Be_At_Station, blueprint.craftingStation);
-            // updateAction = MoveToLocation(updateAction, updateGoal, false);
+            updateAction.Init(ActionType.Make_Blueprint_At_Station, updateGoal);
 
             updateGoal = new Stat(StatType.Be_At_Station, blueprint);
-            updateActions.Add(RequireMoveToLocation(updateAction, updateGoal));
+            updateActions.Add(RequireMoveToLocation(updateAction, updateGoal)); //create goal to be at station -> this needs to be performed last
             //add in a way to select which station to move to
 
             List<Action> subActions = new List<Action>();
 
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 Action subAction = RequireItemSubAction(updateAction, updateGoal);
@@ -651,19 +542,15 @@ namespace GOAP
             Action updateAction = UnEquipItem(action, updateGoal);
 
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
-            updateAction = new Action(updateAction); //make item one all required items are satisfied
-            updateAction.Init(ActionType.Make_Blueprint_From_Station, updateGoal);
+            updateAction = new Action(updateAction); //make item once all required items are satisfied
+            updateAction.Init(ActionType.Make_Blueprint_At_Station, updateGoal);
 
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
             updateAction = EquipFromInventory(updateAction, updateGoal);
 
-            // updateGoal = new Stat(StatType.Be_At_Station, blueprint.craftingStation);
-            // updateAction = MoveToLocation(updateAction, updateGoal, false);
-
             updateGoal = new Stat(StatType.Be_At_Station, blueprint);
             updateActions.Add(RequireMoveToLocation(updateAction, updateGoal));
             //add in a way to select which station to move to
-
 
             List<Action> subActions = new List<Action>();
 
@@ -671,7 +558,7 @@ namespace GOAP
             Action subAction = RequireItemSubAction(updateAction, updateGoal);
             updateActions.Add(subAction);
 
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 subAction = RequireItemSubAction(updateAction, updateGoal);
@@ -686,9 +573,13 @@ namespace GOAP
         {
             Action updateAction = action;
             updateAction = new Action(updateAction);
-            updateAction.Init(ActionType.Interact_With_Station, goal, goal.station.stationData);
+            updateAction.Init(ActionType.Interact_With_Station, goal);
             return updateAction;
         }
+        #endregion
+
+        #region World Action Method
+        public void PlanFromKnownInventories(Action action) { }
 
         #endregion
 
@@ -721,12 +612,8 @@ namespace GOAP
                 .Replace("\"{", "{")
                 .Replace("}\"", "}");
 
-            // Debug.Log("json data : " + jsonData);
-
             // Save the JSON data to a file
-            File.WriteAllText("Assets/" + filePath, jsonData);
-
-            Debug.Log("MasterAction saved to file: " + filePath);
+            File.WriteAllText("Assets/GOAP/" + filePath, jsonData);
         }
         #endregion
     }

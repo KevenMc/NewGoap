@@ -161,7 +161,7 @@ namespace GOAP
 
         public void Use_Item()
         {
-            inventoryHandler.UseItem(currentAction.itemData, agent);
+            inventoryHandler.UseItem(currentAction.itemData, agent.inventory, agent);
             Destroy(agent.equippedItem.gameObject);
             agent.equippedItem = null;
             agent.animator.SetBool(ActionType.Use_Item.ToString(), false);
@@ -196,10 +196,10 @@ namespace GOAP
             {
                 if (item.destroyOnCraft)
                 {
-                    inventoryHandler.RemoveItem(item.itemData);
+                    inventoryHandler.RemoveItem(item.itemData, agent.inventory);
                 }
             }
-            inventoryHandler.AddItem(currentAction.blueprint.craftedItem);
+            inventoryHandler.AddItem(currentAction.blueprint.craftedItem, agent.inventory);
         }
 
         public void Collect_And_Equip()
@@ -215,7 +215,7 @@ namespace GOAP
 
         public void UnEquip_To_Inventory()
         {
-            inventoryHandler.AddItem(currentAction.item.itemData);
+            inventoryHandler.AddItem(currentAction.item.itemData, agent.inventory);
             Destroy(currentAction.item.gameObject);
             agent.animator.SetBool(ActionType.UnEquip_To_Inventory.ToString(), false);
             currentAction.parentAction.canComplete = true;

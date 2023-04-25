@@ -78,6 +78,7 @@ namespace GOAP
         {
             this.statType = statType;
             this.blueprint = blueprint;
+            this.itemData = blueprint.craftedItem;
             this.stationData = blueprint.craftingStation;
         }
 

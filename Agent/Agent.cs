@@ -13,6 +13,7 @@ namespace GOAP
     [RequireComponent(typeof(BlueprintHandler))]
     [RequireComponent(typeof(MovementHandler))]
     [RequireComponent(typeof(ActionHandler))]
+    [RequireComponent(typeof(Inventory))]
     // [RequireComponent(typeof(NavMeshAgent))]
     public class Agent : MonoBehaviour
     {
@@ -20,6 +21,7 @@ namespace GOAP
 
         // public ActionPlanner actionPlanner;
         public InventoryHandler inventoryHandler;
+        public Inventory inventory;
         public KnowledgeHandler knowledgeHandler;
         public BlueprintHandler blueprintHandler;
         public ActionHandler actionHandler;
@@ -58,7 +60,6 @@ namespace GOAP
 
         public void SetMasterAction(Action action)
         {
-            Debug.Log("Set master action");
             actionHandler.masterAction = action;
             actionHandler.SetActionList();
             actionHandler.ExecuteAction();

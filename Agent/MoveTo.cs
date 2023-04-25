@@ -21,13 +21,5 @@ public class MoveTo : MonoBehaviour
                 //   Location(hit.point);
             }
         }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            Debug.Log("Right click");
-            //statHandler.UpdateGoals();
-            //actionPlanner.SetGoal(statHandler.currentGoals[0]);
-            Debug.Log(actionPlanner.masterAction?.actionName);
-        }
     }
 }
