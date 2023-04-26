@@ -32,9 +32,9 @@ namespace GOAP
             this.value = value;
         }
 
-        public static explicit operator StatEffect(ItemSO.StatEffect se)
-        {
-            return new StatEffect(se.statType, se.value);
-        }
+        // public static explicit operator StatEffect(ItemSO.StatEffect se)
+        // {
+        //     return new StatEffect(se.statType, se.value);
+        // }
     }
 }

@@ -26,6 +26,7 @@ namespace GOAP
                         .ToList();
 
                 default:
+                    Debug.Log(goal.statType);
                     return inventory.items
                         .Where(
                             inventoryItem =>

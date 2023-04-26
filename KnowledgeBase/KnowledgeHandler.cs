@@ -11,6 +11,7 @@ namespace GOAP
         public List<BlueprintCatalogue> blueprintCatalogues = new List<BlueprintCatalogue>(); //testing
         public ItemMemory itemMemory = new ItemMemory();
         public StationMemory stationMemory = new StationMemory();
+        public List<Inventory> inventories = new List<Inventory>();
         public BlueprintRepertoire blueprintRepertoire = new BlueprintRepertoire();
 
         public void Init()

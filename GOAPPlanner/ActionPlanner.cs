@@ -377,6 +377,57 @@ namespace GOAP
             }
         }
 
+        public void PlanFromKnownInventories(Action action)
+        {
+            Action updateAction = action;
+
+            switch (action.goal.statType)
+            {
+                case StatType.Have_Item_In_Inventory:
+                case StatType.Have_Item_Equipped:
+                    foreach (Inventory inventory in currentAgent.knowledgeHandler.inventories)
+                    {
+                        List<ItemSO> items = currentAgent.inventoryHandler.ReturnGoalItems(
+                            action.goal,
+                            inventory
+                        );
+                        foreach (ItemSO item in items)
+                        {
+                            if (updateAction.goal.statType == StatType.Have_Item_In_Inventory)
+                            {
+                                Stat invGoal = new Stat(StatType.Have_Item_In_Inventory, items[0]);
+                                updateAction = UnEquipItem(updateAction, invGoal);
+                            }
+                            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, items[0]);
+                            updateAction = EquipFromStorage(updateAction, updateGoal);
+                            actionList.Add(updateAction);
+                        }
+                    }
+                    break;
+
+                default:
+                    foreach (Inventory inventory in currentAgent.knowledgeHandler.inventories)
+                    {
+                        List<ItemSO> items = currentAgent.inventoryHandler.ReturnGoalItems(
+                            action.goal,
+                            inventory
+                        );
+                        Debug.Log(items);
+                        Debug.Log(items.Count);
+                        foreach (ItemSO item in items)
+                        {
+                            Stat invGoal = new Stat(updateAction.goal.statType, items[0]);
+                            updateAction = UseEquippedItem(updateAction, invGoal);
+
+                            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, items[0]);
+                            updateAction = EquipFromStorage(updateAction, updateGoal);
+                            actionList.Add(updateAction);
+                        }
+                    }
+                    break;
+            }
+        }
+
         #endregion
 
         #region Basic Action methods
@@ -579,8 +630,17 @@ namespace GOAP
         #endregion
 
         #region World Action Method
-        public void PlanFromKnownInventories(Action action) { }
+        private static Action EquipFromStorage(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Equip_From_Storage, goal);
 
+            Stat updateGoal = new Stat(StatType.Be_At_Station, goal.stationData);
+            updateAction = MoveToLocation(updateAction, updateGoal);
+            return updateAction;
+        }
+
+        public void CollectFromStorage(Action action) { }
         #endregion
 
         public void SortActionList(List<Action> actionList)
@@ -599,7 +659,6 @@ namespace GOAP
         }
 
         #region
-
         public void SaveMasterActionToFile(string filePath)
         {
             JSONAction jSONAction = new JSONAction(masterAction);

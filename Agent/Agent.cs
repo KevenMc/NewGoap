@@ -43,6 +43,7 @@ namespace GOAP
             statHandler = GetComponent<StatHandler>();
             // actionPlanner = GetComponent<ActionPlanner>();
             inventoryHandler = GetComponent<InventoryHandler>();
+            inventory = GetComponent<Inventory>();
             knowledgeHandler = GetComponent<KnowledgeHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
             actionHandler = GetComponent<ActionHandler>();

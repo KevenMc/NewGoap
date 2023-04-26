@@ -16,4 +16,6 @@ MonoBehaviour:
   itemUseCost: 0
   itemPrefab: {fileID: 7728782186762033283, guid: 1a2d8faa62531fe00b79df451d809f63, type: 3}
   useItemAnimation: {fileID: 0}
-  statEffects: []
+  statEffects:
+  - statType: 101
+    value: -10

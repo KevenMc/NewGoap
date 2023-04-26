@@ -11,6 +11,7 @@ namespace GOAP
         Require_Move_To_Location,
         Interact_With_Station,
         Equip_From_Station,
+        Equip_From_Storage,
         Make_Blueprint_From_Inventory,
         Make_Blueprint_At_Station,
         Blueprint_Require_Item

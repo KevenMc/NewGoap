@@ -15,5 +15,13 @@ namespace GOAP
         }
 
         public List<InventoryItem> items = new List<InventoryItem>();
+
+        private void Start()
+        {
+            foreach (InventoryItem inventoryItem in items)
+            {
+                inventoryItem.statEffects.AddRange(inventoryItem.itemData.statEffects);
+            }
+        }
     }
 }
