@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.AI;
 
 namespace GOAP
@@ -14,6 +14,7 @@ namespace GOAP
     [RequireComponent(typeof(MovementHandler))]
     [RequireComponent(typeof(ActionHandler))]
     [RequireComponent(typeof(Inventory))]
+    [RequireComponent(typeof(RelationshipHandler))]
     // [RequireComponent(typeof(NavMeshAgent))]
     public class Agent : MonoBehaviour
     {
@@ -23,6 +24,7 @@ namespace GOAP
         public InventoryHandler inventoryHandler;
         public Inventory inventory;
         public KnowledgeHandler knowledgeHandler;
+        public RelationshipHandler relationshipHandler;
         public BlueprintHandler blueprintHandler;
         public ActionHandler actionHandler;
         public NavMeshAgent navMeshAgent;
@@ -45,6 +47,7 @@ namespace GOAP
             inventoryHandler = GetComponent<InventoryHandler>();
             inventory = GetComponent<Inventory>();
             knowledgeHandler = GetComponent<KnowledgeHandler>();
+            relationshipHandler = GetComponent<RelationshipHandler>();
             blueprintHandler = GetComponent<BlueprintHandler>();
             actionHandler = GetComponent<ActionHandler>();
             navMeshAgent = GetComponent<NavMeshAgent>();

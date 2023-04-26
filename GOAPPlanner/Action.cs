@@ -25,6 +25,8 @@ namespace GOAP
         #endregion
 
         #region
+        public Agent delegateAgent;
+        public Agent receiverAgent;
         public float actionCost = 1;
         public ItemSO itemData;
         public StationSO stationData;
@@ -74,6 +76,7 @@ namespace GOAP
             this.stationData = goal.stationData;
             this.location = goal.location;
             this.blueprint = goal.blueprint;
+            this.delegateAgent = goal.agent;
 
             switch (actionType)
             {
@@ -114,7 +117,17 @@ namespace GOAP
                         + " from "
                         + goal.stationData.stationName;
                     break;
-
+                case (ActionType.Delegate_Action):
+                    this.delegateAgent = goal.agent;
+                    this.actionName =
+                        actionType.ToString() + " : " + goal.agent + "\n =>> " + goal.delegateGoal;
+                    break;
+                case (ActionType.Move_To_Agent):
+                case (ActionType.Return_Delegate_Action):
+                case (ActionType.Receive_Delegate_Action):
+                    this.delegateAgent = goal.agent;
+                    this.actionName = actionType.ToString() + " : " + goal.agent;
+                    break;
                 default:
                     this.actionName = actionType.ToString();
                     break;

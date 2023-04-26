@@ -14,7 +14,11 @@ namespace GOAP
         Move_To_Location,
         Move_To_Station_Location,
         Use_Station,
+        Delegate_Action,
+        Interrupt_Agent,
+        Return_Delegate_Action,
         Blueprint,
+        Storage,
         Hunger = 100,
         Thirst = 101,
         Energy = 102

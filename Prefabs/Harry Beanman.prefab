@@ -129,90 +129,6 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &2920386005068302045
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2920386005068302040}
-  - component: {fileID: 2920386005068302047}
-  - component: {fileID: 2920386005068302046}
-  m_Layer: 0
-  m_Name: Main Camera
-  m_TagString: MainCamera
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2920386005068302040
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2920386005068302045}
-  m_LocalRotation: {x: -0.066786684, y: 0.9313649, z: -0.22083345, w: -0.28165862}
-  m_LocalPosition: {x: 1.5423908, y: 2.618703, z: 4.54109}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2920386005115969992}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!20 &2920386005068302047
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2920386005068302045}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: -1
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!81 &2920386005068302046
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2920386005068302045}
-  m_Enabled: 1
 --- !u!1 &2920386005115970033
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,6 +147,8 @@ GameObject:
   - component: {fileID: 2920386005115969993}
   - component: {fileID: 2920386005115969994}
   - component: {fileID: 2920386005115969995}
+  - component: {fileID: 7340599183087589932}
+  - component: {fileID: 4628751214290169453}
   m_Layer: 0
   m_Name: Harry Beanman
   m_TagString: Untagged
@@ -251,7 +169,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2920720978767714983}
-  - {fileID: 2920386005068302040}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -274,6 +191,11 @@ MonoBehaviour:
   currentGoal:
     statType: 0
     itemData: {fileID: 0}
+    item: {fileID: 0}
+    blueprint: {fileID: 0}
+    station: {fileID: 0}
+    agent: {fileID: 0}
+    location: {x: 0, y: 0, z: 0}
     stationData: {fileID: 0}
     current: 0
     trigger: 0
@@ -292,7 +214,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6f736378cc741a258e597d205773b20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  items: []
 --- !u!114 &2920386005115969997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,10 +226,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903a0c3209650611e9e2217220ec1e14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemsToAdd: []
-  stationsToAdd: []
+  itemsToAdd:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  stationsToAdd:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   blueprintCatalogues:
   - {fileID: 11400000, guid: 6d11e0cd24d42a6f4b5f2c3f3b0e9b64, type: 2}
+  - {fileID: 11400000, guid: dba32558f9541d5ab89f06a633bf98fd, type: 2}
+  inventories:
+  - {fileID: 0}
 --- !u!114 &2920386005115969996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -347,7 +285,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statHandler: {fileID: 2920386005115969999}
   inventoryHandler: {fileID: 2920386005115969998}
+  inventory: {fileID: 7340599183087589932}
   knowledgeHandler: {fileID: 2920386005115969997}
+  relationshipHandler: {fileID: 4628751214290169453}
   blueprintHandler: {fileID: 2920386005115969996}
   actionHandler: {fileID: 2920386005115969993}
   navMeshAgent: {fileID: 2920386005115969995}
@@ -417,6 +357,33 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &7340599183087589932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2920386005115970033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8e40315ebebefff996c45be7651a753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  items: []
+--- !u!114 &4628751214290169453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2920386005115970033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fb73e101bed07127b1aa24833890a11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knownAgents:
+  - {fileID: 0}
 --- !u!1001 &2920386004356683291
 PrefabInstance:
   m_ObjectHideFlags: 0

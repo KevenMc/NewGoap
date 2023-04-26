@@ -13,10 +13,15 @@ namespace GOAP
         public Action masterAction;
         public Action grandMasterAction;
         public Vector3 currentLocation;
+        public Boolean canDelegate = true;
         public List<List<Action>> duplicateActions = new List<List<Action>>();
 
         public void SetGoal(Stat goal)
         {
+            if (goal.agent != null)
+            {
+                canDelegate = false;
+            }
             actionList.Clear();
             actionList.Add(new Action(goal));
             masterAction = actionList[0];
@@ -27,6 +32,7 @@ namespace GOAP
 
         public void PlanAction(Agent agent)
         {
+            canDelegate = true;
             currentLocation = agent.transform.position;
             currentAgent = agent;
             agent.statHandler.UpdateGoals();
@@ -64,10 +70,17 @@ namespace GOAP
             currentAgent = null;
         }
 
+        int x = 0;
+
         public Boolean IterateThroughActions()
         {
             while (true)
             {
+                x++;
+                if (x > 25)
+                {
+                    return false;
+                }
                 SaveMasterActionToFile("json.json");
 
                 if (actionList.Count == 0)
@@ -118,11 +131,27 @@ namespace GOAP
         #region Extend Actions
         public void ExtendAction(Action action)
         {
-            PlanFromInventory(action);
-            PlanFromKnownInventories(action);
-            PlanFromKnownItems(action);
-            PlanFromStationMemory(action);
-            PlanFromBlueprintRepertoire(action);
+            Debug.Log("next action");
+            if (action.goal.statType == StatType.Return_Delegate_Action)
+            {
+                Action addAction = ReturnDelegateAction(action);
+                Debug.Log("777777777777777777777");
+                Debug.Log(addAction.actionName);
+                actionList.Add(addAction);
+            }
+            else
+            {
+                Debug.Log("back here again");
+                PlanFromInventory(action);
+                PlanFromKnownInventories(action);
+                PlanFromKnownItems(action);
+                PlanFromStationMemory(action);
+                PlanFromBlueprintRepertoire(action);
+                if (canDelegate)
+                {
+                    PlanFromDelegate(action);
+                }
+            }
 
             actionList.Remove(action);
         }
@@ -182,6 +211,8 @@ namespace GOAP
 
         private void PlanFromKnownItems(Action action)
         {
+            Debug.Log("hhhhhhhhhhhhhhhhhhhhhhh");
+            Debug.Log(action.goal.statType);
             Action updateAction = action;
             List<Item> memoryItems = new List<Item>();
             switch (action.goal.statType)
@@ -412,8 +443,7 @@ namespace GOAP
                             action.goal,
                             inventory
                         );
-                        Debug.Log(items);
-                        Debug.Log(items.Count);
+
                         foreach (ItemSO item in items)
                         {
                             Stat invGoal = new Stat(updateAction.goal.statType, items[0]);
@@ -428,6 +458,28 @@ namespace GOAP
             }
         }
 
+        public void PlanFromDelegate(Action action)
+        {
+            if (action.actionType != ActionType.Require_Item_In_Inventory)
+            {
+                return;
+            }
+            List<Agent> agents = currentAgent.relationshipHandler.ReturnDelegateAgents(action.goal);
+            foreach (Agent agent in agents)
+            {
+                Stat updateGoal = new Stat(StatType.Delegate_Action, agent, action.goal);
+                Action updateAction = DelegateAction(action, updateGoal);
+                actionList.Add(updateAction);
+            }
+        }
+
+        public Action ReturnDelegateAction(Action action)
+        {
+            Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, action.goal.itemData);
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Require_Item_In_Inventory, updateGoal);
+            return updateAction;
+        }
         #endregion
 
         #region Basic Action methods
@@ -630,11 +682,34 @@ namespace GOAP
         #endregion
 
         #region World Action Method
+        private static Action MoveToAgent(
+            Action updateAction,
+            Stat goal,
+            Boolean canMoveToLocation = true
+        )
+        {
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.Move_To_Agent, goal, canMoveToLocation);
+            return updateAction;
+        }
+
+        public static Action DelegateAction(Action action, Stat goal)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.Receive_Delegate_Action, goal);
+
+            updateAction = new Action(updateAction);
+            updateAction.Init(ActionType.Delegate_Action, goal);
+
+            Stat updateGoal = new Stat(StatType.Interrupt_Agent, goal.agent, goal);
+            updateAction = MoveToAgent(updateAction, updateGoal);
+            return updateAction;
+        }
+
         private static Action EquipFromStorage(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Equip_From_Storage, goal);
-
             Stat updateGoal = new Stat(StatType.Be_At_Station, goal.stationData);
             updateAction = MoveToLocation(updateAction, updateGoal);
             return updateAction;

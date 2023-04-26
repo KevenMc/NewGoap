@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 namespace GOAP
 {
@@ -54,6 +54,8 @@ namespace GOAP
                 //     break;
                 case StatType.Use_Station:
                 case StatType.Be_At_Station:
+                    if (goal.stationData == null)
+                        break;
                     if (stationLocations.ContainsKey(goal.stationData))
                     {
                         stations.AddRange(stationLocations[goal.stationData]);

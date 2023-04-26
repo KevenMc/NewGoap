@@ -13,8 +13,11 @@ namespace GOAP
         public Item item;
         public Blueprint blueprint;
         public Station station;
+        public Agent agent;
+        public Stat delegateGoal;
         public Vector3 location;
         public StationSO stationData;
+        public Inventory inventory;
         public float current;
         public float trigger;
         public float increment;
@@ -82,6 +85,13 @@ namespace GOAP
             this.stationData = blueprint.craftingStation;
         }
 
+        public Stat(StatType statType, Agent agent, Stat delegateGoal)
+        {
+            this.statType = statType;
+            this.agent = agent;
+            this.delegateGoal = delegateGoal;
+        }
+
         public Stat(
             StatType statType,
             ItemSO itemData,
@@ -104,6 +114,14 @@ namespace GOAP
             string retString = "Satisfy : " + statType.ToString() + " : \n";
             if (itemData != null)
                 retString += "Item type : " + itemData.itemName;
+            if (stationData != null)
+            {
+                retString += "Station type : " + stationData;
+            }
+            if (station != null)
+            {
+                retString += "Station : " + station;
+            }
             return retString;
         }
 
