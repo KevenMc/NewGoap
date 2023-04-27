@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -111,7 +111,6 @@ namespace GOAP
             );
             if (!currentAction.isOwnMaster || currentAction.parentAction.CanComplete())
             {
-                Debug.Log("Adding : " + currentAction.parentAction);
                 actionsToPerform.Add(currentAction.parentAction);
             }
 
@@ -120,7 +119,6 @@ namespace GOAP
                 case ActionType.Move_To_Location:
                     MoveTo(currentAction.location);
                     ActionManager.instance.RegisterSubscriber(this);
-
                     break;
 
                 case ActionType.Equip_From_Inventory:
@@ -135,16 +133,21 @@ namespace GOAP
                     Debug.Log(currentAction.itemData.itemName);
                     agent.animator.Play(currentAction.itemData.useItemAnimation.name);
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
-
                     break;
 
                 case ActionType.Blueprint_Require_Item:
                 case ActionType.Require_Item_In_Inventory:
-                    currentAction.parentAction.canComplete = true;
-                    Debug.Log("Now executing a new action, this action is empty");
-                    Debug.Log(actionsToPerform.Count);
+                case ActionType.Require_Move_To_Location:
+                case ActionType.Delegate_Action:
+
+                case ActionType.Move_To_Agent:
+                case ActionType.Equip_From_Station:
+                case ActionType.Equip_From_Storage:
+                case ActionType.UnEquip_To_Storage:
+                case ActionType.Make_Blueprint_At_Station:
+                case ActionType.Receive_Delegate_Action:
+                case ActionType.Return_Delegate_Action:
                     ExecuteAction();
-                    Debug.Log("Executed");
                     break;
 
                 default:
@@ -154,7 +157,7 @@ namespace GOAP
                             + " : "
                             + currentAction.actionName
                     );
-
+                    ExecuteAction();
                     break;
             }
         }
@@ -215,8 +218,8 @@ namespace GOAP
 
         public void UnEquip_To_Inventory()
         {
-            inventoryHandler.AddItem(currentAction.item.itemData, agent.inventory);
-            Destroy(currentAction.item.gameObject);
+            inventoryHandler.AddItem(currentAction.itemData, agent.inventory);
+            Destroy(agent.equippedItem);
             agent.animator.SetBool(ActionType.UnEquip_To_Inventory.ToString(), false);
             currentAction.parentAction.canComplete = true;
         }

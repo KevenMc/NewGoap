@@ -20,7 +20,7 @@ namespace GOAP
         {
             if (goal.agent != null)
             {
-                canDelegate = false;
+                // canDelegate = false;
             }
             actionList.Clear();
             actionList.Add(new Action(goal));
@@ -77,29 +77,43 @@ namespace GOAP
             while (true)
             {
                 x++;
-                if (x > 25)
+                if (x > 100)
                 {
                     return false;
                 }
-                SaveMasterActionToFile("json.json");
-
-                if (actionList.Count == 0)
-                {
-                    currentAgent.requiresNewAction = false;
-                    return false;
-                }
+                // SaveMasterActionToFile("json.json");
 
                 SortActionList(actionList);
+                // if (actionList[0].actionType == ActionType.Move_To_Agent)
+                // {
+                //     Debug.Log(
+                //         "£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££"
+                //     );
+                //     Debug.Log(actionList[0].actionName);
+                //     Debug.Log(actionList[0].canComplete);
+                //     Debug.Log(CanCompleteMasterAction(grandMasterAction));
+                //     SaveMasterActionToFile("moveto.json", actionList[0].parentAction.parentAction);
 
-                if (
-                    actionList[0].CanComplete()
-                    && CanCompleteMasterAction(actionList[0].grandMasterAction)
-                )
+                //     currentAgent.requiresNewAction = false;
+                //     return false;
+                // }
+                if (CanCompleteMasterAction(grandMasterAction))
                 {
+                    SaveMasterActionToFile("json.json", masterAction);
+
+                    Debug.Log("Plan complete");
                     currentAgent.requiresNewAction = false;
                     return true;
                 }
 
+                if (actionList.Count == 0)
+                {
+                    Debug.Log("There are no more actions to search");
+                    SaveMasterActionToFile("json.json", masterAction);
+
+                    currentAgent.requiresNewAction = false;
+                    return false;
+                }
                 ExtendAction(actionList[0]);
             }
         }
@@ -108,7 +122,8 @@ namespace GOAP
         {
             if (action.subActions.Count + action.childActions.Count == 0)
             {
-                return action.canComplete;
+                Boolean comp = action.CanComplete();
+                return comp;
             }
 
             List<Boolean> returnList = new List<bool>();
@@ -124,6 +139,10 @@ namespace GOAP
             {
                 returnList.Add(CanCompleteMasterAction(childAction));
             }
+            if (action.subActions.Count + action.childActions.Count == 0)
+            {
+                return action.CanComplete();
+            }
 
             return returnList.All(b => b); //return if ALL children and subActions canComplete
         }
@@ -131,28 +150,40 @@ namespace GOAP
         #region Extend Actions
         public void ExtendAction(Action action)
         {
-            Debug.Log("next action");
-            if (action.goal.statType == StatType.Return_Delegate_Action)
+            if (action.canComplete)
             {
-                Action addAction = ReturnDelegateAction(action);
-                Debug.Log("777777777777777777777");
-                Debug.Log(addAction.actionName);
-                actionList.Add(addAction);
-            }
-            else
-            {
-                Debug.Log("back here again");
-                PlanFromInventory(action);
-                PlanFromKnownInventories(action);
-                PlanFromKnownItems(action);
-                PlanFromStationMemory(action);
-                PlanFromBlueprintRepertoire(action);
-                if (canDelegate)
-                {
-                    PlanFromDelegate(action);
-                }
+                actionList.Remove(action);
+                return;
             }
 
+            switch (action.goal.statType)
+            {
+                case StatType.Return_Delegate_Action:
+                    actionList.Add(ReturnDelegateAction(action));
+                    break;
+
+                case StatType.Storage:
+                    actionList.Add(StoreItem(action));
+                    break;
+
+                default:
+                    PlanFromInventory(action);
+                    PlanFromKnownItems(action);
+                    PlanFromStationMemory(action);
+                    PlanFromBlueprintRepertoire(action);
+
+                    // if (grandMasterAction.goal.statType != StatType.Storage)
+                    //     PlanFromKnownInventories(action);
+
+                    if (canDelegate)
+                        PlanFromDelegate(action);
+                    break;
+            }
+
+            if (action.subActions.Count + action.childActions.Count == 0 && !action.CanComplete())
+            {
+                RecursiveDropActions(action);
+            }
             actionList.Remove(action);
         }
 
@@ -211,8 +242,6 @@ namespace GOAP
 
         private void PlanFromKnownItems(Action action)
         {
-            Debug.Log("hhhhhhhhhhhhhhhhhhhhhhh");
-            Debug.Log(action.goal.statType);
             Action updateAction = action;
             List<Item> memoryItems = new List<Item>();
             switch (action.goal.statType)
@@ -514,7 +543,7 @@ namespace GOAP
         private static Action RequireItemInInventory(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
-            updateAction.Init(ActionType.Require_Item_In_Inventory, goal, true);
+            updateAction.Init(ActionType.Require_Item_In_Inventory, goal);
             return updateAction;
         }
 
@@ -693,7 +722,7 @@ namespace GOAP
             return updateAction;
         }
 
-        public static Action DelegateAction(Action action, Stat goal)
+        public Action DelegateAction(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Receive_Delegate_Action, goal);
@@ -712,6 +741,22 @@ namespace GOAP
             updateAction.Init(ActionType.Equip_From_Storage, goal);
             Stat updateGoal = new Stat(StatType.Be_At_Station, goal.stationData);
             updateAction = MoveToLocation(updateAction, updateGoal);
+            return updateAction;
+        }
+
+        private static Action StoreItem(Action action)
+        {
+            Action updateAction = new Action(action);
+            updateAction.Init(ActionType.UnEquip_To_Storage, action.goal);
+
+            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, action.goal.itemData);
+            updateAction = EquipFromInventory(updateAction, updateGoal);
+
+            updateGoal = new Stat(StatType.Be_At_Station, action.goal.stationData);
+            updateAction = MoveToLocation(updateAction, updateGoal, false);
+
+            updateGoal = new Stat(StatType.Have_Item_In_Inventory, action.goal.itemData);
+            updateAction = RequireItemInInventory(updateAction, updateGoal);
             return updateAction;
         }
 
@@ -734,9 +779,9 @@ namespace GOAP
         }
 
         #region
-        public void SaveMasterActionToFile(string filePath)
+        public void SaveMasterActionToFile(string filePath, Action action)
         {
-            JSONAction jSONAction = new JSONAction(masterAction);
+            JSONAction jSONAction = new JSONAction(action);
 
             // Convert the dictionary to JSON
             string jsonData = JsonUtility.ToJson(jSONAction);
