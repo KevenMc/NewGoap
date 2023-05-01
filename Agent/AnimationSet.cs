@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace GOAP
 {
+    public enum AnimationBase
+    {
+        Single_Attack,
+        Use_Item
+    }
+
     public class AnimationClipOverrides : List<KeyValuePair<AnimationClip, AnimationClip>>
     {
         public AnimationClipOverrides(int capacity)
@@ -23,12 +29,6 @@ namespace GOAP
         }
     }
 
-    public enum AnimationBase
-    {
-        Single_Attack,
-        Use_Item
-    }
-
     [CreateAssetMenu(fileName = "New Animation Set", menuName = "GOAP/Animation Set")]
     public class AnimationSet : ScriptableObject
     {
@@ -40,17 +40,5 @@ namespace GOAP
         }
 
         public List<AnimationOverride> animationOverrides = new List<AnimationOverride>();
-
-        // public void AddAnimationOverride(AnimationBase animationName, AnimationClip clip)
-        // {
-        //     animationOverrides.Add(
-        //         new AnimationOverride
-        //         {
-        //             animationName = animationName,
-        //             clip = clip,
-        //             overrideClip = new AnimationClipOverrides(1)
-        //         }
-        //     );
-        // }
     }
 }

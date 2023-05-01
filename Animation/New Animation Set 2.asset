@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac3c11865cf7c00a0bc84b4421d8d06e, type: 3}
-  m_Name: New Animation Set
+  m_Name: New Animation Set 2
   m_EditorClassIdentifier: 
   animationOverrides:
   - animationName: 1
-    clip: {fileID: 7400000, guid: 053ec18f067de0a4c9650802e1995cb6, type: 3}
+    clip: {fileID: 1827226128182048838, guid: a5151a1c33b16674e9ab2a9ae7cf6f8f, type: 3}
   - animationName: 0
     clip: {fileID: 0}
