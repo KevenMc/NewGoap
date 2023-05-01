@@ -19,5 +19,6 @@ namespace GOAP
         public GameObject itemPrefab;
         public AnimationClip useItemAnimation;
         public List<StatEffect> statEffects = new List<StatEffect>();
+        public AnimationClip useAnimationClip;
     }
 }

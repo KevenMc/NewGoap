@@ -18,7 +18,8 @@ namespace GOAP
         public List<Action> childActions = new List<Action>();
         public List<Action> subActions = new List<Action>();
         public bool canComplete = false;
-        public Boolean isSubAction = false;
+
+        // public Boolean isSubAction = false;
         public Boolean isLastSubAction = false;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
         public AnimationClip animation;
@@ -77,6 +78,7 @@ namespace GOAP
             this.location = goal.location;
             this.blueprint = goal.blueprint;
             this.delegateAgent = goal.agent;
+            this.actionName = actionType.ToString() + " : ";
 
             switch (actionType)
             {
@@ -86,50 +88,41 @@ namespace GOAP
                 case (ActionType.Equip_From_Inventory):
                 case (ActionType.Collect_And_Equip):
                 case (ActionType.Blueprint_Require_Item):
-                    this.actionName = actionType.ToString() + " : " + goal.itemData.itemName;
+                    this.actionName += goal.itemData.itemName;
                     break;
                 case (ActionType.Interact_With_Station):
-                    this.actionName = actionType.ToString() + " : " + goal.stationData.stationName;
+                    this.actionName += goal.stationData.stationName;
                     break;
                 case (ActionType.Move_To_Location):
-                    this.actionName = actionType.ToString() + " : " + goal.location;
+                    this.actionName += goal.location;
                     break;
                 case (ActionType.Require_Move_To_Location):
-                    this.actionName = actionType.ToString() + " : " + goal.stationData.stationName;
+                    this.actionName += goal.stationData.stationName;
                     break;
                 case (ActionType.Make_Blueprint_From_Inventory):
-                    this.actionName =
-                        actionType.ToString() + " : " + goal.blueprint.craftedItem.itemName;
+                    this.actionName += goal.blueprint.craftedItem.itemName;
                     break;
                 case (ActionType.Make_Blueprint_At_Station):
-                    this.actionName =
-                        actionType.ToString()
-                        + " : "
-                        + goal.blueprint.craftedItem.itemName
+                    this.actionName +=
+                        goal.blueprint.craftedItem.itemName
                         + " at "
                         + goal.blueprint.craftingStation.stationName;
                     break;
                 case (ActionType.Equip_From_Station):
-                    this.actionName =
-                        actionType.ToString()
-                        + " : "
-                        + goal.itemData.itemName
-                        + " from "
-                        + goal.stationData.stationName;
+                    this.actionName +=
+                        goal.itemData.itemName + " from " + goal.stationData.stationName;
                     break;
                 case (ActionType.Delegate_Action):
                     this.delegateAgent = goal.agent;
-                    this.actionName =
-                        actionType.ToString() + " : " + goal.agent + "\n =>> " + goal.delegateGoal;
+                    this.actionName += goal.agent.agentName + "\n =>> " + goal.delegateGoal;
                     break;
                 case (ActionType.Move_To_Agent):
                 case (ActionType.Return_Delegate_Action):
                 case (ActionType.Receive_Delegate_Action):
                     this.delegateAgent = goal.agent;
-                    this.actionName = actionType.ToString() + " : " + goal.agent;
+                    this.actionName += goal.agent.agentName;
                     break;
                 default:
-                    this.actionName = actionType.ToString();
                     break;
             }
 

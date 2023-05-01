@@ -18,6 +18,7 @@ namespace GOAP
     // [RequireComponent(typeof(NavMeshAgent))]
     public class Agent : MonoBehaviour
     {
+        public string agentName;
         public StatHandler statHandler;
 
         // public ActionPlanner actionPlanner;

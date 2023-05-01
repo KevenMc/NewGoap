@@ -17,3 +17,4 @@ MonoBehaviour:
   itemPrefab: {fileID: 4014549670608976319, guid: 7cb1e3719a40ece2da9f8e49890e947f, type: 3}
   useItemAnimation: {fileID: 0}
   statEffects: []
+  useAnimationClip: {fileID: 7400000, guid: 053ec18f067de0a4c9650802e1995cb6, type: 3}
