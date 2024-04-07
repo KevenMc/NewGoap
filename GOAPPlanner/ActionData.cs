@@ -2,6 +2,7 @@ namespace GOAP
 {
     public enum ActionType
     {
+        Master_Action,
         Use_Item,
         Collect_And_Equip,
         UnEquip_To_Inventory,

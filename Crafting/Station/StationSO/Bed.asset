@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ed9201601de9e2cbff65660120ba3f, type: 3}
+  m_Name: Bed
+  m_EditorClassIdentifier: 
+  stationName: 
+  statEffects:
+  - statType: 102
+    value: -100
+  StationPrefab: {fileID: 1962001065680042917, guid: 61480b10e5cc118ef892bce084078ce9, type: 3}

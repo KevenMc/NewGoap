@@ -24,6 +24,8 @@ namespace GOAP
             }
             actionList.Clear();
             actionList.Add(new Action(goal));
+            // SortActionList(actionList);
+
             masterAction = actionList[0];
             grandMasterAction = masterAction;
             currentAgent.requiresNewAction = true;
@@ -32,6 +34,7 @@ namespace GOAP
 
         public void PlanAction(Agent agent)
         {
+            Debug.Log("Plan Action");
             canDelegate = true;
             currentLocation = agent.transform.position;
             currentAgent = agent;
@@ -40,37 +43,63 @@ namespace GOAP
 
             if (currentGoals.Count == 0)
             {
+                Debug.Log("0");
+                grandMasterAction = null;
+                agent.actionHandler.canPerformAction = false;
+                // currentAgent.requiresNewAction = true;
                 return;
             }
             Stat topStat = currentGoals[0];
-
-            if (topStat.IsUrgent() && agent.statHandler.currentGoal != topStat)
+            Debug.Log("1");
+            if (topStat.IsUrgent() && agent.statHandler.currentGoals[0] != topStat)
             {
-                agent.statHandler.currentGoal = topStat;
-
+                Debug.Log("2");
+                Debug.Log("Urgent");
+                agent.statHandler.currentGoals[0] = topStat;
                 SetGoal(topStat);
                 if (IterateThroughActions())
                 {
+                    Debug.Log("3");
+                    masterAction = actionList[0];
+                    Debug.Log(
+                        "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
+                    );
+                    Debug.Log(masterAction.actionCost);
                     agent.SetMasterAction(masterAction);
                     return;
                 }
             }
             else if (currentAgent.requiresNewAction)
             {
+                Debug.Log("4");
                 foreach (Stat stat in currentGoals)
                 {
                     SetGoal(stat);
                     if (IterateThroughActions())
                     {
+                        masterAction = actionList[0];
+                        Debug.Log(masterAction.actionName);
+                        Debug.Log(masterAction.actionCost);
                         agent.SetMasterAction(masterAction);
+                        Debug.Log("MASTER ACTION LOGGIN");
+                        masterAction.LogAction();
                         return;
                     }
                 }
             }
+            Debug.Log("5");
             currentAgent = null;
         }
 
         int x = 0;
+
+        public void LogAll(Action action)
+        {
+            if (action.parentAction != null)
+            {
+                LogAll(action.parentAction);
+            }
+        }
 
         public Boolean IterateThroughActions()
         {
@@ -81,28 +110,16 @@ namespace GOAP
                 {
                     return false;
                 }
-                // SaveMasterActionToFile("json.json");
 
                 SortActionList(actionList);
-                // if (actionList[0].actionType == ActionType.Move_To_Agent)
-                // {
-                //     Debug.Log(
-                //         "£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££"
-                //     );
-                //     Debug.Log(actionList[0].actionName);
-                //     Debug.Log(actionList[0].canComplete);
-                //     Debug.Log(CanCompleteMasterAction(grandMasterAction));
-                //     SaveMasterActionToFile("moveto.json", actionList[0].parentAction.parentAction);
 
-                //     currentAgent.requiresNewAction = false;
-                //     return false;
-                // }
                 if (CanCompleteMasterAction(grandMasterAction))
                 {
                     SaveMasterActionToFile("json.json", masterAction);
 
                     Debug.Log("Plan complete");
                     currentAgent.requiresNewAction = false;
+                    currentAgent.actionHandler.canPerformAction = true;
                     return true;
                 }
 
@@ -167,10 +184,21 @@ namespace GOAP
                     break;
 
                 default:
+                    Debug.Log("--------------------------------------------------------");
+                    Debug.Log("Action Name  : " + action.actionName);
+                    Debug.Log("Action Type : " + action.actionType);
+                    Debug.Log("Plan from inventory");
                     PlanFromInventory(action);
+
+                    Debug.Log("Plan from known items");
                     PlanFromKnownItems(action);
+
+                    Debug.Log("Plan from stations");
                     PlanFromStationMemory(action);
+
+                    Debug.Log("Plan from blueprints");
                     PlanFromBlueprintRepertoire(action);
+                    Debug.Log("--------------------------------------------------------");
 
                     // if (grandMasterAction.goal.statType != StatType.Storage)
                     //     PlanFromKnownInventories(action);
@@ -259,6 +287,7 @@ namespace GOAP
                             updateAction = UnEquipItem(updateAction, updateGoal);
                         }
                         updateAction = MoveToEquipItem(updateAction, item);
+                        updateAction.Init();
                         actionList.Add(updateAction);
                     }
                     break;
@@ -343,7 +372,7 @@ namespace GOAP
                                     StatType.Have_Item_In_Inventory,
                                     blueprint.craftedItem
                                 );
-                                updateAction = EquipFromInventory(updateAction, updateGoal);
+                                // updateAction = EquipFromInventory(updateAction, updateGoal);
                                 break;
                         }
                         updateActions = MakeFromInventory(updateAction, blueprint);
@@ -400,7 +429,7 @@ namespace GOAP
                                 break;
                         }
                         updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint);
-                        updateAction = EquipFromStation(updateAction, updateGoal);
+                        // updateAction = EquipFromStation(updateAction, updateGoal);
                         updateActions = MakeFromStation(updateAction, blueprint);
                         actionList.AddRange(updateActions);
                         break;
@@ -490,9 +519,8 @@ namespace GOAP
         public void PlanFromDelegate(Action action)
         {
             if (action.actionType != ActionType.Require_Item_In_Inventory)
-            {
                 return;
-            }
+
             List<Agent> agents = currentAgent.relationshipHandler.ReturnDelegateAgents(action.goal);
             foreach (Agent agent in agents)
             {
@@ -512,49 +540,49 @@ namespace GOAP
         #endregion
 
         #region Basic Action methods
-        private static Action UseEquippedItem(Action action, Stat goal)
+        private Action UseEquippedItem(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Use_Item, goal);
             return updateAction;
         }
 
-        private static Action EquipFromInventory(Action action, Stat goal, Boolean hasItem = false)
+        private Action EquipFromInventory(Action action, Stat goal, Boolean hasItem = false)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Equip_From_Inventory, goal, hasItem);
             return updateAction;
         }
 
-        private static Action EquipFromStation(Action action, Stat goal)
+        private Action EquipFromStation(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Equip_From_Station, goal);
             return updateAction;
         }
 
-        private static Action UnEquipItem(Action updateAction, Stat goal)
+        private Action UnEquipItem(Action updateAction, Stat goal)
         {
             updateAction = new Action(updateAction);
             updateAction.Init(ActionType.UnEquip_To_Inventory, goal);
             return updateAction;
         }
 
-        private static Action RequireItemInInventory(Action action, Stat goal)
+        private Action RequireItemInInventory(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Require_Item_In_Inventory, goal);
             return updateAction;
         }
 
-        private static Action RequireItemSubAction(Action action, Stat goal)
+        private Action RequireItemSubAction(Action action, Stat goal)
         {
             Action updateAction = new Action(action, true);
             updateAction.Init(ActionType.Require_Item_In_Inventory, goal);
             return updateAction;
         }
 
-        private static Action MoveToEquipItem(Action action, Item item)
+        private Action MoveToEquipItem(Action action, Item item)
         {
             Stat updateGoal = new Stat(StatType.Move_To_Location, item);
             Action updateAction = CollectAndEquip(action, updateGoal);
@@ -564,28 +592,31 @@ namespace GOAP
             return updateAction;
         }
 
-        private static Action CollectAndEquip(Action updateAction, Stat goal)
+        private Action CollectAndEquip(Action updateAction, Stat goal)
         {
             updateAction = new Action(updateAction);
             updateAction.Init(ActionType.Collect_And_Equip, goal);
             return updateAction;
         }
 
-        private static Action MoveToLocation(
+        private Action MoveToLocation(
             Action updateAction,
             Stat goal,
             Boolean canMoveToLocation = true
         )
         {
             updateAction = new Action(updateAction);
-            updateAction.Init(ActionType.Move_To_Location, goal, canMoveToLocation);
+            float distance = Vector3.Distance(currentAgent.transform.position, goal.location);
+            updateAction.Init(ActionType.Move_To_Location, goal, canMoveToLocation, distance);
+
             return updateAction;
         }
 
-        public static Action RequireMoveToLocation(Action updateAction, Stat goal)
+        public Action RequireMoveToLocation(Action updateAction, Stat goal, bool canMove = true)
         {
-            updateAction = new Action(updateAction, true);
+            updateAction = new Action(updateAction, canMove);
             updateAction.Init(ActionType.Require_Move_To_Location, goal);
+
             return updateAction;
         }
         #endregion
@@ -634,7 +665,6 @@ namespace GOAP
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 subAction = RequireItemSubAction(updateAction, updateGoal);
-
                 updateActions.Add(subAction);
             }
 
@@ -648,9 +678,10 @@ namespace GOAP
             Stat updateGoal = new Stat(StatType.Blueprint, blueprint);
             Action updateAction = new Action(action); //make item one all required items are satisfied
             updateAction.Init(ActionType.Make_Blueprint_At_Station, updateGoal);
-
             updateGoal = new Stat(StatType.Be_At_Station, blueprint);
-            updateActions.Add(RequireMoveToLocation(updateAction, updateGoal)); //create goal to be at station -> this needs to be performed last
+
+            updateAction = RequireMoveToLocation(updateAction, updateGoal);
+            updateActions.Add(updateAction); //create goal to be at station -> this needs to be performed last
             //add in a way to select which station to move to
 
             List<Action> subActions = new List<Action>();
@@ -659,10 +690,8 @@ namespace GOAP
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 Action subAction = RequireItemSubAction(updateAction, updateGoal);
-
                 updateActions.Add(subAction);
             }
-
             return updateActions;
         }
 
@@ -694,14 +723,13 @@ namespace GOAP
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 subAction = RequireItemSubAction(updateAction, updateGoal);
-
                 updateActions.Add(subAction);
             }
 
             return updateActions;
         }
 
-        private static Action InteractWithStation(Action action, Stat goal)
+        private Action InteractWithStation(Action action, Stat goal)
         {
             Action updateAction = action;
             updateAction = new Action(updateAction);
@@ -711,11 +739,7 @@ namespace GOAP
         #endregion
 
         #region World Action Method
-        private static Action MoveToAgent(
-            Action updateAction,
-            Stat goal,
-            Boolean canMoveToLocation = true
-        )
+        private Action MoveToAgent(Action updateAction, Stat goal, Boolean canMoveToLocation = true)
         {
             updateAction = new Action(updateAction);
             updateAction.Init(ActionType.Move_To_Agent, goal, canMoveToLocation);
@@ -735,16 +759,17 @@ namespace GOAP
             return updateAction;
         }
 
-        private static Action EquipFromStorage(Action action, Stat goal)
+        private Action EquipFromStorage(Action action, Stat goal)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Equip_From_Storage, goal);
             Stat updateGoal = new Stat(StatType.Be_At_Station, goal.stationData);
+
             updateAction = MoveToLocation(updateAction, updateGoal);
             return updateAction;
         }
 
-        private static Action StoreItem(Action action)
+        private Action StoreItem(Action action)
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.UnEquip_To_Storage, action.goal);
@@ -766,14 +791,19 @@ namespace GOAP
         public void SortActionList(List<Action> actionList)
         {
             actionList.Sort((action1, action2) => action1.actionCost.CompareTo(action2.actionCost));
+
+            foreach (Action act in actionList)
+            {
+                act.LogAction();
+            }
         }
 
-        public static float GetDistance(Vector3 a, Vector3 b)
+        public float GetDistance(Vector3 a, Vector3 b)
         {
             return Vector3.Distance(a, b);
         }
 
-        public static float GetDistance(Vector2 a, Vector2 b)
+        public float GetDistance(Vector2 a, Vector2 b)
         {
             return Vector2.Distance(a, b);
         }

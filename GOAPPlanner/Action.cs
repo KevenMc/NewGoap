@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace GOAP
@@ -19,6 +20,8 @@ namespace GOAP
         public List<Action> subActions = new List<Action>();
         public bool canComplete = false;
 
+        public bool hasSubActions = false;
+
         // public Boolean isSubAction = false;
         public Boolean isLastSubAction = false;
         public ActionStatus actionStatus = ActionStatus.WaitingToExecute;
@@ -36,6 +39,34 @@ namespace GOAP
         public Blueprint blueprint;
         #endregion
 
+
+        public void LogAction()
+        {
+            Debug.Log("o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o");
+            Debug.Log(
+                actionName + " | Cost :  " + actionCost + " | ActionType : " + actionType.ToString()
+            );
+            Debug.Log("---------Parent--------");
+            LogParent();
+        }
+
+        private void LogParent()
+        {
+            Debug.Log(
+                actionName
+                    + " | Cost :  "
+                    + actionCost
+                    + " | Is Grand Master Action "
+                    + isOwnMaster
+                    + " | ActionType : "
+                    + actionType.ToString()
+            );
+            if (parentAction != null)
+            {
+                parentAction.LogParent();
+            }
+        }
+
         public Action(Stat goal) //Use this to set grandMasterAction
         {
             this.goal = goal;
@@ -44,6 +75,7 @@ namespace GOAP
             this.masterAction = this;
             this.grandMasterAction = this;
             this.actionName = goal.ToString();
+            this.actionType = ActionType.Master_Action;
         }
 
         public Action(Action parentAction, Boolean isSubAction = false)
@@ -68,8 +100,19 @@ namespace GOAP
             }
         }
 
-        public void Init(ActionType actionType, Stat goal, Boolean canComplete = false)
+        public void Init()
         {
+            actionCost += parentAction.actionCost;
+        }
+
+        public void Init(
+            ActionType actionType,
+            Stat goal,
+            Boolean canComplete = false,
+            float addCost = 0
+        )
+        {
+            this.actionCost += this.parentAction.actionCost;
             this.goal = goal;
             this.actionType = actionType;
             this.itemData = goal.itemData;
@@ -83,6 +126,9 @@ namespace GOAP
             switch (actionType)
             {
                 case (ActionType.Use_Item):
+                    this.actionCost += goal.itemData.itemUseCost;
+                    this.actionName += goal.itemData.itemName;
+                    break;
                 case (ActionType.UnEquip_To_Inventory):
                 case (ActionType.Require_Item_In_Inventory):
                 case (ActionType.Equip_From_Inventory):
@@ -95,14 +141,20 @@ namespace GOAP
                     break;
                 case (ActionType.Move_To_Location):
                     this.actionName += goal.location;
+                    this.actionCost += addCost;
                     break;
                 case (ActionType.Require_Move_To_Location):
                     this.actionName += goal.stationData.stationName;
                     break;
                 case (ActionType.Make_Blueprint_From_Inventory):
+                    Debug.Log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+                    Debug.Log(this.parentAction.actionName);
+                    Debug.Log(this.parentAction.parentAction.actionName);
+
                     this.actionName += goal.blueprint.craftedItem.itemName;
                     break;
                 case (ActionType.Make_Blueprint_At_Station):
+                    // this.actionCost += goal.blueprint.actionCost;
                     this.actionName +=
                         goal.blueprint.craftedItem.itemName
                         + " at "
@@ -131,7 +183,6 @@ namespace GOAP
             {
                 this.isLastSubAction = true;
             }
-            this.actionCost += this.parentAction.actionCost;
         }
 
         public Boolean CanComplete()

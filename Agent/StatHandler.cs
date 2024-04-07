@@ -1,9 +1,9 @@
 using System;
-using System.Net.Mail;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using System.Net.Mail;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -14,7 +14,6 @@ namespace GOAP
 
         public Dictionary<StatType, Stat> statsByStatType = new Dictionary<StatType, Stat>();
         public List<Stat> currentGoals = new List<Stat>();
-        public Stat currentGoal;
 
         public class StatHeader
         {
@@ -35,12 +34,13 @@ namespace GOAP
             CompileStatPassports();
             UpdateGoals();
             StatManager.instance.RegisterSubscriber(this);
-        }
-
-        private void OnEnable()
-        {
             RegisterStatHandler();
         }
+
+        // private void OnEnable()
+        // {
+        //     RegisterStatHandler();
+        // }
 
         private void OnDisable()
         {

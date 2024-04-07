@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ed9201601de9e2cbff65660120ba3f, type: 3}
+  m_Name: AppleCrate
+  m_EditorClassIdentifier: 
+  stationName: AppleCrate
+  statEffects: []
+  StationPrefab: {fileID: 562710355720460083, guid: aa936a7d916408367b9aeb1c86e77bd0, type: 3}

@@ -1,1 +1,1 @@
-{"actionName":"Satisfy : Hunger : ","childAction":{"actionName":"Use_Item : Pizza","childAction":{"actionName":"Collect_And_Equip : Pizza","childAction":{"actionName":"Move_To_Location : (-4.05, 0.00, 0.00)","canComplete":true},"canComplete":false},"canComplete":false},"canComplete":false}
+{"actionName":"Satisfy : Energy : ","childAction":{"actionName":"Interact_With_Station : ","childAction":{"actionName":"Move_To_Location : (10.78, 0.00, 9.46)","canComplete":true},"canComplete":false},"canComplete":false}

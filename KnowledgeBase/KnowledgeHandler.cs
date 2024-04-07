@@ -29,5 +29,10 @@ namespace GOAP
 
             blueprintRepertoire.AddBlueprintCatalogues(blueprintCatalogues);
         }
+
+        public void RemoveItem(Item item)
+        {
+            //
+        }
     }
 }

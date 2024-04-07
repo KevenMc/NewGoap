@@ -55,6 +55,7 @@ namespace GOAP
 
             statHandler.Init();
             // actionPlanner.Init();
+            actionHandler.Init();
             inventoryHandler.Init();
             knowledgeHandler.Init();
             blueprintHandler.Init();
@@ -65,6 +66,8 @@ namespace GOAP
 
         public void SetMasterAction(Action action)
         {
+            Debug.Log("Setting master action");
+            UnregisterActionPlanner();
             actionHandler.masterAction = action;
             actionHandler.SetActionList();
             actionHandler.ExecuteAction();
@@ -72,6 +75,7 @@ namespace GOAP
 
         public void InstantiateEquippedItem(GameObject itemPrefab)
         {
+            Debug.Log("Instantiating equipped item " + itemPrefab);
             equippedItem = Instantiate(itemPrefab);
             equippedItem.transform.SetParent(equipLocation.transform);
             equippedItem.transform.localPosition = new Vector3();

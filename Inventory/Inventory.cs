@@ -18,8 +18,11 @@ namespace GOAP
 
         private void Start()
         {
+            Debug.Log(items.Count);
             foreach (InventoryItem inventoryItem in items)
             {
+                Debug.Log("***********************************");
+                Debug.Log(inventoryItem.itemData.itemName);
                 inventoryItem.statEffects.AddRange(inventoryItem.itemData.statEffects);
             }
         }

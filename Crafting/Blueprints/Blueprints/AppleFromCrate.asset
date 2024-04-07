@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3d61f078a02e2112a9b02fa65ba2359, type: 3}
+  m_Name: AppleFromCrate
+  m_EditorClassIdentifier: 
+  blueprintName: AppleFromCrate
+  description: Pick up an apple from a crate
+  actionCost: 100
+  requiredItems: []
+  requiredTool: {fileID: 0}
+  craftingStation: {fileID: 11400000, guid: 243c6be1d76dc76c3ad3cf17728ba867, type: 2}
+  craftedItem: {fileID: 11400000, guid: d8f6f5714fe420c9bad338a1eebf5963, type: 2}

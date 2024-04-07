@@ -3,5 +3,8 @@
         "Behaviour",
         "Dont",
         "Scriptable"
-    ]
+    ],
+    "[csharp]": {
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    }
 }

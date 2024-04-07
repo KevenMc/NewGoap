@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 namespace GOAP
 {
@@ -43,9 +43,11 @@ namespace GOAP
 
         public void ModifyStat(StatHandler subscriber, StatEffect statEffect)
         {
+            Debug.Log("Modify stat");
             Stat stat = subscriber.stats.Find(x => x.statType == statEffect.statType);
             if (stat != null)
             {
+                Debug.Log("1");
                 stat.current += statEffect.value;
             }
             else

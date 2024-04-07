@@ -36,6 +36,37 @@ namespace GOAP
             }
         }
 
+        public void RemoveItem(Item item)
+        {
+            ItemSO itemData = item.itemData;
+
+            // Remove item from itemLocations dictionary
+            if (itemLocations.ContainsKey(itemData))
+            {
+                itemLocations[itemData].Remove(item);
+                // If the list is empty after removing the item, remove the key from the dictionary
+                if (itemLocations[itemData].Count == 0)
+                {
+                    itemLocations.Remove(itemData);
+                }
+            }
+
+            // Remove item from itemsByStat dictionary
+            foreach (StatEffect statEffect in itemData.statEffects)
+            {
+                StatType statType = statEffect.statType;
+                if (itemsByStat.ContainsKey(statType))
+                {
+                    itemsByStat[statType].Remove(item);
+                    // If the list is empty after removing the item, remove the key from the dictionary
+                    if (itemsByStat[statType].Count == 0)
+                    {
+                        itemsByStat.Remove(statType);
+                    }
+                }
+            }
+        }
+
         public List<Item> ItemsByStat(Stat goal)
         {
             List<Item> items = new List<Item>();
