@@ -307,11 +307,9 @@ namespace GOAP
                 switch ((blueprint.requiredTool, blueprint.craftingStation))
                 {
                     case (null, null): //make blueprint from inventory with no tools
-                        Debug.Log("NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL ");
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
-                                Debug.Log("1111111111111111111111111111111111111111111111111111");
                                 break;
 
                             default:
@@ -374,6 +372,9 @@ namespace GOAP
                         break;
 
                     case (null, _): //blueprint from station with no tools
+                        Debug.Log(
+                            "NULL AND _ : NULL AND _ : NULL AND _ : NULL AND _ : NULL AND _ : NULL AND _ : NULL AND _ : "
+                        );
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
@@ -681,10 +682,10 @@ namespace GOAP
 
             Stat updateGoal = new Stat(StatType.Blueprint, blueprint);
             Action updateAction = new Action(action); //make item one all required items are satisfied
-            updateAction.Init(ActionType.Make_Blueprint_At_Station, updateGoal);
+            updateAction.Init(ActionType.Make_Blueprint_At_Station, updateGoal, false);
             updateGoal = new Stat(StatType.Be_At_Station, blueprint);
 
-            updateAction = RequireMoveToLocation(updateAction, updateGoal);
+            updateAction = RequireMoveToLocation(updateAction, updateGoal, false);
             updateActions.Add(updateAction); //create goal to be at station -> this needs to be performed last
             //add in a way to select which station to move to
 

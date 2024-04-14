@@ -108,6 +108,7 @@ namespace GOAP
 
         public void MoveTo(Vector3 location)
         {
+            Debug.Log("MOVETOMOVETOMOVETOMOVETOMOVETOMOVETOMOVETO");
             SetAnimatorState(1);
             target = location;
             navMeshAgent.SetDestination(target);
@@ -130,10 +131,15 @@ namespace GOAP
             return false;
         }
 
+        int numberofactions = 0;
+
         public void ExecuteAction()
         {
-            Debug.Log("Number of actions left to perform : " + actionsToPerform.Count);
-
+            numberofactions++;
+            if (numberofactions > 35)
+            {
+                return;
+            }
             if (!canPerformAction)
             {
                 Debug.Log("Cannot perform next action");
@@ -151,6 +157,7 @@ namespace GOAP
             currentAction = actionsToPerform.Last();
             performAction = currentAction.actionName;
 
+            Debug.Log(currentAction.grandMasterAction.LogActionPlan());
             actionsToPerform.Remove(currentAction);
             Debug.Log(
                 "Execute an action <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -160,7 +167,6 @@ namespace GOAP
                     + " : "
                     + currentAction.canComplete
             );
-            Debug.Log(currentAction.actionType.ToString());
             if (currentAction.actionType == ActionType.Master_Action)
             {
                 SetAnimatorState(0);
@@ -172,19 +178,33 @@ namespace GOAP
                 return;
             }
 
-            if (!currentAction.canComplete)
-            {
-                Debug.Log("OH NO I CANNOT COMPLETE THIS CURRENT TASK THAT I HAVE BEEN GIVEN");
-                RecursiveSetActions(currentAction);
-                ExecuteAction();
-                return;
-            }
+            // if (!currentAction.canComplete)
+            // {
+            //     // Debug.Log("OH NO I CANNOT COMPLETE THIS CURRENT TASK THAT I HAVE BEEN GIVEN");
+            //     // // RecursiveSetActions(currentAction);
+            //     // actionsToPerform.Remove(currentAction);
+
+            //     // ExecuteAction();
+            //     return;
+            // }
 
             if (!currentAction.isOwnMaster || currentAction.parentAction.canComplete)
             {
                 if (!actionsToPerform.Contains(currentAction.parentAction))
                 {
-                    actionsToPerform.Add(currentAction.parentAction);
+                    if (currentAction.parentAction.chainActions.Contains(currentAction))
+                    {
+                        actionsToPerform.Add(currentAction.parentAction);
+                    }
+
+                    if (currentAction.parentAction.branchActions.Contains(currentAction))
+                    {
+                        currentAction.parentAction.branchActions.Remove(currentAction);
+                        if (currentAction.parentAction.branchActions.Count == 0)
+                        {
+                            actionsToPerform.Add(currentAction.parentAction);
+                        }
+                    }
                 }
             }
             SetAnimatorState(0);
@@ -193,17 +213,21 @@ namespace GOAP
             switch (currentAction.actionType)
             {
                 case ActionType.Make_Blueprint_At_Station:
+                    actionsToPerform.Remove(currentAction);
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
                 case ActionType.Move_To_Location:
-                    Debug.Log("MoveTO");
                     MoveTo(currentAction.location);
                     if (HasArrivedAtLocation())
                     {
-                        MoveTo(transform.position);
-                        ExecuteAction();
+                        Debug.Log(
+                            "I HAVE ARRIVED AT MY LOCATIONI HAVE ARRIVED AT MY LOCATIONI HAVE ARRIVED AT MY LOCATIONI HAVE ARRIVED AT MY LOCATION"
+                        );
+                        // MoveTo(transform.position);
+                        // ExecuteAction();
                         break;
                     }
+                    Debug.Log("REGISTERING TO ACTION MANAGER");
                     ActionManager.instance.RegisterSubscriber(this);
                     break;
 
@@ -220,7 +244,10 @@ namespace GOAP
                     //     ExecuteAction();
                     //     break;
                     // }
-
+                    if (currentAction.parentAction.chainActions.Contains(currentAction))
+                    {
+                        currentAction.parentAction.chainActions.Remove(currentAction);
+                    }
                     Equip_From_Inventory();
                     break;
                 case ActionType.UnEquip_To_Inventory:
@@ -254,38 +281,40 @@ namespace GOAP
 
                     if (currentAction.chainActions.Count > 0)
                     {
-                        foreach (Action chainAction in currentAction.chainActions)
-                        {
-                            actionsToPerform.Add(chainAction);
-                            currentAction.chainActions.Remove(chainAction);
-                        }
+                        // foreach (Action chainAction in currentAction.chainActions)
+                        // {
+                        //     actionsToPerform.Add(chainAction);
+                        //     currentAction.chainActions.Remove(chainAction);
+                        // }
 
                         ExecuteAction();
                         break;
                     }
 
+                    agent.animator.SetBool(
+                        ActionType.Make_Blueprint_From_Inventory.ToString(),
+                        true
+                    );
+                    // ExecuteAction();
                     break;
                 case ActionType.Collect_And_Equip:
                 case ActionType.Interact_With_Station:
-
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     break;
-
                 case ActionType.Use_Item:
                     agent.animator.SetBool(currentAction.actionType.ToString(), true);
                     SetAnimatorState(0);
                     break;
-
                 case ActionType.Require_Move_To_Location:
 
-                    if (currentAction.chainActions.Count > 0)
-                    {
-                        foreach (Action chainAction in currentAction.chainActions)
-                        {
-                            actionsToPerform.Add(chainAction);
-                            currentAction.chainActions.Remove(chainAction);
-                        }
-                    }
+                    // if (currentAction.chainActions.Count > 0)
+                    // {
+                    //     Debug.Log(currentAction.chainActions);
+                    //     actionsToPerform.Add(currentAction.chainActions[0]);
+                    //     currentAction.chainActions.RemoveAt(0);
+
+                    // }
+                    actionsToPerform.Remove(currentAction);
                     ExecuteAction();
 
                     break;
@@ -298,6 +327,7 @@ namespace GOAP
                 case ActionType.UnEquip_To_Storage:
                 case ActionType.Receive_Delegate_Action:
                 case ActionType.Return_Delegate_Action:
+                    actionsToPerform.Remove(currentAction);
                     ExecuteAction();
                     break;
 
@@ -314,12 +344,6 @@ namespace GOAP
             actionsToPerform.Remove(currentAction);
 
             agent.animator.SetTrigger("Do");
-            // if (currentAction.parentAction.isOwnMaster)
-            // {
-            //     Debug.Log("This action has no parent!");
-            //     agent.requiresNewAction = true;
-            //     return;
-            // }
         }
 
         public void Use_Item()
