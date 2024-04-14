@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Banana
   m_EditorClassIdentifier: 
   itemName: Banana
-  itemUseCost: 10
+  itemUseCost: 5555
   itemPrefab: {fileID: 5716690658807586702, guid: d4c17f5a7cf037e329bd6aaeff65bc63, type: 3}
   useItemAnimation: {fileID: 0}
   statEffects: []

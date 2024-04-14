@@ -26,6 +26,7 @@ namespace GOAP
         protected override void PerformTask(Agent subscriber)
         {
             actionPlanner.PlanAction(subscriber);
+            subscriber.UnregisterActionPlanner();
         }
     }
 }

@@ -87,21 +87,22 @@ namespace GOAP
 
         private void RecursiveSetActions(Action action)
         {
-            if (action.CanComplete())
+            foreach (Action branchAction in action.branchActions)
+            {
+                RecursiveSetActions(branchAction);
+            }
+
+            if (action.chainActions.Count > 0)
+            {
+                foreach (Action chainAction in action.chainActions)
+                {
+                    RecursiveSetActions(chainAction);
+                }
+            }
+            else if (action.canComplete)
             {
                 if (action.actionType != ActionType.Require_Item_In_Inventory)
                     actionsToPerform.Add(action);
-            }
-            else
-            {
-                foreach (Action childAction in action.childActions)
-                {
-                    RecursiveSetActions(childAction);
-                }
-                foreach (Action subAction in action.subActions)
-                {
-                    RecursiveSetActions(subAction);
-                }
             }
         }
 
@@ -132,12 +133,6 @@ namespace GOAP
         public void ExecuteAction()
         {
             Debug.Log("Number of actions left to perform : " + actionsToPerform.Count);
-            Debug.Log("0000000000000000000000000000000000000000000000000000000000");
-            foreach (Action act in actionsToPerform)
-            {
-                Debug.Log(act.actionName);
-            }
-            Debug.Log("0000000000000000000000000000000000000000000000000000000000");
 
             if (!canPerformAction)
             {
@@ -163,7 +158,7 @@ namespace GOAP
                     + " : "
                     + currentAction?.goal?.statType
                     + " : "
-                    + currentAction.CanComplete()
+                    + currentAction.canComplete
             );
             Debug.Log(currentAction.actionType.ToString());
             if (currentAction.actionType == ActionType.Master_Action)
@@ -171,18 +166,26 @@ namespace GOAP
                 SetAnimatorState(0);
                 agent.RegisterActionPlanner();
                 agent.requiresNewAction = true;
+                canPerformAction = false;
+                agent.RegisterActionPlanner();
                 Debug.Log("This plan has concluded");
                 return;
             }
 
-            if (!currentAction.isOwnMaster || currentAction.parentAction.CanComplete())
+            if (!currentAction.canComplete)
             {
-                actionsToPerform.Add(currentAction.parentAction);
-                actionsToPerform.Remove(currentAction);
-            }
-            if (!currentAction.CanComplete())
-            {
+                Debug.Log("OH NO I CANNOT COMPLETE THIS CURRENT TASK THAT I HAVE BEEN GIVEN");
                 RecursiveSetActions(currentAction);
+                ExecuteAction();
+                return;
+            }
+
+            if (!currentAction.isOwnMaster || currentAction.parentAction.canComplete)
+            {
+                if (!actionsToPerform.Contains(currentAction.parentAction))
+                {
+                    actionsToPerform.Add(currentAction.parentAction);
+                }
             }
             SetAnimatorState(0);
 
@@ -225,12 +228,12 @@ namespace GOAP
                     agent.animator.SetBool(ActionType.UnEquip_To_Inventory.ToString(), true);
                     break;
                 case ActionType.Make_Blueprint_From_Inventory:
-                    if (currentAction.subActions.Count > 0)
+                    if (currentAction.branchActions.Count > 0)
                     {
                         bool canComplete = true;
-                        foreach (Action subAct in currentAction.subActions)
+                        foreach (Action subAct in currentAction.branchActions)
                         {
-                            if (!subAct.CanComplete())
+                            if (!subAct.canComplete)
                             {
                                 canComplete = false;
                                 RecursiveSetActions(subAct);
@@ -249,11 +252,14 @@ namespace GOAP
                         }
                     }
 
-                    if (currentAction.childActions.Count > 0)
+                    if (currentAction.chainActions.Count > 0)
                     {
-                        // Debug.Log("ChildAction : " + currentAction.childActions[0].actionName);
-                        actionsToPerform.Add(currentAction.childActions[0]);
-                        currentAction.childActions.RemoveAt(0);
+                        foreach (Action chainAction in currentAction.chainActions)
+                        {
+                            actionsToPerform.Add(chainAction);
+                            currentAction.chainActions.Remove(chainAction);
+                        }
+
                         ExecuteAction();
                         break;
                     }
@@ -272,10 +278,13 @@ namespace GOAP
 
                 case ActionType.Require_Move_To_Location:
 
-                    if (currentAction.childActions.Count > 0)
+                    if (currentAction.chainActions.Count > 0)
                     {
-                        actionsToPerform.Add(currentAction.childActions[0]);
-                        currentAction.childActions.RemoveAt(0);
+                        foreach (Action chainAction in currentAction.chainActions)
+                        {
+                            actionsToPerform.Add(chainAction);
+                            currentAction.chainActions.Remove(chainAction);
+                        }
                     }
                     ExecuteAction();
 
@@ -302,6 +311,7 @@ namespace GOAP
                     ExecuteAction();
                     break;
             }
+            actionsToPerform.Remove(currentAction);
 
             agent.animator.SetTrigger("Do");
             // if (currentAction.parentAction.isOwnMaster)

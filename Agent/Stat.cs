@@ -111,7 +111,7 @@ namespace GOAP
 
         public override string ToString()
         {
-            string retString = "Satisfy : " + statType.ToString() + " : \n";
+            string retString = "Satisfy : " + statType.ToString() + " : ";
             if (itemData != null)
                 retString += "Item type : " + itemData.itemName;
             if (stationData != null)

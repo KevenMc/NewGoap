@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: FruitSalad
   m_EditorClassIdentifier: 
   itemName: Fruit Salad
-  itemUseCost: 100
+  itemUseCost: 9
   itemPrefab: {fileID: 5434139589704041899, guid: 4854f7e183a555e439e3c322be13290f, type: 3}
   useItemAnimation: {fileID: 0}
   statEffects:
   - statType: 100
-    value: -20
+    value: 50
   useAnimationClip: {fileID: 0}

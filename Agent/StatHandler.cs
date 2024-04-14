@@ -9,6 +9,8 @@ namespace GOAP
 {
     public class StatHandler : MonoBehaviour
     {
+        public Agent agent;
+
         public List<StatPassport> statPassports = new List<StatPassport>();
         public List<Stat> stats = new List<Stat>();
 
@@ -64,6 +66,22 @@ namespace GOAP
             foreach (Stat stat in stats)
             {
                 statsByStatType[stat.statType] = stat;
+            }
+        }
+
+        public void CheckAndUpdateGoals()
+        {
+            foreach (Stat stat in stats)
+            {
+                if (stat.current >= stat.trigger && !currentGoals.Contains(stat))
+                {
+                    // Add the stat to the current goals list
+                    currentGoals.Add(stat);
+                    // Sort the current goals list based on priority
+                    currentGoals = currentGoals.OrderByDescending(s => s.priority).ToList();
+
+                    agent.RegisterActionPlanner();
+                }
             }
         }
 

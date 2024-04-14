@@ -39,6 +39,7 @@ namespace GOAP
                 }
                 statsToModify.Remove(subscriber);
             }
+            subscriber.CheckAndUpdateGoals();
         }
 
         public void ModifyStat(StatHandler subscriber, StatEffect statEffect)

@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Chef
   m_EditorClassIdentifier: 
   blueprints:
+  - {fileID: 11400000, guid: c1f78491428493cf5a1efdfdbe6e8cad, type: 2}
   - {fileID: 11400000, guid: effce876fa51aaf96a34cb96dae051ac, type: 2}

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Apple
   m_EditorClassIdentifier: 
   itemName: Apple
-  itemUseCost: 500
+  itemUseCost: 0
   itemPrefab: {fileID: 6740075024524601679, guid: c92def76f1105cfc78a2b5b382a42f86, type: 3}
   useItemAnimation: {fileID: 0}
   statEffects:
   - statType: 100
-    value: -10
+    value: 10
   useAnimationClip: {fileID: 0}

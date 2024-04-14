@@ -43,176 +43,129 @@ namespace GOAP
 
             if (currentGoals.Count == 0)
             {
-                Debug.Log("0");
                 grandMasterAction = null;
                 agent.actionHandler.canPerformAction = false;
-                // currentAgent.requiresNewAction = true;
                 return;
             }
-            Stat topStat = currentGoals[0];
-            Debug.Log("1");
-            if (topStat.IsUrgent() && agent.statHandler.currentGoals[0] != topStat)
+
+            Action lowestCostPlan = null;
+            float lowestCost = float.MaxValue;
+
+            foreach (Stat stat in currentGoals)
             {
-                Debug.Log("2");
-                Debug.Log("Urgent");
-                agent.statHandler.currentGoals[0] = topStat;
-                SetGoal(topStat);
+                SetGoal(stat);
+                Debug.Log("Stat goal  setting  : " + stat);
                 if (IterateThroughActions())
                 {
-                    Debug.Log("3");
-                    masterAction = actionList[0];
-                    Debug.Log(
-                        "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
-                    );
-                    Debug.Log(masterAction.actionCost);
-                    agent.SetMasterAction(masterAction);
-                    return;
-                }
-            }
-            else if (currentAgent.requiresNewAction)
-            {
-                Debug.Log("4");
-                foreach (Stat stat in currentGoals)
-                {
-                    SetGoal(stat);
-                    if (IterateThroughActions())
+                    // Get the lowest-cost plan
+                    if (masterAction.actionCost < lowestCost)
                     {
-                        masterAction = actionList[0];
-                        Debug.Log(masterAction.actionName);
-                        Debug.Log(masterAction.actionCost);
-                        agent.SetMasterAction(masterAction);
-                        Debug.Log("MASTER ACTION LOGGIN");
-                        masterAction.LogAction();
-                        return;
+                        lowestCost = masterAction.actionCost;
+                        lowestCostPlan = masterAction.grandMasterAction;
                     }
                 }
             }
-            Debug.Log("5");
+
+            // Set the master action to the lowest-cost plan
+            if (lowestCostPlan != null)
+            {
+                agent.SetMasterAction(lowestCostPlan);
+                RemoveUncompletableActionsRecursive(lowestCostPlan);
+                agent.actionHandler.canPerformAction = true;
+            }
+
             currentAgent = null;
         }
 
-        int x = 0;
-
-        public void LogAll(Action action)
-        {
-            if (action.parentAction != null)
-            {
-                LogAll(action.parentAction);
-            }
-        }
+        int iterateNumber = 0;
 
         public Boolean IterateThroughActions()
         {
-            while (true)
+            Debug.Log("Iterate Through Actions");
+            iterateNumber++;
+            if (iterateNumber > 99)
             {
-                x++;
-                if (x > 100)
+                Debug.Log(
+                    "CRASH AND BURN AND CRASH AND BURN AND CRASH AND BURN AND CRASH AND BURN AND CRASH AND BURN AND CRASH AND BURN AND "
+                );
+                return false;
+            }
+            // Make a copy of the action list to iterate over
+            List<Action> actionListCopy = new List<Action>(actionList);
+            Action action;
+            // Sort the copied action list by cost
+            SortActionList(actionListCopy);
+            if (actionListCopy.Count > 0)
+            {
+                action = actionListCopy[0];
+
+                actionListCopy.RemoveAt(0);
+
+                if (action.canComplete)
                 {
-                    return false;
+                    action.CompleteSearch();
+                    action.RemoveOtherActions();
                 }
-
-                SortActionList(actionList);
-
-                if (CanCompleteMasterAction(grandMasterAction))
+                if (action.grandMasterAction.searchComplete)
                 {
-                    SaveMasterActionToFile("json.json", masterAction);
+                    masterAction = action.grandMasterAction;
+                    Debug.Log("-----CAN COMPLETE ACTION-----");
+                    Debug.Log(masterAction.LogActionPlan());
+                    Debug.Log("-----------------------------");
 
-                    Debug.Log("Plan complete");
-                    currentAgent.requiresNewAction = false;
+                    // SaveMasterActionToFile("json.json", action.grandMasterAction);
+                    // currentAgent.requiresNewAction = false;
                     currentAgent.actionHandler.canPerformAction = true;
                     return true;
                 }
-
-                if (actionList.Count == 0)
+                else
                 {
-                    Debug.Log("There are no more actions to search");
-                    SaveMasterActionToFile("json.json", masterAction);
+                    Debug.Log(action.grandMasterAction.LogActionPlan());
 
-                    currentAgent.requiresNewAction = false;
-                    return false;
+                    ExtendAction(action);
                 }
-                ExtendAction(actionList[0]);
             }
-        }
 
-        public Boolean CanCompleteMasterAction(Action action)
-        {
-            if (action.subActions.Count + action.childActions.Count == 0)
+            if (actionList.Count > 0)
             {
-                Boolean comp = action.CanComplete();
-                return comp;
+                return IterateThroughActions();
             }
-
-            List<Boolean> returnList = new List<bool>();
-            returnList.Add(true);
-
-            SortActionList(action.subActions);
-            foreach (Action subAction in action.subActions)
-            {
-                returnList.Add(CanCompleteMasterAction(subAction));
-            }
-
-            foreach (Action childAction in action.childActions)
-            {
-                returnList.Add(CanCompleteMasterAction(childAction));
-            }
-            if (action.subActions.Count + action.childActions.Count == 0)
-            {
-                return action.CanComplete();
-            }
-
-            return returnList.All(b => b); //return if ALL children and subActions canComplete
+            // If no action can be completed, return false
+            Debug.Log(
+                "NO ACTION CAN BE FOUIND::NO ACTION CAN BE FOUIND::NO ACTION CAN BE FOUIND::NO ACTION CAN BE FOUIND::"
+            );
+            return false;
         }
 
         #region Extend Actions
         public void ExtendAction(Action action)
         {
-            if (action.canComplete)
-            {
-                actionList.Remove(action);
-                return;
-            }
+            actionList.Remove(action);
 
             switch (action.goal.statType)
             {
-                case StatType.Return_Delegate_Action:
-                    actionList.Add(ReturnDelegateAction(action));
-                    break;
+                // case StatType.Return_Delegate_Action:
+                //     actionList.Add(ReturnDelegateAction(action));
+                //     break;
 
-                case StatType.Storage:
-                    actionList.Add(StoreItem(action));
-                    break;
+                // case StatType.Storage:
+                //     actionList.Add(StoreItem(action));
+                //     break;
 
                 default:
-                    Debug.Log("--------------------------------------------------------");
-                    Debug.Log("Action Name  : " + action.actionName);
-                    Debug.Log("Action Type : " + action.actionType);
-                    Debug.Log("Plan from inventory");
                     PlanFromInventory(action);
-
-                    Debug.Log("Plan from known items");
                     PlanFromKnownItems(action);
-
-                    Debug.Log("Plan from stations");
                     PlanFromStationMemory(action);
-
-                    Debug.Log("Plan from blueprints");
                     PlanFromBlueprintRepertoire(action);
-                    Debug.Log("--------------------------------------------------------");
-
-                    // if (grandMasterAction.goal.statType != StatType.Storage)
-                    //     PlanFromKnownInventories(action);
-
                     if (canDelegate)
                         PlanFromDelegate(action);
                     break;
             }
 
-            if (action.subActions.Count + action.childActions.Count == 0 && !action.CanComplete())
-            {
-                RecursiveDropActions(action);
-            }
-            actionList.Remove(action);
+            // else
+            // {
+            //     action.RemoveAction();
+            // }
         }
 
         public void RecursiveDropActions(Action action)
@@ -221,11 +174,7 @@ namespace GOAP
             {
                 return;
             }
-            action.parentAction.childActions.Remove(action);
-            if (action.parentAction.childActions.Count == 0)
-            {
-                RecursiveDropActions(action.parentAction);
-            }
+            action.parentAction.chainActions.RemoveAt(0);
         }
 
         private void PlanFromInventory(Action action)
@@ -348,26 +297,40 @@ namespace GOAP
                     action.goal
                 );
 
+            if (matchingBlueprints.Count > 0)
+            {
+                Debug.Log("Checking Blueprints");
+            }
             foreach (Blueprint blueprint in matchingBlueprints)
             {
                 switch ((blueprint.requiredTool, blueprint.craftingStation))
                 {
                     case (null, null): //make blueprint from inventory with no tools
+                        Debug.Log("NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL NULL ");
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
+                                Debug.Log("1111111111111111111111111111111111111111111111111111");
                                 break;
 
                             default:
                                 if (action.goal.statType != StatType.Have_Item_Equipped)
                                 {
+                                    Debug.Log("2");
                                     updateGoal = new Stat(
                                         StatType.Have_Item_Equipped,
                                         blueprint.craftedItem
                                     );
-                                    updateAction = UseEquippedItem(updateAction, updateGoal);
-                                }
+                                    Debug.Log(
+                                        "CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM "
+                                    );
+                                    Debug.Log(blueprint.craftedItem);
+                                    Debug.Log(updateAction.actionName);
+                                    Debug.Log(action.actionName);
 
+                                    updateAction = UseEquippedItem(action, updateGoal);
+                                }
+                                Debug.Log("3");
                                 updateGoal = new Stat(
                                     StatType.Have_Item_In_Inventory,
                                     blueprint.craftedItem
@@ -377,9 +340,11 @@ namespace GOAP
                         }
                         updateActions = MakeFromInventory(updateAction, blueprint);
                         actionList.AddRange(updateActions);
+
                         break;
 
                     case (_, null): //blueprint from inventory using a tool
+                        Debug.Log("Case _ null");
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
@@ -392,7 +357,7 @@ namespace GOAP
                                         StatType.Have_Item_Equipped,
                                         blueprint.craftedItem
                                     );
-                                    updateAction = UseEquippedItem(updateAction, updateGoal);
+                                    updateAction = UseEquippedItem(action, updateGoal);
                                 }
                                 updateGoal = new Stat(
                                     StatType.Have_Item_In_Inventory,
@@ -425,7 +390,6 @@ namespace GOAP
                                     blueprint.craftedItem
                                 );
                                 updateAction = UseEquippedItem(updateAction, updateGoal);
-
                                 break;
                         }
                         updateGoal = new Stat(StatType.Item_Is_At_Station, blueprint);
@@ -435,6 +399,7 @@ namespace GOAP
                         break;
 
                     case (_, _): //blueprint from station using a tool
+                        Debug.Log("Case _ _");
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
@@ -544,6 +509,11 @@ namespace GOAP
         {
             Action updateAction = new Action(action);
             updateAction.Init(ActionType.Use_Item, goal);
+            Debug.Log("---------------------------");
+            Debug.Log(updateAction.actionName);
+            Debug.Log(updateAction.parentAction.actionName);
+            Debug.Log("---------------------------");
+
             return updateAction;
         }
 
@@ -575,7 +545,7 @@ namespace GOAP
             return updateAction;
         }
 
-        private Action RequireItemSubAction(Action action, Stat goal)
+        private Action RequireItemBranchAction(Action action, Stat goal)
         {
             Action updateAction = new Action(action, true);
             updateAction.Init(ActionType.Require_Item_In_Inventory, goal);
@@ -624,19 +594,21 @@ namespace GOAP
         #region Blueprint Action Methods
         private List<Action> MakeFromInventory(Action action, Blueprint blueprint)
         {
+            Debug.Log("4");
             List<Action> updateActions = new List<Action>();
-            List<Action> subActions = new List<Action>();
+            List<Action> branchActions = new List<Action>();
 
             Action updateAction = new Action(action); //make item one all required items are satisfied
             Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
             updateAction.Init(ActionType.Make_Blueprint_From_Inventory, updateGoal);
 
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subaction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
+                Debug.Log("5");
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
-                Action subAction = RequireItemSubAction(updateAction, updateGoal);
+                Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
 
-                updateActions.Add(subAction);
+                updateActions.Add(branchAction);
             }
 
             return updateActions;
@@ -645,7 +617,7 @@ namespace GOAP
         private List<Action> MakeFromInventoryWithTool(Action action, Blueprint blueprint)
         {
             List<Action> updateActions = new List<Action>();
-            List<Action> subActions = new List<Action>();
+            List<Action> branchActions = new List<Action>();
 
             Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
             Action updateAction = UnEquipItem(action, updateGoal);
@@ -658,14 +630,14 @@ namespace GOAP
             updateAction = EquipFromInventory(updateAction, updateGoal);
 
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
-            Action subAction = RequireItemSubAction(updateAction, updateGoal);
+            Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
 
-            updateActions.Add(subAction);
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
+            updateActions.Add(branchAction);
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
-                subAction = RequireItemSubAction(updateAction, updateGoal);
-                updateActions.Add(subAction);
+                branchAction = RequireItemBranchAction(updateAction, updateGoal);
+                updateActions.Add(branchAction);
             }
 
             return updateActions;
@@ -684,13 +656,13 @@ namespace GOAP
             updateActions.Add(updateAction); //create goal to be at station -> this needs to be performed last
             //add in a way to select which station to move to
 
-            List<Action> subActions = new List<Action>();
+            List<Action> branchActions = new List<Action>();
 
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
-                Action subAction = RequireItemSubAction(updateAction, updateGoal);
-                updateActions.Add(subAction);
+                Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
+                updateActions.Add(branchAction);
             }
             return updateActions;
         }
@@ -713,17 +685,17 @@ namespace GOAP
             updateActions.Add(RequireMoveToLocation(updateAction, updateGoal));
             //add in a way to select which station to move to
 
-            List<Action> subActions = new List<Action>();
+            List<Action> branchActions = new List<Action>();
 
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
-            Action subAction = RequireItemSubAction(updateAction, updateGoal);
-            updateActions.Add(subAction);
+            Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
+            updateActions.Add(branchAction);
 
-            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to subAction
+            foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
-                subAction = RequireItemSubAction(updateAction, updateGoal);
-                updateActions.Add(subAction);
+                branchAction = RequireItemBranchAction(updateAction, updateGoal);
+                updateActions.Add(branchAction);
             }
 
             return updateActions;
@@ -791,11 +763,6 @@ namespace GOAP
         public void SortActionList(List<Action> actionList)
         {
             actionList.Sort((action1, action2) => action1.actionCost.CompareTo(action2.actionCost));
-
-            foreach (Action act in actionList)
-            {
-                act.LogAction();
-            }
         }
 
         public float GetDistance(Vector3 a, Vector3 b)
@@ -809,20 +776,84 @@ namespace GOAP
         }
 
         #region
+
+        public void LogAll(Action action)
+        {
+            if (action.parentAction != null)
+            {
+                LogAll(action.parentAction);
+            }
+        }
+
+        private bool RemoveUncompletableActionsRecursive(Action action)
+        {
+            // Base case: If the action has no child actions, it's a terminal node
+            if (action.chainActions.Count == 0)
+            {
+                // Check if the terminal node can be completed
+                if (!action.CanCompleteActionPlan())
+                {
+                    // If the terminal node cannot be completed, remove it from its parent's child actions
+                    if (action.parentAction != null)
+                    {
+                        action.parentAction.chainActions.Remove(action);
+                        return false; // Indicate that this branch cannot be completed
+                    }
+                    else
+                    {
+                        // If the terminal node has no parent (i.e., it's the root), just return false
+                        return false;
+                    }
+                }
+                else
+                {
+                    // If the terminal node can be completed, set its parent's canComplete flag to true
+                    if (action.parentAction != null)
+                    {
+                        action.parentAction.canComplete = true;
+                    }
+                    return true; // Indicate that this branch can be completed
+                }
+            }
+            else
+            {
+                // If the action has child actions, recursively process each child
+                bool branchCompletable = true;
+
+                if (!RemoveUncompletableActionsRecursive(action.chainActions[0]))
+                {
+                    // If the child branch cannot be completed, remove it from the parent's child actions
+                    action.chainActions.RemoveAt(0);
+                }
+                else
+                {
+                    // If the child branch can be completed, set the flag to indicate this branch can be completed
+                    branchCompletable = true;
+                }
+
+                // If any child branch can be completed, set the parent's canComplete flag to true
+                if (branchCompletable && action.parentAction != null)
+                {
+                    action.parentAction.canComplete = true;
+                }
+                return branchCompletable;
+            }
+        }
+
         public void SaveMasterActionToFile(string filePath, Action action)
         {
-            JSONAction jSONAction = new JSONAction(action);
+            // JSONAction jSONAction = new JSONAction(action);
 
             // Convert the dictionary to JSON
-            string jsonData = JsonUtility.ToJson(jSONAction);
-            jsonData = jsonData
-                .Replace("\\n", "")
-                .Replace("\\", "")
-                .Replace("\"{", "{")
-                .Replace("}\"", "}");
+            // string jsonData = JsonUtility.ToJson(jSONAction);
+            // jsonData = jsonData
+            //     .Replace("\\n", "")
+            //     .Replace("\\", "")
+            //     .Replace("\"{", "{")
+            //     .Replace("}\"", "}");
 
-            // Save the JSON data to a file
-            File.WriteAllText("Assets/GOAP/" + filePath, jsonData);
+            // // Save the JSON data to a file
+            // File.WriteAllText("Assets/GOAP/" + filePath, jsonData);
         }
         #endregion
     }

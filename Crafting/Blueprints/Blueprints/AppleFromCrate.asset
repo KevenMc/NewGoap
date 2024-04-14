@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blueprintName: AppleFromCrate
   description: Pick up an apple from a crate
-  actionCost: 100
+  actionCost: -5
   requiredItems: []
   requiredTool: {fileID: 0}
   craftingStation: {fileID: 11400000, guid: 243c6be1d76dc76c3ad3cf17728ba867, type: 2}
