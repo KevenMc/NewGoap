@@ -10,13 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8831ba4ae774c74ca41727f7f051f5e, type: 3}
-  m_Name: FruitSalad
+  m_Name: Knife
   m_EditorClassIdentifier: 
-  itemName: Fruit Salad
-  itemUseCost: 9
-  itemPrefab: {fileID: 5434139589704041899, guid: 4854f7e183a555e439e3c322be13290f, type: 3}
+  itemName: Knife
+  itemUseCost: 0
+  itemPrefab: {fileID: 8327276510085761581, guid: 89fb6677ace05665da4917e3482eafb2, type: 3}
   useItemAnimation: {fileID: 0}
-  statEffects:
-  - statType: 100
-    value: 50
+  statEffects: []
   useAnimationClip: {fileID: 0}

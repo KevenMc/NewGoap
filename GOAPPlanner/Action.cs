@@ -68,7 +68,6 @@ namespace GOAP
 
         public Action(Action parentAction, Boolean isBranchAction = false)
         {
-            Debug.Log("MAKING ACTION FROM PARENT ACTION");
             this.actionName = actionType.ToString();
             this.parentAction = parentAction;
             this.masterAction = parentAction.masterAction;
@@ -78,8 +77,6 @@ namespace GOAP
             }
             else
             {
-                Debug.Log(this.parentAction);
-                Debug.Log(this.parentAction.chainActions);
                 this.parentAction.chainActions.Add(this);
             }
 

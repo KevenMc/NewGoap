@@ -125,6 +125,7 @@ namespace GOAP
                     ExtendAction(action);
                 }
             }
+            Debug.Log(masterAction.LogActionPlan());
 
             if (actionList.Count > 0)
             {
@@ -316,13 +317,9 @@ namespace GOAP
                             default:
                                 if (action.goal.statType != StatType.Have_Item_Equipped)
                                 {
-                                    Debug.Log("2");
                                     updateGoal = new Stat(
                                         StatType.Have_Item_Equipped,
                                         blueprint.craftedItem
-                                    );
-                                    Debug.Log(
-                                        "CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM CRAFTED ITEM "
                                     );
                                     Debug.Log(blueprint.craftedItem);
                                     Debug.Log(updateAction.actionName);
@@ -330,7 +327,6 @@ namespace GOAP
 
                                     updateAction = UseEquippedItem(action, updateGoal);
                                 }
-                                Debug.Log("3");
                                 updateGoal = new Stat(
                                     StatType.Have_Item_In_Inventory,
                                     blueprint.craftedItem
@@ -344,7 +340,9 @@ namespace GOAP
                         break;
 
                     case (_, null): //blueprint from inventory using a tool
-                        Debug.Log("Case _ null");
+                        Debug.Log(
+                            "Case _ null---- Case _ nullCase _ null---- Case _ null---- Case _ null---- Case _ null---- Case _ null---- "
+                        );
                         switch (action.goal.statType)
                         {
                             case StatType.Have_Item_In_Inventory:
@@ -353,6 +351,9 @@ namespace GOAP
                             default:
                                 if (action.goal.statType != StatType.Have_Item_Equipped)
                                 {
+                                    Debug.Log(
+                                        "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+                                    );
                                     updateGoal = new Stat(
                                         StatType.Have_Item_Equipped,
                                         blueprint.craftedItem
@@ -364,8 +365,10 @@ namespace GOAP
                                     blueprint.craftedItem
                                 );
                                 updateAction = EquipFromInventory(updateAction, updateGoal);
+
                                 break;
                         }
+
                         updateActions = MakeFromInventoryWithTool(updateAction, blueprint);
                         actionList.AddRange(updateActions);
                         break;
@@ -594,7 +597,6 @@ namespace GOAP
         #region Blueprint Action Methods
         private List<Action> MakeFromInventory(Action action, Blueprint blueprint)
         {
-            Debug.Log("4");
             List<Action> updateActions = new List<Action>();
             List<Action> branchActions = new List<Action>();
 
@@ -604,7 +606,6 @@ namespace GOAP
 
             foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
-                Debug.Log("5");
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
                 Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
 
@@ -619,28 +620,59 @@ namespace GOAP
             List<Action> updateActions = new List<Action>();
             List<Action> branchActions = new List<Action>();
 
-            Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
-            Action updateAction = UnEquipItem(action, updateGoal);
-
-            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
-            updateAction = new Action(updateAction); //make item one all required items are satisfied
+            Action updateAction = new Action(action); //make item one all required items are satisfied
+            Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
             updateAction.Init(ActionType.Make_Blueprint_From_Inventory, updateGoal);
 
-            updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
-            updateAction = EquipFromInventory(updateAction, updateGoal);
+            //line
+            // Debug.Log("TOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOL");
+            // Debug.Log(blueprint.requiredTool);
 
             updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
-            Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
+            updateActions.Add(RequireItemBranchAction(updateAction, updateGoal));
 
-            updateActions.Add(branchAction);
+            // updateActions.Add(branchAction);
+            // foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
+            // {
+            //     updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
+            //     updateActions.Add(RequireItemBranchAction(updateAction, updateGoal));
+            // }
+            //line
+
             foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
             {
                 updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
-                branchAction = RequireItemBranchAction(updateAction, updateGoal);
-                updateActions.Add(branchAction);
+                updateActions.Add(RequireItemBranchAction(updateAction, updateGoal));
             }
 
             return updateActions;
+            // List<Action> updateActions = new List<Action>();
+            // List<Action> branchActions = new List<Action>();
+
+            // // Stat updateGoal = new Stat(StatType.Have_Item_Equipped, blueprint.requiredTool);
+            // // Action updateAction = UnEquipItem(action, updateGoal);
+
+            // Stat updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint);
+            // Action updateAction = new Action(action); //make item one all required items are satisfied
+            // updateAction.Init(ActionType.Make_Blueprint_From_Inventory, updateGoal);
+
+            // updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            // updateAction = EquipFromInventory(updateAction, updateGoal);
+
+            // Debug.Log("TOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOLTOOL");
+            // Debug.Log(blueprint.requiredTool);
+            // updateGoal = new Stat(StatType.Have_Item_In_Inventory, blueprint.requiredTool);
+            // Action branchAction = RequireItemBranchAction(updateAction, updateGoal);
+
+            // updateActions.Add(branchAction);
+            // foreach (Blueprint.ItemRequirement itemRequirement in blueprint.requiredItems) // add required items to branchAction
+            // {
+            //     updateGoal = new Stat(StatType.Have_Item_In_Inventory, itemRequirement.itemData);
+            //     branchAction = RequireItemBranchAction(updateAction, updateGoal);
+            //     updateActions.Add(branchAction);
+            // }
+
+            // return updateActions;
         }
 
         private List<Action> MakeFromStation(Action action, Blueprint blueprint)
